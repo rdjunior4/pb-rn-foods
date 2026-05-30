@@ -1,29 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { TopBar } from "@/components/TopBar";
+import { Header } from "@/components/Header";
+import { CategoryNav } from "@/components/CategoryNav";
+import { HeroBanner } from "@/components/HeroBanner";
+import { CategoryCards } from "@/components/CategoryCards";
+import { BrandHighlights } from "@/components/BrandHighlights";
+import { OfferProducts } from "@/components/OfferProducts";
+import { BenefitsBar } from "@/components/BenefitsBar";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "PB&RN Foods — Distribuidora de Alimentos para o seu Negócio" },
+      {
+        name: "description",
+        content:
+          "E-commerce B2B PB&RN Foods: variedade, marcas selecionadas e logística eficiente para restaurantes, hotéis, mercados e clientes CNPJ.",
+      },
+      { property: "og:title", content: "PB&RN Foods — Atacado para o seu negócio" },
+      {
+        property: "og:description",
+        content:
+          "Abastecimento inteligente para o seu negócio. Compre no atacado com condições exclusivas para CNPJ.",
+      },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background">
+      <TopBar />
+      <Header />
+      <CategoryNav />
+      <main>
+        <HeroBanner />
+        <CategoryCards />
+        <BrandHighlights />
+        <OfferProducts />
+        <BenefitsBar />
+      </main>
     </div>
   );
 }
