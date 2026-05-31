@@ -24,7 +24,7 @@ const categories = [
 
 export function CategoryNav() {
   return (
-    <div className="border-b border-border bg-background">
+    <div className="border-b border-border bg-muted">
       <div className="mx-auto flex max-w-[1400px] items-stretch gap-3 px-4 sm:px-6">
         <button className="inline-flex items-center gap-2 bg-brand-black text-brand-black-foreground px-4 py-3 text-sm font-semibold rounded-t-md whitespace-nowrap hover:bg-brand-black/90 transition-colors">
           <Menu className="h-4 w-4" />
