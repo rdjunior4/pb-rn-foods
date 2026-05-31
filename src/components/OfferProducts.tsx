@@ -1,4 +1,5 @@
-import { ProductCard, type Product } from "./ProductCard";
+import { ProductSection } from "./ProductSection";
+import type { Product } from "./ProductCard";
 
 const products: Product[] = [
   { name: "Arroz Tio João Parboilizado 5kg", oldPrice: "27,90", price: "24,90", unit: "un", discount: "-10%", emoji: "🍚" },
@@ -11,18 +12,11 @@ const products: Product[] = [
 
 export function OfferProducts() {
   return (
-    <section className="mx-auto max-w-[1400px] px-4 sm:px-6 mt-10">
-      <div className="flex items-end justify-between mb-4">
-        <h2 className="text-xl font-bold">Ofertas para o seu negócio</h2>
-        <a href="#" className="text-sm font-semibold text-primary hover:underline">
-          Ver todas as ofertas
-        </a>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        {products.map((p) => (
-          <ProductCard key={p.name} p={p} />
-        ))}
-      </div>
-    </section>
+    <ProductSection
+      title="Ofertas para o seu negócio"
+      subtitle="Condições exclusivas válidas por tempo limitado"
+      linkLabel="Ver todas as ofertas"
+      products={products}
+    />
   );
 }
