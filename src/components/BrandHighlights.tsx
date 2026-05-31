@@ -10,6 +10,9 @@ const brands = [
 ];
 
 export function BrandHighlights() {
+  // Duplicate list to create seamless infinite loop
+  const loop = [...brands, ...brands];
+
   return (
     <section className="mx-auto max-w-[1400px] px-4 sm:px-6 mt-10">
       <div className="flex items-end justify-between mb-4">
@@ -18,15 +21,26 @@ export function BrandHighlights() {
           Ver todas as marcas
         </a>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-        {brands.map((b) => (
-          <div
-            key={b.name}
-            className="flex h-24 items-center justify-center rounded-xl border border-border bg-card hover:border-primary transition-colors"
-          >
-            <span className={`text-lg ${b.style}`}>{b.name}</span>
-          </div>
-        ))}
+
+      <div
+        className="group relative overflow-hidden"
+        style={{
+          maskImage:
+            "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+        }}
+      >
+        <div className="flex w-max gap-3 animate-marquee group-hover:[animation-play-state:paused]">
+          {loop.map((b, i) => (
+            <div
+              key={`${b.name}-${i}`}
+              className="flex h-24 w-44 shrink-0 items-center justify-center rounded-xl border border-border bg-card hover:border-primary transition-colors"
+            >
+              <span className={`text-lg ${b.style}`}>{b.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
