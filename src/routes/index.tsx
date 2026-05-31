@@ -36,7 +36,7 @@ function Index() {
       <CategoryNav />
       <main>
         <HeroBanner />
-        <CategoryCards />
+        
         <BrandHighlights />
         <OfferProducts />
         <BenefitsBar />
