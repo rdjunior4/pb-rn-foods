@@ -3,7 +3,7 @@ import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { CategoryNav } from "@/components/CategoryNav";
 import { HeroBanner } from "@/components/HeroBanner";
-import { CategoryCards } from "@/components/CategoryCards";
+
 import { BrandHighlights } from "@/components/BrandHighlights";
 import { OfferProducts } from "@/components/OfferProducts";
 import { BenefitsBar } from "@/components/BenefitsBar";
