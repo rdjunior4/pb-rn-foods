@@ -6,6 +6,12 @@ import { HeroBanner } from "@/components/HeroBanner";
 
 import { BrandHighlights } from "@/components/BrandHighlights";
 import { OfferProducts } from "@/components/OfferProducts";
+import {
+  MoreSavingsProducts,
+  BeveragesProducts,
+  MeatsAndDairyProducts,
+  CleaningProducts,
+} from "@/components/MoreProductSections";
 import { BenefitsBar } from "@/components/BenefitsBar";
 
 export const Route = createFileRoute("/")({
@@ -39,6 +45,10 @@ function Index() {
         
         <BrandHighlights />
         <OfferProducts />
+        <MoreSavingsProducts />
+        <BeveragesProducts />
+        <MeatsAndDairyProducts />
+        <CleaningProducts />
         <BenefitsBar />
       </main>
     </div>
