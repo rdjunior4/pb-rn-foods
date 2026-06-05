@@ -3,8 +3,8 @@ import { TopBar } from "@/components/TopBar";
 import { Header } from "@/components/Header";
 import { CategoryNav } from "@/components/CategoryNav";
 import { HeroBanner } from "@/components/HeroBanner";
-
 import { BrandHighlights } from "@/components/BrandHighlights";
+import { BenefitsBar } from "@/components/BenefitsBar";
 import { OfferProducts } from "@/components/OfferProducts";
 import {
   MoreSavingsProducts,
@@ -12,7 +12,8 @@ import {
   MeatsAndDairyProducts,
   CleaningProducts,
 } from "@/components/MoreProductSections";
-import { BenefitsBar } from "@/components/BenefitsBar";
+import { Newsletter } from "@/components/Newsletter";
+import { Footer } from "@/components/Footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,15 +43,16 @@ function Index() {
       <CategoryNav />
       <main>
         <HeroBanner />
-        
         <BrandHighlights />
+        <BenefitsBar />
         <OfferProducts />
         <MoreSavingsProducts />
         <BeveragesProducts />
         <MeatsAndDairyProducts />
         <CleaningProducts />
-        <BenefitsBar />
+        <Newsletter />
       </main>
+      <Footer />
     </div>
   );
 }
