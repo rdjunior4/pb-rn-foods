@@ -26,7 +26,7 @@ export function ProductCard({ product }: { product: Product }) {
       <button
         onClick={() => toggleFavorite(product.id)}
         aria-label={favorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-        className="absolute top-2.5 right-2.5 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/70 backdrop-blur-sm hover:bg-background transition-all shadow-sm opacity-0 group-hover:opacity-100"
+        className="absolute top-2.5 right-2.5 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/70 backdrop-blur-sm hover:bg-background transition-all shadow-sm md:opacity-0 md:group-hover:opacity-100"
       >
         <Heart className={`h-4 w-4 ${favorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
       </button>
@@ -41,8 +41,8 @@ export function ProductCard({ product }: { product: Product }) {
           className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
           loading="lazy"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/img:bg-black/10 transition-colors">
-          <span className="rounded-full bg-white/90 p-2 opacity-0 group-hover/img:opacity-100 transition-all duration-300 shadow-lg translate-y-2 group-hover/img:translate-y-0">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 md:group-hover/img:bg-black/10 transition-colors">
+          <span className="rounded-full bg-white/90 p-2 md:opacity-0 md:group-hover/img:opacity-100 transition-all duration-300 shadow-lg md:translate-y-2 md:group-hover/img:translate-y-0">
             <Eye className="h-4 w-4 text-foreground" />
           </span>
         </div>

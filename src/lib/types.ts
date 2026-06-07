@@ -41,3 +41,14 @@ export interface User {
   email: string;
   isLoggedIn: boolean;
 }
+
+export interface Banner {
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  link: string;
+  active: boolean;
+  order: number;
+  createdAt: string;
+}

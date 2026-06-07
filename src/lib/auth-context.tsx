@@ -9,12 +9,14 @@ export interface AuthUser {
   document: string;
   documentType: DocumentType;
   phone?: string;
+  role?: "admin" | "customer";
   createdAt: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoggedIn: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => boolean;
   register: (name: string, email: string, password: string, document: string, documentType: DocumentType) => boolean;
   logout: () => void;
@@ -72,6 +74,7 @@ const MOCK_USERS: Record<string, { password: string; user: AuthUser }> = {
       document: "11222333444455",
       documentType: "cnpj",
       phone: "(83) 99999-9999",
+      role: "admin",
       createdAt: "2024-01-15T08:00:00.000Z",
     },
   },
@@ -158,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoggedIn: !!user, login, register, logout, updateUser, validateDocument, formatDocument }}
+      value={{ user, isLoggedIn: !!user, isAdmin: user?.role === "admin", login, register, logout, updateUser, validateDocument, formatDocument }}
     >
       {children}
     </AuthContext.Provider>
