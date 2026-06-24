@@ -28,6 +28,13 @@ function ProductPage() {
   const [tab, setTab] = useState<"desc" | "specs">("desc");
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(undefined);
 
+  const hasVariants = (product?.variants?.length ?? 0) > 0;
+
+  const selectedVariant = useMemo(() => {
+    if (!product || !hasVariants) return undefined;
+    return product.variants.find((v) => v.id === selectedVariantId) ?? product.variants[0];
+  }, [product, selectedVariantId, hasVariants]);
+
   if (!product) {
     return (
       <CustomerLayout maxWidth="1400">
@@ -41,12 +48,6 @@ function ProductPage() {
 
   const category = getCategoryById(product.categoryId);
   const favorite = isFavorite(product.id);
-  const hasVariants = product.variants.length > 0;
-
-  const selectedVariant = useMemo(() => {
-    if (!hasVariants) return undefined;
-    return product.variants.find((v) => v.id === selectedVariantId) ?? product.variants[0];
-  }, [product.variants, selectedVariantId, hasVariants]);
 
   const currentPrice = selectedVariant ? selectedVariant.unitPrice : product.price;
   const currentOldPrice = selectedVariant?.oldPrice ?? product.oldPrice;

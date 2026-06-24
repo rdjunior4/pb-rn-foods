@@ -19,10 +19,12 @@ import {
   CreditCard,
   CheckCircle,
   XCircle,
+  KeyRound,
 } from "lucide-react";
 import { useAuth, type DocumentType } from "@/lib/auth-context";
 import { formatDoc } from "@/lib/format";
 import { CustomerLayout } from "@/components/CustomerLayout";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/entrar")({
   component: LoginPage,
@@ -39,7 +41,7 @@ const docLabels: Record<
 function LoginPage() {
   const search = useSearch({ strict: false }) as { tab?: string };
   const tab = search.tab || "";
-  const { login, register, isLoggedIn, validateDocument } = useAuth();
+  const { login, register, isLoggedIn, validateDocument, requestPasswordReset, resetPassword } = useAuth();
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(tab === "cadastro");
   const [name, setName] = useState("");
@@ -50,6 +52,11 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetStep, setResetStep] = useState<"email" | "code" | "done">("email");
 
   useEffect(() => {
     if (tab) setIsRegister(tab === "cadastro");
@@ -126,6 +133,46 @@ function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRequestReset = () => {
+    if (!resetEmail.trim()) {
+      toast.error("Informe seu e-mail.");
+      return;
+    }
+    const result = requestPasswordReset(resetEmail);
+    if (!result.ok) {
+      toast.error(result.error || "Erro ao solicitar recuperação.");
+      return;
+    }
+    toast.success("Código enviado! Verifique seu e-mail (demo: código exibido abaixo).");
+    setResetStep("code");
+  };
+
+  const handleConfirmReset = () => {
+    if (!resetCode.trim() || !resetNewPassword.trim()) {
+      toast.error("Preencha o código e a nova senha.");
+      return;
+    }
+    if (resetNewPassword.length < 4) {
+      toast.error("A senha deve ter pelo menos 4 caracteres.");
+      return;
+    }
+    const result = resetPassword(resetEmail, resetCode, resetNewPassword);
+    if (!result.ok) {
+      toast.error(result.error || "Erro ao redefinir senha.");
+      return;
+    }
+    toast.success("Senha redefinida com sucesso! Faça login.");
+    setResetStep("done");
+    setTimeout(() => {
+      setShowReset(false);
+      setResetStep("email");
+      setResetEmail("");
+      setResetCode("");
+      setResetNewPassword("");
+      setEmail(resetEmail);
+    }, 1500);
   };
 
   const DocIcon = docLabels[documentType].icon;
@@ -270,6 +317,15 @@ function LoginPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {!isRegister && (
+                  <button
+                    type="button"
+                    onClick={() => setShowReset(true)}
+                    className="text-xs text-primary hover:text-primary-hover transition-colors mt-1"
+                  >
+                    Esqueci minha senha
+                  </button>
+                )}
               </div>
 
               {error && (
@@ -317,6 +373,100 @@ function LoginPage() {
           </div>
         </div>
       </div>
+
+      {showReset && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={() => setShowReset(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-card border border-border/40 shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                <KeyRound className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Recuperar senha</h3>
+                <p className="text-xs text-muted-foreground">
+                  {resetStep === "email" && "Digite seu e-mail cadastrado"}
+                  {resetStep === "code" && "Insira o código e a nova senha"}
+                  {resetStep === "done" && "Senha redefinida!"}
+                </p>
+              </div>
+            </div>
+
+            {resetStep === "email" && (
+              <div className="space-y-4">
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowReset(false)}
+                    className="flex-1 h-11 rounded-xl border border-border/40 text-sm font-medium hover:bg-accent transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleRequestReset}
+                    className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
+                  >
+                    Enviar código
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {resetStep === "code" && (
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value)}
+                  placeholder="Código de 6 dígitos"
+                  maxLength={6}
+                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-center text-lg tracking-widest"
+                />
+                <input
+                  type="password"
+                  value={resetNewPassword}
+                  onChange={(e) => setResetNewPassword(e.target.value)}
+                  placeholder="Nova senha"
+                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setResetStep("email")}
+                    className="flex-1 h-11 rounded-xl border border-border/40 text-sm font-medium hover:bg-accent transition-colors"
+                  >
+                    Voltar
+                  </button>
+                  <button
+                    onClick={handleConfirmReset}
+                    className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
+                  >
+                    Redefinir senha
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {resetStep === "done" && (
+              <div className="text-center py-4">
+                <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto mb-3" />
+                <p className="text-sm font-medium">Senha redefinida com sucesso!</p>
+                <p className="text-xs text-muted-foreground mt-1">Redirecionando para o login...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </CustomerLayout>
   );
 }

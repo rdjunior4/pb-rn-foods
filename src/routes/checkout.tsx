@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { getProductById } from "@/lib/data";
-import { saveOrders, loadOrders, generateOrderId, loadStore, validateCoupon, incrementCouponUsage } from "@/lib/admin-store";
+import { saveOrders, loadOrders, generateOrderId, loadStore, validateCoupon, incrementCouponUsage, decrementStockForOrder } from "@/lib/admin-store";
 import type { Order, Coupon } from "@/lib/types";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency, formatDoc, formatPhone } from "@/lib/format";
@@ -87,11 +87,19 @@ function CheckoutPage() {
 
   const distributors = useMemo(() => loadStore().distributors.filter((d) => d.active), []);
   const detectedDistributor = useMemo(() => {
+    const cityName = city || location?.city;
     if (location?.latitude && location?.longitude) {
-      return findDistributorForPoint({ lat: location.latitude, lng: location.longitude }, distributors);
+      return findDistributorForPoint(
+        { lat: location.latitude, lng: location.longitude },
+        distributors,
+        cityName,
+      );
+    }
+    if (cityName) {
+      return findDistributorForPoint({ lat: 0, lng: 0 }, distributors, cityName);
     }
     return null;
-  }, [location, distributors]);
+  }, [location, distributors, city]);
 
   useEffect(() => {
     detectLocation().then((loc) => {
@@ -190,16 +198,37 @@ function CheckoutPage() {
   }
 
   const handleFinish = () => {
-    if (!phone.replace(/\D/g, "").startsWith("(") && phone.replace(/\D/g, "").length < 10) {
+    const phoneDigits = phone.replace(/\D/g, "");
+    const docDigits = docNumber.replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      toast.error("Informe um telefone válido com DDD.");
       return;
     }
+    if (docDigits.length < 11) {
+      toast.error("Informe um CPF ou CNPJ válido.");
+      return;
+    }
+    if (!cep.replace(/\D/g, "")) {
+      toast.error("Informe o CEP.");
+      return;
+    }
+    if (!address.trim() || !number.trim()) {
+      toast.error("Informe o endereço e o número.");
+      return;
+    }
+    if (!city.trim() || !state.trim()) {
+      toast.error("Informe a cidade e o estado.");
+      return;
+    }
+
     const orders = loadOrders();
+    const orderId = generateOrderId();
     const newOrder: Order = {
-      id: generateOrderId(),
+      id: orderId,
       customerId: user?.id || "guest",
       customerName: user?.name || "Cliente visitante",
       customerEmail: user?.email || "guest@example.com",
-      customerDocument: docNumber || user?.document || "",
+      customerDocument: docDigits || user?.document || "",
       customerPhone: phone,
       items: cartProducts.map((p) => ({
         productId: p!.id,
@@ -227,13 +256,24 @@ function CheckoutPage() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    const orderId = newOrder.id;
     orders.push(newOrder);
     saveOrders(orders);
+
+    decrementStockForOrder(
+      cartProducts.map((p) => ({
+        productId: p!.id,
+        variantId: p!.variantId,
+        quantity: p!.quantity,
+        productName: p!.name,
+      })),
+      orderId,
+    );
+
     if (appliedCoupon) {
       incrementCouponUsage(appliedCoupon.id);
     }
     clearCart();
+    toast.success("Pedido realizado com sucesso!");
     navigate({ to: "/pedido-confirmado", search: { id: orderId } });
   };
 

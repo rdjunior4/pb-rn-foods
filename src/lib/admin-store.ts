@@ -329,3 +329,56 @@ export function addStockMovement(movement: StockMovement): void {
 export function getStockMovementsByProduct(productId: string): StockMovement[] {
   return loadStockMovements().filter((m) => m.productId === productId);
 }
+
+export function decrementStockForOrder(
+  items: { productId: string; variantId?: string; quantity: number; productName: string }[],
+  orderId: string,
+): void {
+  const store = loadStore();
+  const now = new Date().toISOString();
+  const movements: StockMovement[] = [];
+
+  for (const item of items) {
+    const product = store.products.find((p) => p.id === item.productId);
+    if (!product) continue;
+
+    if (item.variantId) {
+      const variant = product.variants.find((v) => v.id === item.variantId);
+      if (variant) {
+        const previousStock = variant.stock;
+        variant.stock = Math.max(0, variant.stock - item.quantity);
+        movements.push({
+          id: `smv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          productId: product.id,
+          productName: product.name,
+          type: "out",
+          quantity: item.quantity,
+          previousStock,
+          newStock: variant.stock,
+          reason: `Venda — pedido ${orderId}`,
+          createdAt: now,
+        });
+      }
+    }
+
+    const previousStock = product.stock;
+    product.stock = Math.max(0, product.stock - item.quantity);
+    movements.push({
+      id: `smv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      productId: product.id,
+      productName: product.name,
+      type: "out",
+      quantity: item.quantity,
+      previousStock,
+      newStock: product.stock,
+      reason: `Venda — pedido ${orderId}`,
+      createdAt: now,
+    });
+  }
+
+  saveStore(store);
+
+  const allMovements = loadStockMovements();
+  allMovements.unshift(...movements);
+  saveStockMovements(allMovements.slice(0, 500));
+}

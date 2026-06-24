@@ -47,7 +47,16 @@ export function cityMatchesDistributor(
 export function findDistributorForPoint(
   point: { lat: number; lng: number },
   distributors: Distributor[],
+  cityName?: string,
 ): Distributor | null {
+  if (cityName) {
+    for (const dist of distributors) {
+      if (!dist.active) continue;
+      if (cityMatchesDistributor(cityName, dist)) {
+        return dist;
+      }
+    }
+  }
   for (const dist of distributors) {
     if (!dist.active) continue;
     if (pointInDistributorCoverage(point, dist)) {

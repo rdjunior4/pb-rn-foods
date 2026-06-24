@@ -52,7 +52,7 @@ function AdminMarcas() {
       return;
     }
     if (file.size > MAX_IMAGE_SIZE) {
-      toast.error("A imagem deve ter no máximo 2MB");
+      toast.error("A imagem deve ter no máximo 3MB");
       return;
     }
     const preview = URL.createObjectURL(file);

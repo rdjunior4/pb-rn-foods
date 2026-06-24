@@ -1,12 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { Tag, ShoppingBag, ArrowRight, Percent } from "lucide-react";
+import { Tag, ShoppingBag, ArrowRight, Percent, Plus } from "lucide-react";
 import { getCombos } from "@/lib/admin-store";
 import { formatCurrency } from "@/lib/format";
+import { useCart } from "@/lib/cart-context";
+import { toast } from "sonner";
 
 export function CombosSection() {
   const combos = getCombos().filter((c) => c.active);
+  const { addItem } = useCart();
 
   if (combos.length === 0) return null;
+
+  const handleAddCombo = (combo: typeof combos[0]) => {
+    for (const item of combo.items) {
+      addItem(item.productId, item.quantity, undefined, item.unitPrice);
+    }
+    toast.success(`Combo "${combo.name}" adicionado ao carrinho!`, {
+      description: `${combo.items.length} itens — ${formatCurrency(combo.comboPrice)}`,
+    });
+  };
 
   return (
     <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] mt-10">
@@ -101,15 +113,21 @@ export function CombosSection() {
                   </div>
                 </div>
 
-                  {/* Savings badge */}
-                  <div className="mt-2 flex items-center justify-between">
+                  {/* Savings badge + Add button */}
+                  <div className="mt-2 flex items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
                       <Tag className="h-3 w-3" />
                       {combo.discountType === "fixed"
                         ? `Economize ${formatCurrency(combo.discountValue)}`
                         : `Economize ${combo.discountPercent}%`}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">{combo.items.length} itens</span>
+                    <button
+                      onClick={() => handleAddCombo(combo)}
+                      className="inline-flex items-center gap-1 bg-primary text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-hover transition-colors active:scale-95"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Adicionar
+                    </button>
                   </div>
               </div>
             </div>
