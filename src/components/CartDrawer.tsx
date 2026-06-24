@@ -3,6 +3,7 @@ import { useCart } from "@/lib/cart-context";
 import { getProductById } from "@/lib/data";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { formatCurrency } from "@/lib/format";
 import {
   Sheet,
   SheetContent,
@@ -32,7 +33,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex flex-col w-full sm:max-w-md bg-white/95 backdrop-blur-xl p-0">
+      <SheetContent side="right" className="flex flex-col w-full sm:max-w-md bg-background/95 backdrop-blur-xl p-0">
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
             <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-muted/60 mb-5">
@@ -85,9 +86,9 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                 return (
                   <div
                     key={item.productId}
-                    className="group flex gap-3 rounded-2xl border border-border/40 bg-card p-3 transition-all hover:border-border/80 hover:shadow-sm"
+                    className="group flex gap-3 rounded border border-border/40 bg-card p-3 transition-all hover:border-border/80 hover:shadow-sm"
                   >
-                    <div className="h-20 w-20 shrink-0 rounded-xl bg-muted/50 overflow-hidden">
+                    <div className="h-20 w-20 shrink-0 rounded bg-muted/50 overflow-hidden">
                       <img
                         src={product.image}
                         alt={product.name}
@@ -108,11 +109,11 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                         </button>
                       </div>
                       <div className="text-xs text-muted-foreground/50 mt-0.5">{product.brand}</div>
-                      <div className="text-xs text-muted-foreground/40 mt-0.5 font-mono">
-                        R$ {(product.price * item.quantity).toFixed(2)}
-                      </div>
+<div className="text-xs text-muted-foreground/40 mt-0.5 font-mono">
+                         {formatCurrency(product.price * item.quantity)}
+                       </div>
                       <div className="mt-1.5 flex items-center gap-2">
-                        <div className="flex items-center border border-border/50 rounded-lg overflow-hidden">
+                        <div className="flex items-center border border-border/40 rounded overflow-hidden">
                           <button
                             onClick={() => {
                               if (item.quantity === 1) {
@@ -125,7 +126,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                           >
                             <Minus className="h-3 w-3" />
                           </button>
-                          <span className="w-8 text-center text-xs font-semibold border-x border-border/50">{item.quantity}</span>
+                          <span className="w-8 text-center text-xs font-semibold border-x border-border/40">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                             className="inline-flex h-7 w-7 items-center justify-center hover:bg-primary/10 transition-colors"
@@ -134,7 +135,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                           </button>
                         </div>
                         <span className="text-[11px] text-muted-foreground/40">
-                          R$ {(product.price).toFixed(2)} un.
+                          {formatCurrency(product.price)} un.
                         </span>
                       </div>
                     </div>
@@ -143,11 +144,11 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
               })}
             </div>
 
-            <div className="border-t border-border/60 px-6 py-5 space-y-4 bg-muted/20">
+            <div className="border-t border-border/40 px-6 py-5 space-y-4 bg-muted/20">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Subtotal</span>
-                  <span className="text-base font-bold text-primary">R$ {total.toFixed(2)}</span>
+                  <span className="text-base font-bold text-primary">{formatCurrency(total)}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground/40">
                   <span>{totalQuantity} {totalQuantity === 1 ? "item" : "itens"}</span>

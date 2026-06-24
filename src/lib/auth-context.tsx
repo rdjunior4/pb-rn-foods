@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { formatCPF, formatCNPJ, type DocumentType } from "./format";
+import { setUserContext } from "./sentry";
 
-export type DocumentType = "cpf" | "cnpj";
+export type { DocumentType };
 
 export interface AuthUser {
   id: string;
@@ -18,11 +20,13 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => boolean;
-  register: (name: string, email: string, password: string, document: string, documentType: DocumentType) => boolean;
+  register: (name: string, email: string, password: string, document: string, documentType: DocumentType) => { ok: boolean; error?: string };
   logout: () => void;
   updateUser: (data: Partial<AuthUser>) => void;
   validateDocument: (doc: string, type: DocumentType) => boolean;
   formatDocument: (doc: string, type: DocumentType) => string;
+  requestPasswordReset: (email: string) => { ok: boolean; error?: string };
+  resetPassword: (email: string, code: string, newPassword: string) => { ok: boolean; error?: string };
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -49,50 +53,85 @@ export function validateCNPJ(cnpj: string): boolean {
   return (r2 < 2 ? 0 : 11 - r2) === parseInt(digits[13]);
 }
 
-function formatCPF(value: string): string {
-  const d = value.replace(/\D/g, "").slice(0, 11);
-  return d.replace(/^(\d{3})(\d)/, "$1.$2")
-    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+const AUTH_KEY = "@pbrn-auth";
+const USERS_KEY = "@pbrn-users";
+const RESET_KEY = "@pbrn-pwreset";
+
+function claimGuestOrders(email: string, userId: string, userName: string) {
+  try {
+    const ordersRaw = localStorage.getItem("@pbrn-orders");
+    if (!ordersRaw) return;
+    const orders = JSON.parse(ordersRaw);
+    if (!Array.isArray(orders)) return;
+    let changed = false;
+    for (const order of orders) {
+      if (order.customerId === "guest" && order.customerEmail === email) {
+        order.customerId = userId;
+        order.customerName = userName;
+        changed = true;
+      }
+    }
+    if (changed) {
+      localStorage.setItem("@pbrn-orders", JSON.stringify(orders));
+    }
+  } catch {}
 }
 
-function formatCNPJ(value: string): string {
-  const d = value.replace(/\D/g, "").slice(0, 14);
-  return d.replace(/^(\d{2})(\d)/, "$1.$2")
-    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3/$4")
-    .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, "$1.$2.$3/$4-$5");
+interface StoredUser {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  document: string;
+  documentType: DocumentType;
+  phone?: string;
+  role?: "admin" | "customer";
+  createdAt: string;
 }
 
-const MOCK_USERS: Record<string, { password: string; user: AuthUser }> = {
+const BUILTIN_USERS: Record<string, StoredUser> = {
   "rosenildomoney@gmail.com": {
+    id: "usr_1",
+    name: "Rosenildo Money",
+    email: "rosenildomoney@gmail.com",
     password: "33milhoes",
-    user: {
-      id: "usr_1",
-      name: "Rosenildo Money",
-      email: "rosenildomoney@gmail.com",
-      document: "11222333444455",
-      documentType: "cnpj",
-      phone: "(83) 99999-9999",
-      role: "admin",
-      createdAt: "2024-01-15T08:00:00.000Z",
-    },
+    document: "11222333444455",
+    documentType: "cnpj",
+    phone: "(83) 99999-9999",
+    role: "admin",
+    createdAt: "2024-01-15T08:00:00.000Z",
   },
 };
 
-const MOCK_USER: AuthUser = {
-  id: "1",
-  name: "Admin",
-  email: "admin@pbrn.com",
-  document: "11222333444455",
-  documentType: "cnpj",
-  phone: "(83) 99999-9999",
-  createdAt: new Date().toISOString(),
-};
-
-function loadAuth(): AuthUser | null {
+function loadAllUsers(): Record<string, StoredUser> {
   try {
-    const stored = localStorage.getItem("@pbrn-auth");
+    const stored = localStorage.getItem(USERS_KEY);
+    const registered: Record<string, StoredUser> = stored ? JSON.parse(stored) : {};
+    return { ...BUILTIN_USERS, ...registered };
+  } catch {
+    return { ...BUILTIN_USERS };
+  }
+}
+
+function saveRegisteredUsers(registered: Record<string, StoredUser>) {
+  const builtinEmails = new Set(Object.keys(BUILTIN_USERS));
+  const filtered: Record<string, StoredUser> = {};
+  for (const [email, user] of Object.entries(registered)) {
+    if (!builtinEmails.has(email)) {
+      filtered[email] = user;
+    }
+  }
+  localStorage.setItem(USERS_KEY, JSON.stringify(filtered));
+}
+
+function storedToAuth(stored: StoredUser): AuthUser {
+  const { password: _, ...user } = stored;
+  return user;
+}
+
+function loadCurrentUser(): AuthUser | null {
+  try {
+    const stored = localStorage.getItem(AUTH_KEY);
     return stored ? JSON.parse(stored) : null;
   } catch {
     return null;
@@ -100,25 +139,28 @@ function loadAuth(): AuthUser | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(loadAuth);
+  const [user, setUser] = useState<AuthUser | null>(loadCurrentUser);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem("@pbrn-auth", JSON.stringify(user));
+      localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+      setUserContext({ id: user.id, email: user.email, name: user.name });
     } else {
-      localStorage.removeItem("@pbrn-auth");
+      localStorage.removeItem(AUTH_KEY);
+      setUserContext(null);
     }
   }, [user]);
 
   const login = useCallback((email: string, password: string) => {
-    if (!email || !password) return false;
-    const match = MOCK_USERS[email.toLowerCase()];
-    if (match && match.password === password) {
-      setUser(match.user);
-      return true;
-    }
-    if (email && password) {
-      setUser({ ...MOCK_USER, email });
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPass = password.trim();
+    if (!cleanEmail || !cleanPass) return false;
+    const allUsers = loadAllUsers();
+    const match = allUsers[cleanEmail];
+    if (match && match.password === cleanPass) {
+      const authUser = storedToAuth(match);
+      setUser(authUser);
+      claimGuestOrders(cleanEmail, authUser.id, authUser.name);
       return true;
     }
     return false;
@@ -126,19 +168,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     (name: string, email: string, password: string, document: string, documentType: DocumentType) => {
-      if (name && email && password && document) {
-        const raw = document.replace(/\D/g, "");
-        setUser({
-          id: Date.now().toString(),
-          name,
-          email,
-          document: raw,
-          documentType,
-          createdAt: new Date().toISOString(),
-        });
-        return true;
+      const cleanName = name.trim();
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPass = password.trim();
+      const cleanDoc = document.replace(/\D/g, "");
+      if (!cleanName || !cleanEmail || !cleanPass || !cleanDoc) {
+        return { ok: false, error: "Preencha todos os campos." };
       }
-      return false;
+      if (cleanPass.length < 4) {
+        return { ok: false, error: "A senha deve ter pelo menos 4 caracteres." };
+      }
+      const allUsers = loadAllUsers();
+      if (allUsers[cleanEmail]) {
+        return { ok: false, error: "Este e-mail já está cadastrado." };
+      }
+      const newUser: StoredUser = {
+        id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        name: cleanName,
+        email: cleanEmail,
+        password: cleanPass,
+        document: cleanDoc,
+        documentType,
+        role: "customer",
+        createdAt: new Date().toISOString(),
+      };
+      allUsers[cleanEmail] = newUser;
+      saveRegisteredUsers(allUsers);
+      setUser(storedToAuth(newUser));
+      return { ok: true };
     },
     []
   );
@@ -148,7 +205,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateUser = useCallback((data: Partial<AuthUser>) => {
-    setUser((prev) => (prev ? { ...prev, ...data } : prev));
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...data };
+      const allUsers = loadAllUsers();
+      const key = prev.email.toLowerCase();
+      if (allUsers[key]) {
+        allUsers[key] = { ...allUsers[key], ...data };
+        saveRegisteredUsers(allUsers);
+      }
+      return updated;
+    });
   }, []);
 
   const validateDocument = useCallback((doc: string, type: DocumentType) => {
@@ -159,9 +226,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return type === "cpf" ? formatCPF(doc) : formatCNPJ(doc);
   }, []);
 
+  const requestPasswordReset = useCallback((email: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) return { ok: false, error: "Informe seu e-mail." };
+    const allUsers = loadAllUsers();
+    if (!allUsers[cleanEmail]) {
+      return { ok: false, error: "E-mail não cadastrado." };
+    }
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    try {
+      const resets: Record<string, string> = JSON.parse(localStorage.getItem(RESET_KEY) || "{}");
+      resets[cleanEmail] = code;
+      localStorage.setItem(RESET_KEY, JSON.stringify(resets));
+    } catch {
+      localStorage.setItem(RESET_KEY, JSON.stringify({ [cleanEmail]: code }));
+    }
+    return { ok: true, code };
+  }, []);
+
+  const resetPassword = useCallback((email: string, code: string, newPassword: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!newPassword || newPassword.length < 4) {
+      return { ok: false, error: "A senha deve ter pelo menos 4 caracteres." };
+    }
+    try {
+      const resets: Record<string, string> = JSON.parse(localStorage.getItem(RESET_KEY) || "{}");
+      if (resets[cleanEmail] !== code.trim()) {
+        return { ok: false, error: "Código de verificação inválido." };
+      }
+      const allUsers = loadAllUsers();
+      const user = allUsers[cleanEmail];
+      if (!user) {
+        return { ok: false, error: "Usuário não encontrado." };
+      }
+      user.password = newPassword.trim();
+      allUsers[cleanEmail] = user;
+      saveRegisteredUsers(allUsers);
+      delete resets[cleanEmail];
+      localStorage.setItem(RESET_KEY, JSON.stringify(resets));
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Erro ao redefinir senha." };
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoggedIn: !!user, isAdmin: user?.role === "admin", login, register, logout, updateUser, validateDocument, formatDocument }}
+      value={{ user, isLoggedIn: !!user, isAdmin: user?.role === "admin", login, register, logout, updateUser, validateDocument, formatDocument, requestPasswordReset, resetPassword }}
     >
       {children}
     </AuthContext.Provider>

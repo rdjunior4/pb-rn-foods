@@ -7,15 +7,25 @@ export function Newsletter() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
+    if (!email.trim()) return;
+    try {
+      const stored: string[] = JSON.parse(localStorage.getItem("@pbrn-newsletter") || "[]");
+      if (stored.includes(email.trim().toLowerCase())) {
+        toast.error("Este e-mail já está cadastrado!");
+        return;
+      }
+      stored.push(email.trim().toLowerCase());
+      localStorage.setItem("@pbrn-newsletter", JSON.stringify(stored));
       toast.success("E-mail cadastrado com sucesso!");
       setEmail("");
+    } catch {
+      toast.error("Erro ao salvar e-mail. Tente novamente.");
     }
   };
 
   return (
-    <section className="mx-auto max-w-[1400px] px-4 sm:px-6 mt-16">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a0a0a] via-primary to-primary-hover px-8 py-14 sm:px-16 sm:py-16 text-center">
+    <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] mt-16">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-black via-primary to-primary-hover px-8 py-14 sm:px-16 sm:py-16 text-center">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.08),transparent_50%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(0,0,0,0.3),transparent_50%)]" />
@@ -37,7 +47,7 @@ export function Newsletter() {
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-white/25 to-white/10 backdrop-blur-md mb-6 ring-1 ring-white/20 shadow-lg shadow-black/10">
             <Mail className="h-7 w-7 text-white" />
           </div>
-          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight">
+          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
             Receba ofertas exclusivas
           </h3>
           <p className="mt-3 text-white/80 text-sm sm:text-base leading-relaxed max-w-md mx-auto">
@@ -52,12 +62,12 @@ export function Newsletter() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Seu melhor e-mail"
                 required
-                className="w-full h-12 rounded-xl border border-white/20 bg-white/10 pl-11 pr-4 text-sm text-white placeholder:text-white/50 outline-none focus:border-white/40 focus:bg-white/15 focus:ring-2 focus:ring-white/20 transition-all backdrop-blur-sm"
+                className="w-full h-12 rounded border border-white/20 bg-white/10 pl-11 pr-4 text-sm text-white placeholder:text-white/50 outline-none focus:border-white/40 focus:bg-white/15 focus:ring-2 focus:ring-white/20 transition-all backdrop-blur-sm"
               />
             </div>
             <button
               type="submit"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-primary font-semibold px-8 text-sm hover:bg-white/90 hover:shadow-xl hover:shadow-white/10 transition-all active:scale-[0.98] shadow-lg shadow-black/5"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded bg-white text-primary font-semibold px-8 text-sm hover:bg-white/90 hover:shadow-xl hover:shadow-white/10 transition-all active:scale-[0.98] shadow-lg shadow-black/5"
             >
               Cadastrar
               <Send className="h-4 w-4" />

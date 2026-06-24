@@ -1,11 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { searchProducts, categories } from "@/lib/data";
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { searchProducts, getCategories } from "@/lib/data";
 import { ProductCard } from "@/components/ProductCard";
-import { TopBar } from "@/components/TopBar";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { CustomerLayout } from "@/components/CustomerLayout";
+import { ITEMS_PER_PAGE, SELECT_CLASSES } from "@/lib/constants";
 
 export const Route = createFileRoute("/buscar")({
   component: SearchPage,
@@ -18,81 +17,141 @@ function SearchPage() {
   const { q } = Route.useSearch();
   const navigate = useNavigate();
   const [query, setQuery] = useState(q);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<"default" | "price-asc" | "price-desc" | "name">("default");
 
-  const results = q ? searchProducts(q) : [];
+  let results = q ? searchProducts(q) : [];
+
+  if (sort === "price-asc") results = [...results].sort((a, b) => a.price - b.price);
+  else if (sort === "price-desc") results = [...results].sort((a, b) => b.price - a.price);
+  else if (sort === "name") results = [...results].sort((a, b) => a.name.localeCompare(b.name));
+
+  const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
+  const paged = results.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      setPage(1);
       navigate({ to: "/buscar", search: { q: query.trim() } });
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <TopBar />
-      <Header />
-      <main className="mx-auto max-w-[1400px] px-4 sm:px-6 py-8">
-        <form onSubmit={handleSubmit} className="mb-8">
-          <div className="relative max-w-xl">
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar produtos, marcas..."
-              className="w-full h-12 rounded-xl border border-border bg-background pl-12 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
-              autoFocus
-            />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          </div>
-        </form>
+    <CustomerLayout maxWidth="1400">
+      <form onSubmit={handleSubmit} className="mb-8">
+        <div className="relative max-w-xl">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar produtos, marcas..."
+            className="w-full h-12 rounded border border-border/40 bg-background pl-12 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+            autoFocus
+          />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        </div>
+      </form>
 
-        {q && (
-          <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
+      {q && (
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <SlidersHorizontal className="h-4 w-4" />
             <span>
-              {results.length} resultado{results.length !== 1 ? "s" : ""} para "<strong className="text-foreground">{q}</strong>"
+              {results.length} resultado{results.length !== 1 ? "s" : ""} para "
+              <strong className="text-foreground">{q}</strong>"
             </span>
           </div>
-        )}
-
-        {!q && (
-          <div className="text-center py-16">
-            <Search className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-            <h2 className="text-lg font-semibold">Busque por produtos ou marcas</h2>
-            <p className="text-sm text-muted-foreground mt-1">Encontre o que precisa para seu negócio</p>
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+            <select
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value as typeof sort);
+                setPage(1);
+              }}
+              className={SELECT_CLASSES.public}
+            >
+              <option value="default">Padrão</option>
+              <option value="price-asc">Menor preço</option>
+              <option value="price-desc">Maior preço</option>
+              <option value="name">Nome A-Z</option>
+            </select>
           </div>
-        )}
+        </div>
+      )}
 
-        {q && results.length === 0 && (
-          <div className="text-center py-16">
-            <h2 className="text-lg font-semibold">Nenhum resultado encontrado</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Tente buscar por outro termo ou navegue pelas categorias
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {categories.map((cat) => (
-                <a
-                  key={cat.id}
-                  href={`/categoria/${cat.slug}`}
-                  className="inline-flex items-center rounded-full border border-border px-4 py-1.5 text-sm hover:border-primary hover:text-primary transition-colors"
-                >
-                  {cat.name}
-                </a>
-              ))}
-            </div>
+      {!q && (
+        <div className="text-center py-16">
+          <Search className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
+          <h2 className="text-lg font-semibold">Busque por produtos ou marcas</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Encontre o que precisa para seu negócio
+          </p>
+        </div>
+      )}
+
+      {q && results.length === 0 && (
+        <div className="text-center py-16">
+          <h2 className="text-lg font-semibold">Nenhum resultado encontrado</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Tente buscar por outro termo ou navegue pelas categorias
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
+            {getCategories().map((cat) => (
+              <a
+                key={cat.id}
+                href={`/categoria/${cat.slug}`}
+                className="inline-flex items-center rounded border border-border/40 px-4 py-1.5 text-sm hover:border-primary hover:text-primary transition-colors"
+              >
+                {cat.name}
+              </a>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {results.length > 0 && (
+      {results.length > 0 && (
+        <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {results.map((p) => (
+            {paged.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
-        )}
-      </main>
-      <Footer />
-    </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="inline-flex h-9 w-9 items-center justify-center rounded border border-border/40 hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                    p === page
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border hover:bg-muted"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="inline-flex h-9 w-9 items-center justify-center rounded border border-border/40 hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </CustomerLayout>
   );
 }

@@ -1,14 +1,13 @@
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Youtube, Linkedin, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { categories } from "@/lib/data";
+import { getCategories } from "@/lib/data";
 
 const helpers = [
-  { label: "Central de ajuda", to: "#" },
-  { label: "Como comprar", to: "#" },
-  { label: "Formas de pagamento", to: "#" },
-  { label: "Troca e devolução", to: "#" },
-  { label: "Política de privacidade", to: "#" },
+  { label: "Sobre nós", to: "/pagina/sobre" },
+  { label: "Perguntas frequentes", to: "/pagina/faq" },
+  { label: "Termos e condições", to: "/pagina/termos" },
+  { label: "Política de privacidade", to: "/pagina/privacidade" },
 ];
 
 const business = [
@@ -28,37 +27,37 @@ const social = [
 
 export function Footer() {
   return (
-    <footer className="mt-20 bg-[#0a0a0a]">
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
+    <footer className="mt-20 bg-brand-black">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px]">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 py-14 lg:py-20">
           <div className="lg:col-span-3">
             <Link to="/">
               <Logo className="h-14" />
             </Link>
-            <p className="mt-5 text-sm text-white/40 leading-relaxed max-w-xs">
+            <p className="mt-5 text-sm text-white/60 leading-relaxed max-w-xs">
               Distribuidora de alimentos com foco em atender empresas com variedade,
               qualidade e condições especiais para seu negócio crescer.
             </p>
             <div className="mt-7 space-y-3.5 text-sm">
-              <a href="tel:83999999999" className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group">
+              <a href="tel:83999999999" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors group">
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 group-hover:bg-primary/20 transition-colors">
                   <Phone className="h-4 w-4 text-primary" />
                 </span>
                 (83) 99999-9999
               </a>
-              <a href="mailto:contato@pbrnfoods.com.br" className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group">
+              <a href="mailto:contato@pbrnfoods.com.br" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors group">
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 group-hover:bg-primary/20 transition-colors">
                   <Mail className="h-4 w-4 text-primary" />
                 </span>
                 contato@pbrnfoods.com.br
               </a>
-              <span className="flex items-center gap-3 text-white/50 group">
+              <span className="flex items-center gap-3 text-white/60 group">
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
                   <MapPin className="h-4 w-4 text-primary" />
                 </span>
                 João Pessoa - PB
               </span>
-              <span className="flex items-center gap-3 text-white/50">
+              <span className="flex items-center gap-3 text-white/60">
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
                   <Clock className="h-4 w-4 text-primary" />
                 </span>
@@ -71,7 +70,7 @@ export function Footer() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 text-white/40 hover:border-primary/40 hover:text-primary hover:bg-primary/10 transition-all"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded border border-white/10 text-white/40 hover:border-primary/40 hover:text-primary hover:bg-primary/10 transition-all"
                 >
                   <s.icon className="h-4 w-4" />
                 </a>
@@ -82,9 +81,9 @@ export function Footer() {
           <div className="lg:col-span-3">
             <h4 className="text-white font-semibold text-sm mb-5">Categorias</h4>
             <ul className="space-y-3">
-              {categories.slice(0, 5).map((c) => (
+              {getCategories().slice(0, 5).map((c) => (
                 <li key={c.id}>
-                  <Link to={`/categoria/${c.slug}`} className="group inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors">
+                  <Link to="/categoria/$slug" params={{ slug: c.slug }} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
                     <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
                     {c.name}
                   </Link>
@@ -98,10 +97,10 @@ export function Footer() {
             <ul className="space-y-3">
               {helpers.map((h) => (
                 <li key={h.label}>
-                  <a href={h.to} className="group inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors">
+                  <Link to={h.to} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
                     <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
                     {h.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -112,7 +111,7 @@ export function Footer() {
             <ul className="space-y-3">
               {business.map((b) => (
                 <li key={b.label}>
-                  <Link to={b.to} className="group inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors">
+                  <Link to={b.to} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
                     <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
                     {b.label}
                   </Link>
@@ -122,7 +121,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/5 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/20">
+        <div className="border-t border-white/5 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/30">
           <span>&copy; {new Date().getFullYear()} PB&RN Foods. Todos os direitos reservados.</span>
           <span>CNPJ: 00.000.000/0001-00</span>
         </div>

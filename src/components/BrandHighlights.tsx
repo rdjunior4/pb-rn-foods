@@ -1,31 +1,41 @@
 import { Link } from "@tanstack/react-router";
-import { brands } from "@/lib/data";
+import { getBrands } from "@/lib/data";
+import { loadStoreConfig } from "@/lib/store-config";
 
 export function BrandHighlights() {
-  const loop = [...brands, ...brands];
+  const allBrands = getBrands();
+  const config = loadStoreConfig();
+
+  const featured = config.featuredBrandIds.length > 0
+    ? allBrands.filter((b) => config.featuredBrandIds.includes(b.id) && b.active)
+    : allBrands.filter((b) => b.active);
+
+  if (featured.length === 0) return null;
+
+  const loop = [...featured, ...featured];
 
   return (
-    <section className="mx-auto max-w-[1400px] px-4 sm:px-6 mt-12">
+    <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] mt-12">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Marcas em destaque</h2>
-        <Link to="/buscar" className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors">
+        <Link to="/buscar" search={{ q: "" }} className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors">
           Ver todas →
         </Link>
       </div>
       <div
-        className="overflow-hidden"
+        className="group overflow-hidden"
         style={{
           maskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
           WebkitMaskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
         }}
       >
-        <div className="flex w-max gap-4 animate-marquee">
+        <div className="flex w-max gap-4 animate-marquee group-hover:[animation-play-state:paused]">
           {loop.map((b, i) => (
             <Link
               key={`${b.name}-${i}`}
               to="/buscar"
               search={{ q: b.name }}
-              className="flex h-20 w-40 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-md transition-all p-4"
+              className="flex h-20 w-40 shrink-0 items-center justify-center rounded border border-border/40 bg-card hover:border-primary/30 hover:shadow-md transition-all p-4"
             >
               <img
                 src={b.logo}

@@ -1,4 +1,4 @@
-import { Search, User, ShoppingCart, Menu, LogIn, UserPlus, Package, Heart, Settings, LogOut, X, Home, Tag, Phone, ShieldCheck } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, LogIn, UserPlus, Package, Heart, Settings, LogOut, X, Home, Tag, Phone, ShieldCheck, Shield } from "lucide-react";
 import { Logo } from "./Logo";
 import { CartDrawer } from "./CartDrawer";
 import {
@@ -17,9 +17,9 @@ import {
 } from "@/components/ui/sheet";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { categories } from "@/lib/data";
+import { getCategories } from "@/lib/data";
 
 export function Header() {
   const { totalItems } = useCart();
@@ -47,22 +47,22 @@ export function Header() {
     <header
       className={`sticky top-0 z-50 text-white transition-all duration-300 ${
         scrolled
-          ? "bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/5 shadow-lg shadow-black/10"
-          : "bg-[#0a0a0a] border-b border-white/5"
+          ? "bg-brand-black/95 backdrop-blur-xl border-b border-white/5 shadow-elevated"
+          : "bg-brand-black border-b border-white/5"
       }`}
     >
-      <div className="mx-auto flex max-w-[1400px] items-center gap-3 sm:gap-6 px-4 sm:px-6 py-3">
+      <div className="mx-auto flex max-w-[1400px] items-center gap-3 sm:gap-6 px-4 sm:px-6 lg:px-[30px] py-3">
         <button
           aria-label="Menu"
           onClick={() => setMenuOpen(true)}
-          className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
+          className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all"
         >
           <Menu className="h-5 w-5" />
         </button>
 
-        <a href="/" className="shrink-0">
+        <Link to="/" className="shrink-0">
           <Logo />
-        </a>
+        </Link>
 
         <form onSubmit={handleSearch} className="hidden sm:block flex-1 mx-4 lg:mx-8">
           <div className="relative">
@@ -71,7 +71,7 @@ export function Header() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar produtos, marcas..."
-              className="w-full h-10 rounded-xl border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
+              className="w-full h-10 rounded border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
             />
             <button
               type="submit"
@@ -86,15 +86,15 @@ export function Header() {
         <div className="flex items-center gap-1 sm:gap-2">
           <button
             aria-label="Buscar"
-            onClick={() => navigate({ to: "/buscar" })}
-            className="sm:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
+            onClick={() => navigate({ to: "/buscar", search: { q: "" } })}
+            className="sm:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all"
           >
             <Search className="h-5 w-5" />
           </button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-xl bg-primary hover:bg-primary-hover transition-colors group">
+              <button className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded border border-border/40 bg-primary hover:bg-primary-hover transition-colors group">
                 <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 <div className="hidden lg:block text-left leading-tight">
                   <div className="text-sm font-semibold text-white">Minha conta</div>
@@ -104,7 +104,7 @@ export function Header() {
                 </div>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent side="bottom" align="end" className="w-56 rounded-xl border-border/50 shadow-xl">
+            <DropdownMenuContent side="bottom" align="end" className="w-56 rounded border-border/40 shadow-xl">
               {isLoggedIn ? (
                 <>
                   <DropdownMenuLabel>
@@ -117,16 +117,25 @@ export function Header() {
                     <Package className="h-4 w-4" />
                     <span>Meus pedidos</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer gap-3">
+                  <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/favoritos" })}>
                     <Heart className="h-4 w-4" />
                     <span>Lista de desejos</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer gap-3">
+                  <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/minha-conta" })}>
                     <Settings className="h-4 w-4" />
                     <span>Configurações</span>
                   </DropdownMenuItem>
+                  {user?.role === "admin" && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/admin" })}>
+                        <Shield className="h-4 w-4" />
+                        <span>Painel Admin</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer gap-3 text-muted-foreground" onClick={logout}>
+                  <DropdownMenuItem className="cursor-pointer gap-3 text-muted-foreground" onClick={() => { logout(); navigate({ to: "/" }); }}>
                     <LogOut className="h-4 w-4" />
                     <span>Sair</span>
                   </DropdownMenuItem>
@@ -153,7 +162,7 @@ export function Header() {
 
           <button
             onClick={() => setCartOpen(true)}
-            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-xl hover:bg-white/5 transition-colors group relative"
+            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded border border-border/40 hover:bg-white/5 transition-colors group relative"
           >
             <div className="relative">
               <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-white/70 group-hover:text-white transition-colors" />
@@ -175,7 +184,7 @@ export function Header() {
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="left" className="w-72 sm:w-80 bg-[#0a0a0a] border-white/5 p-0 flex flex-col">
+        <SheetContent side="left" className="w-72 sm:w-80 bg-brand-black border-white/5 p-0 flex flex-col">
           <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
             <Logo />
@@ -186,71 +195,72 @@ export function Header() {
 
           <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
             <div>
-              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/30 mb-2">Navegar</h3>
+              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-2">Navegar</h3>
               <div className="space-y-0.5">
                 <SheetClose asChild>
-                  <a href="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  <Link to="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                     <Home className="h-4 w-4" />
                     Início
-                  </a>
+                  </Link>
                 </SheetClose>
                 <SheetClose asChild>
-                  <a href="/buscar" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  <Link to="/buscar" search={{ q: "oferta" }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                     <Tag className="h-4 w-4" />
                     Ofertas
-                  </a>
+                  </Link>
                 </SheetClose>
               </div>
             </div>
 
             <div>
-              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/30 mb-2">Categorias</h3>
+              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-2">Categorias</h3>
               <div className="space-y-0.5">
-                {categories.map((c) => (
+                {getCategories().map((c) => (
                   <SheetClose key={c.id} asChild>
-                    <a
-                      href={`/categoria/${c.slug}`}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                    <Link
+                      to="/categoria/$slug"
+                      params={{ slug: c.slug }}
+ className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 active:scale-[0.98] transition-all"
                     >
                       {c.name}
-                    </a>
+                    </Link>
                   </SheetClose>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/30 mb-2">Acesso</h3>
+              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-2">Acesso</h3>
               <div className="space-y-0.5">
                 <SheetClose asChild>
-                  <a href={isLoggedIn ? "/minha-conta" : "/entrar"} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  <Link to={isLoggedIn ? "/minha-conta" : "/entrar"} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                     <User className="h-4 w-4" />
                     {isLoggedIn ? "Minha conta" : "Entrar"}
-                  </a>
+                  </Link>
                 </SheetClose>
                 <SheetClose asChild>
-                  <a href="/carrinho" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  <Link to="/carrinho" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
-                  </a>
+                  </Link>
                 </SheetClose>
               </div>
             </div>
 
             <div>
-              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/30 mb-2">Ajuda</h3>
+              <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-2">Ajuda</h3>
               <div className="space-y-0.5">
                 <SheetClose asChild>
-                  <a href="/entrar" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  <a href="https://wa.me/5583999999999" target="_blank" rel="noopener" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                     <Phone className="h-4 w-4" />
                     Fale conosco
                   </a>
                 </SheetClose>
                 <SheetClose asChild>
-                  <a href="/entrar" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  <Link to="/buscar" search={{ q: "oferta" }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                     <ShieldCheck className="h-4 w-4" />
                     Troca e devolução
-                  </a>
+                  </Link>
                 </SheetClose>
               </div>
             </div>

@@ -20,6 +20,22 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Env
+.env
+.env.*
+!.env.example
+
+# Opencode config (contains API keys)
+opencode.json
+
+# Build logs / temp
+build_*.txt
+run_build.bat
+
+# Knowledge graph
+graphify-out/
+.graphignore
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

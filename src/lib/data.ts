@@ -1,4 +1,5 @@
-import type { Product, Category, Brand } from "./types";
+import type { Product, Category, Brand, ProductSeed } from "./types";
+import { loadStore } from "./admin-store";
 
 export const categories: Category[] = [
   { id: "cat-1", slug: "mercearia", name: "Mercearia", icon: "Wheat", productCount: 12 },
@@ -22,9 +23,16 @@ const baseSpecs = (brand: string, weight: string, unit: string) => [
   { label: "Conservação", value: "Temperatura ambiente" },
 ];
 
-export const products: Product[] = [
+const seedProducts: ProductSeed[] = [
   // Mercearia
-  { id: "p1", slug: "arroz-tio-joao-5kg", name: "Arroz Tio João Parboilizado 5kg", details: ["Grãos selecionados e uniformes", "Processo de parboilização que preserva nutrientes", "Ideal para restaurantes e lanchonetes", "Rendimento superior na panela", "Embalagem hermética que preserva o frescor"], specs: [...baseSpecs("Tio João", "5kg", "un"), { label: "Tipo", value: "Parboilizado" }, { label: "Validade", value: "12 meses" }], categoryId: "cat-1", brand: "Tio João", price: 24.90, oldPrice: 27.90, unit: "un", image: img("arroz-tio-joao"), discount: 10, stock: 50, featured: true },
+  { id: "p1", slug: "arroz-tio-joao-5kg", name: "Arroz Tio João Parboilizado 5kg", details: ["Grãos selecionados e uniformes", "Processo de parboilização que preserva nutrientes", "Ideal para restaurantes e lanchonetes", "Rendimento superior na panela", "Embalagem hermética que preserva o frescor"], specs: [...baseSpecs("Tio João", "5kg", "un"), { label: "Tipo", value: "Parboilizado" }, { label: "Validade", value: "12 meses" }], categoryId: "cat-1", brand: "Tio João", price: 24.90, oldPrice: 27.90, unit: "un", image: img("arroz-tio-joao"), images: [img("arroz-tio-joao"), img("arroz-tio-joao-2"), img("arroz-tio-joao-3")], discount: 10, stock: 50, featured: true, variants: [
+    { id: "v1-un", label: "Unidade", unitPrice: 24.90, oldPrice: 27.90, stock: 50, unit: "un" },
+    { id: "v1-cx", label: "Caixa (10un)", unitPrice: 22.90, oldPrice: 27.90, boxPrice: 229.00, boxQuantity: 10, stock: 20, unit: "un" },
+  ], pricingTiers: [
+    { id: "t1-1", minQuantity: 1, pricePerUnit: 24.90, discountPercent: 0, label: "A partir de 1 unidade" },
+    { id: "t1-10", minQuantity: 10, pricePerUnit: 22.90, discountPercent: 8, label: "A partir de 10 unidades" },
+    { id: "t1-50", minQuantity: 50, pricePerUnit: 21.50, discountPercent: 14, label: "A partir de 50 unidades" },
+  ] },
   { id: "p2", slug: "oleo-soja-liza-900ml", name: "Óleo de Soja Liza Pet 900ml", details: ["Óleo de soja refinado e purificado", "Alto ponto de fumaça para frituras crocantes", "Neutro, não altera o sabor dos alimentos", "Garrafa pet com alça ergonômica"], specs: [...baseSpecs("Liza", "900ml", "un"), { label: "Tipo", value: "Óleo de Soja" }, { label: "Validade", value: "18 meses" }], categoryId: "cat-1", brand: "Liza", price: 6.59, oldPrice: 7.49, unit: "un", image: img("oleo-soja-liza"), discount: 12, stock: 80, featured: true },
   { id: "p3", slug: "acucar-refinado-uniao-5kg", name: "Açúcar Refinado União 5kg", details: ["Açúcar refinado de alta pureza", "Cristais finos e homogêneos", "Dissolução rápida e uniforme", "Perfeito para confeitaria e panificação"], specs: [...baseSpecs("União", "5kg", "un"), { label: "Tipo", value: "Refinado" }, { label: "Validade", value: "24 meses" }], categoryId: "cat-1", brand: "União", price: 19.90, oldPrice: 22.90, unit: "un", image: img("acucar-refinado-uniao"), discount: 13, stock: 40, featured: false },
   { id: "p4", slug: "feijao-carioca-camil-1kg", name: "Feijão Carioca Camil 1kg", details: ["Feijão carioca tipo 1", "Grãos selecionados e uniformes", "Pré-cozido para preparo mais rápido", "Sabor tradicional brasileiro"], specs: [...baseSpecs("Camil", "1kg", "un"), { label: "Tipo", value: "Carioca" }, { label: "Validade", value: "12 meses" }], categoryId: "cat-1", brand: "Camil", price: 7.99, oldPrice: 9.49, unit: "un", image: img("feijao-carioca-camil"), discount: 15, stock: 60, featured: false },
@@ -44,12 +52,27 @@ export const products: Product[] = [
   { id: "p14", slug: "salmao-file-fresco-kg", name: "Salmão Filé Fresco kg", details: ["Filé de salmão fresco importado", "Rico em ômega-3 e proteínas", "Corte nobre sem espinhas", "Sabor delicado e textura firme"], specs: [...baseSpecs("Hemmer", "1kg", "kg"), { label: "Tipo", value: "Filé Fresco" }, { label: "Origem", value: "Chile" }, { label: "Conservação", value: "Refrigerado" }, { label: "Validade", value: "10 dias" }], categoryId: "cat-3", brand: "Hemmer", price: 79.90, oldPrice: 89.90, unit: "kg", image: img("salmao-file-fresco"), discount: 11, stock: 15, featured: true },
 
   // Carnes
-  { id: "p15", slug: "contrafile-bovino-kg", name: "Contrafilé Bovino Peça a Vácuo kg", details: ["Contrafilé bovino selecionado", "Embalado a vácuo para maior conservação", "Corte nobre e macio", "Ideal para churrascos e grelhados"], specs: [...baseSpecs("Seara", "1kg", "kg"), { label: "Tipo", value: "Contrafilé" }, { label: "Conservação", value: "Refrigerado" }, { label: "Embalagem", value: "Vácuo" }, { label: "Validade", value: "60 dias" }], categoryId: "cat-4", brand: "Seara", price: 45.50, oldPrice: 49.90, unit: "kg", image: img("contrafile-bovino"), discount: 9, stock: 20, featured: true },
+  { id: "p15", slug: "contrafile-bovino-kg", name: "Contrafilé Bovino Peça a Vácuo kg", details: ["Contrafilé bovino selecionado", "Embalado a vácuo para maior conservação", "Corte nobre e macio", "Ideal para churrascos e grelhados"], specs: [...baseSpecs("Seara", "1kg", "kg"), { label: "Tipo", value: "Contrafilé" }, { label: "Conservação", value: "Refrigerado" }, { label: "Embalagem", value: "Vácuo" }, { label: "Validade", value: "60 dias" }], categoryId: "cat-4", brand: "Seara", price: 45.50, oldPrice: 49.90, unit: "kg", image: img("contrafile-bovino"), images: [img("contrafile-bovino"), img("contrafile-bovino-2")], discount: 9, stock: 20, featured: true, variants: [
+    { id: "v15-kg", label: "Peso (kg)", unitPrice: 45.50, oldPrice: 49.90, stock: 20, unit: "kg" },
+    { id: "v15-pc", label: "Peça (aprox. 8kg)", unitPrice: 43.99, oldPrice: 49.90, boxPrice: 351.92, boxQuantity: 8, stock: 10, unit: "kg" },
+    { id: "v15-cx", label: "Caixa (aprox. 24kg)", unitPrice: 43.99, oldPrice: 49.90, boxPrice: 1055.76, boxQuantity: 24, stock: 5, unit: "kg" },
+  ], pricingTiers: [
+    { id: "t15-1", minQuantity: 1, pricePerUnit: 45.50, discountPercent: 0, label: "A partir de 1 kg" },
+    { id: "t15-10", minQuantity: 10, pricePerUnit: 43.99, discountPercent: 3, label: "A partir de 10 kg" },
+    { id: "t15-50", minQuantity: 50, pricePerUnit: 41.50, discountPercent: 9, label: "A partir de 50 kg" },
+  ] },
 
   // Bebidas
   { id: "p16", slug: "coca-cola-2l", name: "Coca-Cola Pet 2L", details: ["Refrigerante Coca-Cola sabor original", "Tradicional sabor inconfundível", "Garrafa pet 2 litros", "Perfeito para refeições e confraternizações"], specs: [...baseSpecs("Coca-Cola", "2L", "un"), { label: "Tipo", value: "Refrigerante" }, { label: "Sabor", value: "Cola" }, { label: "Validade", value: "6 meses" }], categoryId: "cat-7", brand: "Coca-Cola", price: 8.49, oldPrice: 9.99, unit: "un", image: img("coca-cola"), discount: 15, stock: 200, featured: true },
   { id: "p17", slug: "suco-del-valle-laranja-1l", name: "Suco Del Valle Laranja 1L", details: ["Suco de laranja integral", "Sem adição de açúcar", "Vitamina C natural", "Embalagem longa vida 1 litro"], specs: [...baseSpecs("Del Valle", "1L", "un"), { label: "Tipo", value: "Suco Integral" }, { label: "Sabor", value: "Laranja" }, { label: "Validade", value: "8 meses" }], categoryId: "cat-7", brand: "Del Valle", price: 7.29, oldPrice: 8.90, unit: "un", image: img("suco-del-valle"), discount: 18, stock: 85, featured: false },
-  { id: "p18", slug: "agua-crystal-500ml-fd12", name: "Água Mineral Crystal 500ml Fardo 12", details: ["Água mineral natural", "Fardo com 12 unidades de 500ml", "Hidratação pura e leve", "Garrafinhas práticas para consumo individual"], specs: [...baseSpecs("Crystal", "500ml", "fd"), { label: "Tipo", value: "Água Mineral" }, { label: "Quantidade", value: "12 unidades" }, { label: "Validade", value: "12 meses" }], categoryId: "cat-7", brand: "Crystal", price: 14.90, oldPrice: 18.00, unit: "fd", image: img("agua-crystal"), discount: 17, stock: 60, featured: false },
+  { id: "p18", slug: "agua-crystal-500ml-fd12", name: "Água Mineral Crystal 500ml Fardo 12", details: ["Água mineral natural", "Fardo com 12 unidades de 500ml", "Hidratação pura e leve", "Garrafinhas práticas para consumo individual"], specs: [...baseSpecs("Crystal", "500ml", "fd"), { label: "Tipo", value: "Água Mineral" }, { label: "Quantidade", value: "12 unidades" }, { label: "Validade", value: "12 meses" }], categoryId: "cat-7", brand: "Crystal", price: 14.90, oldPrice: 18.00, unit: "fd", image: img("agua-crystal"), images: [img("agua-crystal"), img("agua-crystal-2")], discount: 17, stock: 60, featured: false, variants: [
+    { id: "v18-fd", label: "Fardo (12un)", unitPrice: 14.90, oldPrice: 18.00, stock: 60, unit: "fd" },
+    { id: "v18-cx", label: "Caixa (6 fardos)", unitPrice: 14.20, oldPrice: 18.00, boxPrice: 85.20, boxQuantity: 6, stock: 30, unit: "fd" },
+  ], pricingTiers: [
+    { id: "t18-1", minQuantity: 1, pricePerUnit: 14.90, discountPercent: 0, label: "A partir de 1 fardo" },
+    { id: "t18-5", minQuantity: 5, pricePerUnit: 14.50, discountPercent: 3, label: "A partir de 5 fardos" },
+    { id: "t18-20", minQuantity: 20, pricePerUnit: 13.80, discountPercent: 7, label: "A partir de 20 fardos" },
+  ] },
   { id: "p19", slug: "cerveja-heineken-ln-330ml", name: "Cerveja Heineken Long Neck 330ml", details: ["Cerveja puro malte premium", "Receita original holandesa", "Sabor encorpado e refrescante", "Garrafa long neck 330ml"], specs: [...baseSpecs("Heineken", "330ml", "un"), { label: "Tipo", value: "Puro Malte" }, { label: "Teor", value: "5%" }, { label: "Validade", value: "12 meses" }], categoryId: "cat-7", brand: "Heineken", price: 6.49, oldPrice: 7.90, unit: "un", image: img("cerveja-heineken"), discount: 18, stock: 150, featured: false },
   { id: "p20", slug: "vinho-tinto-pergola-750ml", name: "Vinho Tinto Pérgola 750ml", details: ["Vinho tinto de mesa suave", "Uvas selecionadas do Vale do São Francisco", "Sabor frutado e equilibrado", "Garrafa 750ml ideal para refeições"], specs: [...baseSpecs("Pérgola", "750ml", "un"), { label: "Tipo", value: "Tinto Suave" }, { label: "Teor", value: "11%" }, { label: "Validade", value: "24 meses" }], categoryId: "cat-7", brand: "Pérgola", price: 21.90, oldPrice: 24.90, unit: "un", image: img("vinho-tinto-pergola"), discount: 12, stock: 40, featured: false },
 
@@ -68,44 +91,92 @@ export const products: Product[] = [
   { id: "p28", slug: "linguiça-toscana-seara-kg", name: "Linguiça Toscana Seara kg", details: ["Linguiça toscana artesanal", "Tempero tradicional", "Suculenta e saborosa", "Ideal para churrasco e grelhados"], specs: [...baseSpecs("Seara", "1kg", "kg"), { label: "Tipo", value: "Toscana" }, { label: "Conservação", value: "Refrigerado" }, { label: "Validade", value: "20 dias" }], categoryId: "cat-6", brand: "Seara", price: 22.50, oldPrice: 26.90, unit: "kg", image: img("linguica-toscana-seara"), discount: 16, stock: 35, featured: false },
 ];
 
+export { seedProducts as products };
+
+function normalizeProduct(p: ProductSeed): Product {
+  return {
+    ...p,
+    description: p.description || "",
+    images: p.images || (p.image ? [p.image] : []),
+    variants: p.variants || [],
+    pricingTiers: p.pricingTiers || [],
+  };
+}
+
+function getAllProducts(): Product[] {
+  try {
+    const store = loadStore();
+    if (store.products && store.products.length > 0) return store.products;
+  } catch {}
+  return seedProducts.map(normalizeProduct);
+}
+
+function getAllCategories(): Category[] {
+  try {
+    const store = loadStore();
+    if (store.categories && store.categories.length > 0) return store.categories;
+  } catch {}
+  return categories;
+}
+
+export function getCategories(): Category[] {
+  return getAllCategories();
+}
+
+export function getProducts(): Product[] {
+  return getAllProducts();
+}
+
 export const brands: Brand[] = [
-  { name: "Nestlé", slug: "nestle", logo: "https://logo.clearbit.com/nestle.com" },
-  { name: "Seara", slug: "seara", logo: "https://logo.clearbit.com/seara.com.br" },
-  { name: "Pilão", slug: "pilao", logo: "https://logo.clearbit.com/pilao.com.br" },
-  { name: "Aurora", slug: "aurora", logo: "https://logo.clearbit.com/auroraalimentos.com.br" },
-  { name: "Camponesa", slug: "camponesa", logo: "https://logo.clearbit.com/laticinioscamponesa.com.br" },
-  { name: "Hemmer", slug: "hemmer", logo: "https://logo.clearbit.com/hemmer.com.br" },
-  { name: "Bauducco", slug: "bauducco", logo: "https://logo.clearbit.com/bauducco.com.br" },
-  { name: "Yoki", slug: "yoki", logo: "https://logo.clearbit.com/yoki.com.br" },
+  { id: "b1", name: "Nestlé", slug: "nestle", logo: "https://logo.clearbit.com/nestle.com", active: true, createdAt: "2024-01-01T00:00:00Z" },
+  { id: "b2", name: "Seara", slug: "seara", logo: "https://logo.clearbit.com/seara.com.br", active: true, createdAt: "2024-01-01T00:00:00Z" },
+  { id: "b3", name: "Pilão", slug: "pilao", logo: "https://logo.clearbit.com/pilao.com.br", active: true, createdAt: "2024-01-01T00:00:00Z" },
+  { id: "b4", name: "Aurora", slug: "aurora", logo: "https://logo.clearbit.com/auroraalimentos.com.br", active: true, createdAt: "2024-01-01T00:00:00Z" },
+  { id: "b5", name: "Camponesa", slug: "camponesa", logo: "https://logo.clearbit.com/laticinioscamponesa.com.br", active: true, createdAt: "2024-01-01T00:00:00Z" },
+  { id: "b6", name: "Hemmer", slug: "hemmer", logo: "https://logo.clearbit.com/hemmer.com.br", active: true, createdAt: "2024-01-01T00:00:00Z" },
+  { id: "b7", name: "Bauducco", slug: "bauducco", logo: "https://logo.clearbit.com/bauducco.com.br", active: true, createdAt: "2024-01-01T00:00:00Z" },
+  { id: "b8", name: "Yoki", slug: "yoki", logo: "https://logo.clearbit.com/yoki.com.br", active: true, createdAt: "2024-01-01T00:00:00Z" },
 ];
 
+function getAllBrands(): Brand[] {
+  try {
+    const store = loadStore();
+    if (store.brands && store.brands.length > 0) return store.brands;
+  } catch {}
+  return brands;
+}
+
+export function getBrands(): Brand[] {
+  return getAllBrands();
+}
+
 export function getProductById(id: string) {
-  return products.find((p) => p.id === id);
+  return getAllProducts().find((p) => p.id === id);
 }
 
 export function getProductBySlug(slug: string) {
-  return products.find((p) => p.slug === slug);
+  return getAllProducts().find((p) => p.slug === slug);
 }
 
 export function getCategoryBySlug(slug: string) {
-  return categories.find((c) => c.slug === slug);
+  return getAllCategories().find((c) => c.slug === slug);
 }
 
 export function getCategoryById(id: string) {
-  return categories.find((c) => c.id === id);
+  return getAllCategories().find((c) => c.id === id);
 }
 
 export function getProductsByCategory(categoryId: string) {
-  return products.filter((p) => p.categoryId === categoryId);
+  return getAllProducts().filter((p) => p.categoryId === categoryId);
 }
 
 export function getFeaturedProducts() {
-  return products.filter((p) => p.featured);
+  return getAllProducts().filter((p) => p.featured);
 }
 
 export function searchProducts(query: string) {
   const q = query.toLowerCase();
-  return products.filter(
+  return getAllProducts().filter(
     (p) =>
       p.name.toLowerCase().includes(q) ||
       p.brand.toLowerCase().includes(q)

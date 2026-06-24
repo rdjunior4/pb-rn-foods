@@ -1,8 +1,8 @@
 import { ProductSection } from "./ProductSection";
-import { getProductsByCategory, categories } from "@/lib/data";
+import { getProductsByCategory, getCategories } from "@/lib/data";
 
 export function MoreSavingsProducts() {
-  const cat = categories.find((c) => c.slug === "mercearia");
+  const cat = getCategories().find((c) => c.slug === "mercearia");
   const prods = cat ? getProductsByCategory(cat.id).slice(0, 6) : [];
   return (
     <ProductSection
@@ -15,7 +15,7 @@ export function MoreSavingsProducts() {
 }
 
 export function BeveragesProducts() {
-  const cat = categories.find((c) => c.slug === "bebidas");
+  const cat = getCategories().find((c) => c.slug === "bebidas");
   const prods = cat ? getProductsByCategory(cat.id).slice(0, 6) : [];
   return (
     <ProductSection
@@ -29,7 +29,7 @@ export function BeveragesProducts() {
 
 export function MeatsAndDairyProducts() {
   const cats = ["carnes", "aves-pescados", "embutidos", "laticinios", "frios-queijos"];
-  const catIds = cats.map((s) => categories.find((c) => c.slug === s)?.id).filter(Boolean);
+  const catIds = cats.map((s) => getCategories().find((c) => c.slug === s)?.id).filter(Boolean);
   const prods = catIds.flatMap((id) => getProductsByCategory(id!)).slice(0, 6);
   return (
     <ProductSection
@@ -42,7 +42,7 @@ export function MeatsAndDairyProducts() {
 }
 
 export function CleaningProducts() {
-  const cat = categories.find((c) => c.slug === "limpeza-higiene");
+  const cat = getCategories().find((c) => c.slug === "limpeza-higiene");
   const prods = cat ? getProductsByCategory(cat.id).slice(0, 6) : [];
   return (
     <ProductSection

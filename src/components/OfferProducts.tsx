@@ -1,8 +1,8 @@
 import { ProductSection } from "./ProductSection";
-import { products } from "@/lib/data";
+import { getProducts } from "@/lib/data";
 
 export function OfferProducts() {
-  const offerProducts = products.filter((p) => p.discount && p.discount >= 10).slice(0, 6);
+  const offerProducts = getProducts().filter((p) => p.discount && p.discount >= 10).slice(0, 6);
   return (
     <ProductSection
       title="Ofertas para o seu negócio"
@@ -10,6 +10,7 @@ export function OfferProducts() {
       linkLabel="Ver todas as ofertas"
       linkTo="/buscar?q=oferta"
       products={offerProducts}
+      variant="featured"
     />
   );
 }
