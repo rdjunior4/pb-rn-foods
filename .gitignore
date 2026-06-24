@@ -28,6 +28,9 @@ dist-ssr
 # Opencode config (contains API keys)
 opencode.json
 
+# Supabase CLI temp
+supabase/.temp/
+
 # Build logs / temp
 build_*.txt
 run_build.bat
