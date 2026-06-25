@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
-import { searchProducts, getCategories } from "@/lib/data";
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, ArrowUpDown, Loader2 } from "lucide-react";
+import { useSearchProducts, useCategories } from "@/lib/hooks";
 import { ProductCard } from "@/components/ProductCard";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { ITEMS_PER_PAGE, SELECT_CLASSES } from "@/lib/constants";
@@ -20,11 +20,14 @@ function SearchPage() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<"default" | "price-asc" | "price-desc" | "name">("default");
 
-  let results = q ? searchProducts(q) : [];
+  const { data: searchResults = [], isLoading } = useSearchProducts(q);
+  const { data: categories = [] } = useCategories();
 
-  if (sort === "price-asc") results = [...results].sort((a, b) => a.price - b.price);
-  else if (sort === "price-desc") results = [...results].sort((a, b) => b.price - a.price);
-  else if (sort === "name") results = [...results].sort((a, b) => a.name.localeCompare(b.name));
+  let results = [...searchResults];
+
+  if (sort === "price-asc") results.sort((a, b) => a.price - b.price);
+  else if (sort === "price-desc") results.sort((a, b) => b.price - a.price);
+  else if (sort === "name") results.sort((a, b) => a.name.localeCompare(b.name));
 
   const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
   const paged = results.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -53,7 +56,14 @@ function SearchPage() {
         </div>
       </form>
 
-      {q && (
+      {isLoading && q && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Buscando...</span>
+        </div>
+      )}
+
+      {!isLoading && q && (
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <SlidersHorizontal className="h-4 w-4" />
@@ -91,14 +101,14 @@ function SearchPage() {
         </div>
       )}
 
-      {q && results.length === 0 && (
+      {!isLoading && q && results.length === 0 && (
         <div className="text-center py-16">
           <h2 className="text-lg font-semibold">Nenhum resultado encontrado</h2>
           <p className="text-sm text-muted-foreground mt-1">
             Tente buscar por outro termo ou navegue pelas categorias
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-6">
-            {getCategories().map((cat) => (
+            {categories.map((cat) => (
               <a
                 key={cat.id}
                 href={`/categoria/${cat.slug}`}
@@ -111,7 +121,7 @@ function SearchPage() {
         </div>
       )}
 
-      {results.length > 0 && (
+      {!isLoading && results.length > 0 && (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {paged.map((p) => (

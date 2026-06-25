@@ -3,10 +3,11 @@ import { useState, useMemo } from "react";
 import {
   ShoppingCart, Heart, Truck, ShieldCheck,
   Minus, Plus, Package, RotateCcw, Check, Share2, ChevronLeft, ChevronRight,
-  CheckCircle2,
+  CheckCircle2, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getProductBySlug, getCategoryById, getProductsByCategory } from "@/lib/data";
+import { useProductBySlug, useProductsByCategory } from "@/lib/hooks";
+import { getCategoryById } from "@/lib/data";
 import { useCart } from "@/lib/cart-context";
 import { useWishlist } from "@/lib/wishlist-context";
 import { ProductCard } from "@/components/ProductCard";
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/produto/$slug")({
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const product = getProductBySlug(slug);
+  const { data: product, isLoading } = useProductBySlug(slug);
   const { addItem, getItemQuantity } = useCart();
   const { isFavorite, toggleFavorite } = useWishlist();
   const [qty, setQty] = useState(1);
@@ -35,9 +36,22 @@ function ProductPage() {
     return product.variants.find((v) => v.id === selectedVariantId) ?? product.variants[0];
   }, [product, selectedVariantId, hasVariants]);
 
+  const { data: relatedProducts = [] } = useProductsByCategory(product?.categoryId || "");
+
+  if (isLoading) {
+    return (
+      <CustomerLayout maxWidth="1200">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Carregando produto...</span>
+        </div>
+      </CustomerLayout>
+    );
+  }
+
   if (!product) {
     return (
-      <CustomerLayout maxWidth="1400">
+      <CustomerLayout maxWidth="1200">
         <div className="text-center py-16">
           <h1 className="text-2xl font-bold">Produto não encontrado</h1>
           <Link to="/" className="text-primary hover:underline mt-2 inline-block">Voltar ao início</Link>
@@ -69,7 +83,7 @@ function ProductPage() {
     setQty(1);
   };
 
-  const related = getProductsByCategory(product.categoryId).filter((p) => p.id !== product.id).slice(0, 5);
+  const related = relatedProducts.filter((p) => p.id !== product.id).slice(0, 5);
 
   const stockLevel = currentStock > 20 ? "high" : currentStock > 5 ? "low" : "critical";
   const stockLabel = stockLevel === "high" ? "Em estoque" : stockLevel === "low" ? `Apenas ${currentStock} unidades` : "Últimas unidades";

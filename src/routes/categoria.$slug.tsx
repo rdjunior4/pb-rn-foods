@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { getCategoryBySlug, getProductsByCategory } from "@/lib/data";
+import { useProductsByCategory, useCategories } from "@/lib/hooks";
 import { ProductCard } from "@/components/ProductCard";
 import { CustomerLayout } from "@/components/CustomerLayout";
-import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUpDown, Loader2 } from "lucide-react";
 import { ITEMS_PER_PAGE, SELECT_CLASSES } from "@/lib/constants";
 
 export const Route = createFileRoute("/categoria/$slug")({
@@ -12,9 +12,22 @@ export const Route = createFileRoute("/categoria/$slug")({
 
 function CategoryPage() {
   const { slug } = Route.useParams();
-  const category = getCategoryBySlug(slug);
+  const { data: categories = [] } = useCategories();
+  const category = categories.find((c) => c.slug === slug);
+  const { data: products = [], isLoading } = useProductsByCategory(category?.id || "");
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<"default" | "price-asc" | "price-desc" | "name">("default");
+
+  if (isLoading) {
+    return (
+      <CustomerLayout maxWidth="1400">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Carregando produtos...</span>
+        </div>
+      </CustomerLayout>
+    );
+  }
 
   if (!category) {
     return (
@@ -29,14 +42,14 @@ function CategoryPage() {
     );
   }
 
-  let products = getProductsByCategory(category.id);
+  let sortedProducts = [...products];
 
-  if (sort === "price-asc") products = [...products].sort((a, b) => a.price - b.price);
-  else if (sort === "price-desc") products = [...products].sort((a, b) => b.price - a.price);
-  else if (sort === "name") products = [...products].sort((a, b) => a.name.localeCompare(b.name));
+  if (sort === "price-asc") sortedProducts.sort((a, b) => a.price - b.price);
+  else if (sort === "price-desc") sortedProducts.sort((a, b) => b.price - a.price);
+  else if (sort === "name") sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
 
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
-  const paged = products.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE);
+  const paged = sortedProducts.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   return (
     <CustomerLayout maxWidth="1400">
@@ -51,7 +64,7 @@ function CategoryPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{category.name}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{products.length} produtos</p>
+          <p className="text-sm text-muted-foreground mt-1">{sortedProducts.length} produtos</p>
         </div>
         <div className="flex items-center gap-2">
           <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
@@ -71,7 +84,7 @@ function CategoryPage() {
         </div>
       </div>
 
-      {products.length === 0 ? (
+      {sortedProducts.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-muted-foreground">Nenhum produto encontrado nesta categoria.</p>
         </div>

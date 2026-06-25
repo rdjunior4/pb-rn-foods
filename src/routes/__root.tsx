@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   Outlet,
   Link,
@@ -178,6 +179,9 @@ function RootComponent() {
       <StoreProvider>
         <Outlet />
       </StoreProvider>
+      {import.meta.env.DEV && (
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+      )}
     </QueryClientProvider>
   );
 }
