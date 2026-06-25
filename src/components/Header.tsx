@@ -1,6 +1,7 @@
 import { Search, User, ShoppingCart, Menu, LogIn, UserPlus, Package, Heart, Settings, LogOut, X, Home, Tag, Phone, ShieldCheck, Shield } from "lucide-react";
 import { Logo } from "./Logo";
 import { CartDrawer } from "./CartDrawer";
+import { AuthModal } from "./AuthModal";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -30,6 +31,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<"login" | "register">("login");
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
@@ -45,6 +48,7 @@ export function Header() {
   };
 
   return (
+    <>
     <header
       className={`sticky top-0 z-50 text-white transition-all duration-300 ${
         scrolled
@@ -143,11 +147,11 @@ export function Header() {
                       <p className="font-semibold text-sm mt-0.5">Olá, visitante</p>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/entrar" })}>
+                    <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => { setAuthTab("login"); setAuthOpen(true); }}>
                       <LogIn className="h-4 w-4" />
                       <span>Entrar</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/entrar" })}>
+                    <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => { setAuthTab("register"); setAuthOpen(true); }}>
                       <UserPlus className="h-4 w-4" />
                       <span>Criar conta</span>
                     </DropdownMenuItem>
@@ -249,10 +253,17 @@ export function Header() {
               <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-2">Acesso</h3>
               <div className="space-y-0.5">
                 <SheetClose asChild>
-                  <Link to={isLoggedIn ? "/minha-conta" : "/entrar"} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
-                    <User className="h-4 w-4" />
-                    {isLoggedIn ? "Minha conta" : "Entrar"}
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link to="/minha-conta" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                      <User className="h-4 w-4" />
+                      Minha conta
+                    </Link>
+                  ) : (
+                    <button onClick={() => { setAuthTab("login"); setAuthOpen(true); }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors w-full text-left">
+                      <User className="h-4 w-4" />
+                      Entrar
+                    </button>
+                  )}
                 </SheetClose>
                 <SheetClose asChild>
                   <Link to="/carrinho" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
@@ -287,6 +298,8 @@ export function Header() {
           </div>
         </SheetContent>
       </Sheet>
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} initialTab={authTab} />
     </header>
+    </>
   );
 }
