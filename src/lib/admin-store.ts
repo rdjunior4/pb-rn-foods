@@ -414,39 +414,44 @@ export function syncFromSupabase(): Promise<void> {
         supabase.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }),
       ]);
 
+      // Só sobrescrever dados se Supabase retornar dados não-vazios
+      // Isso preserva dados existentes (seed) quando admin não cadastrou nada ainda
+      const existingStore = loadStore();
+      
       const store: AdminStore = {
-        products: (prods.data || []).map(mapDbProduct),
-        banners: (bans.data || []).map(mapDbBanner),
-        categories: (cats.data || []).map((c: Record<string, unknown>) => ({
+        products: (prods.data && prods.data.length > 0) ? prods.data.map(mapDbProduct) : existingStore.products,
+        banners: (bans.data && bans.data.length > 0) ? bans.data.map(mapDbBanner) : existingStore.banners,
+        categories: (cats.data && cats.data.length > 0) ? cats.data.map((c: Record<string, unknown>) => ({
           id: c.id as string,
           slug: c.slug as string,
           name: c.name as string,
           icon: c.icon as string,
           productCount: 0,
-        })),
-        brands: (brs.data || []).map((b: Record<string, unknown>) => ({
+        })) : existingStore.categories,
+        brands: (brs.data && brs.data.length > 0) ? brs.data.map((b: Record<string, unknown>) => ({
           id: b.id as string,
           name: b.name as string,
           slug: b.slug as string,
           logo: b.logo as string,
           active: b.active as boolean,
           createdAt: b.created_at as string,
-        })),
-        distributors: (dists.data || []).map(mapDbDistributor),
-        combos: (combs.data || []).map(mapDbCombo),
+        })) : existingStore.brands,
+        distributors: (dists.data && dists.data.length > 0) ? dists.data.map(mapDbDistributor) : existingStore.distributors,
+        combos: (combs.data && combs.data.length > 0) ? combs.data.map(mapDbCombo) : existingStore.combos,
       };
       saveStore(store);
 
-      if (ords.data) {
+      // Pedidos, cupons, avaliações e estoque: só sobrescrever se houver dados
+      if (ords.data && ords.data.length > 0) {
         localStorage.setItem(ORDERS_KEY, JSON.stringify(ords.data.map(mapDbOrder)));
       }
-      if (cpns.data) {
+      if (cpns.data && cpns.data.length > 0) {
         localStorage.setItem(COUPONS_KEY, JSON.stringify(cpns.data.map(mapDbCoupon)));
       }
-      if (revs.data) {
+      if (revs.data && revs.data.length > 0) {
         localStorage.setItem(REVIEWS_KEY, JSON.stringify(revs.data.map(mapDbReview)));
       }
-      if (movs.data) {
+      if (movs.data && movs.data.length > 0) {
         localStorage.setItem(STOCK_KEY, JSON.stringify(movs.data.map(mapDbMovement)));
       }
     } catch (err) {

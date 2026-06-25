@@ -106,46 +106,49 @@ export function TopBar() {
     localStorage.setItem(REGION_KEY, JSON.stringify(region));
   };
 
-  if (regions.length === 0) return null;
   const current = selected ?? regions[0];
 
   return (
     <div ref={ref} className="relative z-[60] bg-gradient-to-r from-primary to-primary-hover text-primary-foreground text-[11px] sm:text-xs">
       <div className="mx-auto flex max-w-[1400px] items-center justify-center px-4 sm:px-6 lg:px-[30px] h-9">
-        <div className="relative z-50">
-          <button
-            type="button"
-            onClick={() => setOpen(!open)}
-            className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
-          >
-            <MapPin className="h-3.5 w-3.5" />
-            <span className="font-medium">{current.label}</span>
-            {detected && <span className="text-[10px] opacity-70">(detectado)</span>}
-            <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-          </button>
+        {regions.length === 0 ? (
+          <span className="text-white/80">Entregamos em toda a região Nordeste</span>
+        ) : (
+          <div className="relative z-50">
+            <button
+              type="button"
+              onClick={() => setOpen(!open)}
+              className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
+            >
+              <MapPin className="h-3.5 w-3.5" />
+              <span className="font-medium">{current?.label}</span>
+              {detected && <span className="text-[10px] opacity-70">(detectado)</span>}
+              <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+            </button>
 
-          {open && (
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-64 rounded border border-border/40 bg-popover shadow-xl z-[100] py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-              <p className="px-3.5 py-1.5 text-[10px] text-muted-foreground uppercase tracking-wider">Escolha sua região</p>
-              <div className="max-h-[320px] overflow-y-auto">
-                {regions.map((region) => (
-                  <button
-                    key={region.value}
-                    onClick={() => handleSelect(region)}
-                    className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-xs text-popover-foreground hover:bg-muted transition-colors`}
-                  >
-                    <span className={current.value === region.value ? "font-semibold" : ""}>{region.label}</span>
-                    {current.value === region.value && (
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary">
-                        <Check className="h-2.5 w-2.5 text-primary-foreground" />
-                      </span>
-                    )}
-                  </button>
-                ))}
+            {open && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-64 rounded border border-border/40 bg-popover shadow-xl z-[100] py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <p className="px-3.5 py-1.5 text-[10px] text-muted-foreground uppercase tracking-wider">Escolha sua região</p>
+                <div className="max-h-[320px] overflow-y-auto">
+                  {regions.map((region) => (
+                    <button
+                      key={region.value}
+                      onClick={() => handleSelect(region)}
+                      className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-xs text-popover-foreground hover:bg-muted transition-colors`}
+                    >
+                      <span className={current?.value === region.value ? "font-semibold" : ""}>{region.label}</span>
+                      {current?.value === region.value && (
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary">
+                          <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
