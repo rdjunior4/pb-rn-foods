@@ -1,4 +1,4 @@
-import { Search, ShoppingCart, Menu, LogIn, UserPlus, Heart, LogOut, X, Home, Tag, Phone, ShieldCheck, Shield, User } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, LogIn, UserPlus, Package, Heart, Settings, LogOut, X, Home, Tag, Phone, ShieldCheck, Shield } from "lucide-react";
 import { Logo } from "./Logo";
 import { CartDrawer } from "./CartDrawer";
 import {
@@ -45,35 +45,62 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`sticky top-0 z-50 text-white transition-all duration-300 ${
         scrolled
           ? "bg-brand-black/95 backdrop-blur-xl border-b border-white/5 shadow-elevated"
           : "bg-brand-black border-b border-white/5"
       }`}
     >
-      <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 sm:px-6 lg:px-[30px] py-3 gap-4">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto flex max-w-[1400px] items-center gap-3 sm:gap-6 px-4 sm:px-6 lg:px-[30px] py-3">
+        <button
+          aria-label="Menu"
+          onClick={() => setMenuOpen(true)}
+          className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        <Link to="/" className="shrink-0">
+          <Logo />
+        </Link>
+
+        <form onSubmit={handleSearch} className="hidden sm:block flex-1 mx-4 lg:mx-8">
+          <div className="relative">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar produtos, marcas..."
+              className="w-full h-10 rounded border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+            <button
+              type="submit"
+              aria-label="Buscar"
+              className="absolute right-1 top-1 inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </div>
+        </form>
+
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
-            aria-label="Menu"
-            onClick={() => setMenuOpen(true)}
-            className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/10 active:scale-95 transition-all"
+            aria-label="Buscar"
+            onClick={() => navigate({ to: "/buscar", search: { q: "" } })}
+            className="sm:hidden inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all"
           >
-            <Menu className="h-5 w-5" />
+            <Search className="h-5 w-5" />
           </button>
 
-          <Link to="/" className="shrink-0">
-            <Logo />
-          </Link>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 px-3 sm:px-4 h-10 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-brand-black font-semibold text-sm transition-colors">
-                <User className="h-5 w-5" />
-                <div className="hidden sm:block text-left leading-tight">
-                  <div className="text-xs font-bold">Cadastre-se</div>
-                  <div className="text-[10px] font-normal opacity-80">Ou faça Login</div>
+              <button className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded border border-border/40 bg-primary hover:bg-primary-hover transition-colors group">
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <div className="hidden lg:block text-left leading-tight">
+                  <div className="text-sm font-semibold text-white">Minha conta</div>
+                  <div className="text-[11px] text-white/70">
+                    {isLoggedIn ? user!.name : "Entrar"}
+                  </div>
                 </div>
               </button>
             </DropdownMenuTrigger>
@@ -87,8 +114,16 @@ export function Header() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/minha-conta" })}>
-                    <Heart className="h-4 w-4" />
+                    <Package className="h-4 w-4" />
                     <span>Meus pedidos</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/favoritos" })}>
+                    <Heart className="h-4 w-4" />
+                    <span>Lista de desejos</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer gap-3" onClick={() => navigate({ to: "/minha-conta" })}>
+                    <Settings className="h-4 w-4" />
+                    <span>Configurações</span>
                   </DropdownMenuItem>
                   {user?.role === "admin" && (
                     <>
@@ -127,41 +162,25 @@ export function Header() {
 
           <button
             onClick={() => setCartOpen(true)}
-            className="flex items-center gap-2 px-3 h-10 rounded-lg border border-white/20 hover:bg-white/10 transition-colors group relative text-white"
+            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded border border-border/40 hover:bg-white/5 transition-colors group relative"
           >
             <div className="relative">
-              <ShoppingCart className="h-5 w-5 text-white/70 group-hover:text-white transition-colors" />
+              <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-white/70 group-hover:text-white transition-colors" />
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-yellow-400 text-brand-black px-1 text-[10px font-bold shadow-sm">
+                <span className="absolute -top-1.5 -right-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground shadow-sm shadow-primary/30">
                   {totalItems > 99 ? "99+" : totalItems}
                 </span>
               )}
             </div>
             <div className="hidden lg:block text-left leading-tight">
-              <div className="text-xs font-semibold text-white">Carrinho</div>
-              <div className="text-[10px] text-white/40">
+              <div className="text-sm font-semibold text-white">Carrinho</div>
+              <div className="text-[11px] text-white/40">
                 {totalItems} {totalItems === 1 ? "item" : "itens"}
               </div>
             </div>
           </button>
         </div>
       </div>
-
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] pb-3">
-        <form onSubmit={handleSearch} className="w-full">
-          <div className="relative">
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Pesquisar produtos..."
-              className="w-full h-12 rounded-lg border-0 bg-white pl-12 pr-4 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-white/30 transition-all shadow-inner"
-            />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          </div>
-        </form>
-      </div>
-
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
