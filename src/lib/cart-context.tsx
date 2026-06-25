@@ -1,6 +1,6 @@
-import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import type { CartItem } from "./types";
-import { getProductById } from "./data";
+import { useProducts } from "./hooks";
 import { toast } from "sonner";
 
 interface CartState {
@@ -77,6 +77,8 @@ function loadCart(): CartItem[] {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: loadCart() });
+  const { data: products = [] } = useProducts();
+  const productMap = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
 
   useEffect(() => {
     localStorage.setItem("@pbrn-cart", JSON.stringify(state.items));
@@ -84,7 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((productId: string, quantity?: number, variantId?: string, unitPrice?: number) => {
     const q = quantity ?? 1;
-    const product = getProductById(productId);
+    const product = productMap.get(productId);
     if (!product) {
       toast.error("Produto não encontrado");
       return;
@@ -117,14 +119,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
     dispatch({ type: "ADD_ITEM", productId, variantId, quantity: q, unitPrice: price });
-  }, [state.items]);
+  }, [state.items, productMap]);
 
   const removeItem = useCallback((productId: string, variantId?: string) => {
     dispatch({ type: "REMOVE_ITEM", productId, variantId });
   }, []);
 
   const updateQuantity = useCallback((productId: string, quantity: number, variantId?: string) => {
-    const product = getProductById(productId);
+    const product = productMap.get(productId);
     if (product) {
       let stock = product.stock;
       if (variantId && product.variants.length > 0) {
@@ -138,7 +140,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     }
     dispatch({ type: "UPDATE_QUANTITY", productId, variantId, quantity });
-  }, []);
+  }, [productMap]);
 
   const clearCart = useCallback(() => {
     dispatch({ type: "CLEAR" });

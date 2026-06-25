@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { loadStore, saveStore, generateId, slugify } from "@/lib/admin-store";
-import { getCategories } from "@/lib/data";
+import { generateId, slugify } from "@/lib/admin-store";
+import { useAdminCategories, useSaveProduct } from "@/lib/hooks";
 import { ArrowLeft, Package } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { toast } from "sonner";
@@ -12,9 +12,10 @@ export const Route = createFileRoute("/admin/produtos/novo")({
 
 function NewProduct() {
   const navigate = useNavigate();
+  const { data: categories = [] } = useAdminCategories();
+  const saveProductMutation = useSaveProduct();
 
   const onSubmit = async (data: ProductFormData) => {
-    const store = loadStore();
     const price = parseFloat(data.price);
     const oldPrice = data.oldPrice ? parseFloat(data.oldPrice) : null;
     const stock = parseInt(data.stock) || 0;
@@ -42,8 +43,8 @@ function NewProduct() {
         .filter((t) => t.quantityPerPackage && t.packagePrice)
         .map((t, i) => {
           const qty = parseInt(t.quantityPerPackage) || 1;
-          const price = parseFloat(t.packagePrice) || 0;
-          const unitPrice = qty > 0 ? price / qty : 0;
+          const p = parseFloat(t.packagePrice) || 0;
+          const unitPrice = qty > 0 ? p / qty : 0;
           const basePrice = parseFloat(data.price) || 0;
           return {
             id: `tier-${Date.now()}-${i}`,
@@ -55,10 +56,15 @@ function NewProduct() {
         }),
     };
 
-    store.products.push(newProduct);
-    saveStore(store);
-    toast.success("Produto criado com sucesso!");
-    navigate({ to: "/admin/produtos" });
+    saveProductMutation.mutate(newProduct, {
+      onSuccess: () => {
+        toast.success("Produto criado com sucesso!");
+        navigate({ to: "/admin/produtos" });
+      },
+      onError: (err) => {
+        toast.error(`Erro ao salvar: ${err.message}`);
+      },
+    });
   };
 
   return (
@@ -88,7 +94,7 @@ function NewProduct() {
           defaultValues={{
             name: "",
             description: "",
-            categoryId: getCategories()[0]?.id || "",
+            categoryId: categories[0]?.id || "",
             brand: "",
             price: "",
             oldPrice: "",

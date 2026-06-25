@@ -4,7 +4,7 @@ import {
   Package, Sandwich, Fish, Drumstick, LayoutGrid,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { getCategories } from "@/lib/data";
+import { useCategories } from "@/lib/hooks";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wheat, ShoppingCart, Beef, Wine, Milk,
@@ -13,10 +13,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function CategoryCards() {
+  const { data: categories = [] } = useCategories();
   return (
     <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] mt-8">
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 gap-3">
-        {getCategories().map((c) => {
+        {categories.map((c) => {
           const Icon = iconMap[c.icon] || Wheat;
           return (
             <Link

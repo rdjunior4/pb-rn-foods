@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trash2, ShoppingBag, ArrowLeft, Minus, Plus, Package, ArrowRight } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { getProductById } from "@/lib/data";
+import { useProducts } from "@/lib/hooks";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency } from "@/lib/format";
 
@@ -11,10 +11,12 @@ export const Route = createFileRoute("/carrinho")({
 
 function CartPage() {
   const { items, totalItems, addItem, removeItem, updateQuantity, clearCart } = useCart();
+  const { data: products = [] } = useProducts();
+  const productMap = new Map(products.map((p) => [p.id, p]));
 
   const cartProducts = items
     .map((item) => {
-      const product = getProductById(item.productId);
+      const product = productMap.get(item.productId);
       if (!product) return null;
       const variant = item.variantId ? product.variants.find((v) => v.id === item.variantId) : undefined;
       return {

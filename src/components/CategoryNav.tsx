@@ -5,7 +5,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { getCategories } from "@/lib/data";
+import { useCategories } from "@/lib/hooks";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wheat, ShoppingCart, Beef, Wine, Milk,
@@ -14,10 +14,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function CategoryNav() {
+  const { data: categories = [] } = useCategories();
   return (
     <nav className="flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar">
       <div className="flex items-center gap-1.5 shrink-0">
-        {getCategories().map((c) => {
+        {categories.map((c) => {
           const Icon = iconMap[c.icon] || Wheat;
           return (
             <Link

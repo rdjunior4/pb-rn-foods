@@ -9,7 +9,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { useWishlist } from "@/lib/wishlist-context";
-import { loadOrders } from "@/lib/admin-store";
+import { useOrdersByCustomer } from "@/lib/hooks";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { EditProfileSheet } from "@/components/EditProfileSheet";
 import { formatCurrency } from "@/lib/format";
@@ -64,8 +64,9 @@ function AccountPage() {
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
+  const { data: allOrders = [] } = useOrdersByCustomer(isLoggedIn ? user!.id : "");
 
-  const myOrders = isLoggedIn ? loadOrders().filter((o) => o.customerId === user!.id) : [];
+  const myOrders = isLoggedIn ? allOrders : [];
   const activeOrders = myOrders.filter((o) => o.status !== "delivered" && o.status !== "cancelled");
 
   const handleSoon = (label: string) => {

@@ -116,6 +116,13 @@ const statusLabel: Record<OrderStatus, string> = {
 function AdminDashboard() {
   const { data: store, isLoading: storeLoading } = useAdminStore();
   const { data: orders = [], isLoading: ordersLoading } = useAdminOrders();
+  const [period, setPeriod] = useState<Period>("30d");
+  const [customStart, setCustomStart] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().slice(0, 10);
+  });
+  const [customEnd, setCustomEnd] = useState(() => new Date().toISOString().slice(0, 10));
 
   const isLoading = storeLoading || ordersLoading;
 
@@ -129,14 +136,6 @@ function AdminDashboard() {
   }
 
   if (!store) return null;
-
-  const [period, setPeriod] = useState<Period>("30d");
-  const [customStart, setCustomStart] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 30);
-    return d.toISOString().slice(0, 10);
-  });
-  const [customEnd, setCustomEnd] = useState(() => new Date().toISOString().slice(0, 10));
 
   const { start, end } = getPeriodRange(period, customStart, customEnd);
   const { prevStart, prevEnd } = getPreviousPeriod(start, end);

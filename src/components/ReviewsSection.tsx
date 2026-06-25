@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
-import { Star, ThumbsUp, MessageCircle } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Star, MessageCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { getReviewsByProduct, addReview } from "@/lib/admin-store";
+import { useReviewsByProduct, useAddReview } from "@/lib/hooks";
 import { generateId } from "@/lib/admin-store";
 import type { ProductReview } from "@/lib/types";
 import { toast } from "sonner";
@@ -17,15 +17,12 @@ function formatDateBR(iso: string) {
 
 export function ReviewsSection({ productId }: ReviewsSectionProps) {
   const { user, isLoggedIn } = useAuth();
-  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const { data: reviews = [] } = useReviewsByProduct(productId);
+  const addReviewMutation = useAddReview();
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
-
-  useEffect(() => {
-    setReviews(getReviewsByProduct(productId));
-  }, [productId]);
 
   const avgRating = useMemo(() => {
     if (reviews.length === 0) return 0;
@@ -59,12 +56,17 @@ export function ReviewsSection({ productId }: ReviewsSectionProps) {
       comment: comment.trim(),
       createdAt: new Date().toISOString(),
     };
-    addReview(review);
-    setReviews(getReviewsByProduct(productId));
-    setComment("");
-    setRating(5);
-    setShowForm(false);
-    toast.success("Avaliação publicada!");
+    addReviewMutation.mutate(review, {
+      onSuccess: () => {
+        setComment("");
+        setRating(5);
+        setShowForm(false);
+        toast.success("Avaliação publicada!");
+      },
+      onError: () => {
+        toast.error("Erro ao publicar avaliação. Tente novamente.");
+      },
+    });
   };
 
   return (
@@ -165,8 +167,8 @@ export function ReviewsSection({ productId }: ReviewsSectionProps) {
                   <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-lg border border-border/40 px-4 py-2 text-sm font-medium hover:bg-muted transition-colors">
                     Cancelar
                   </button>
-                  <button type="submit" className="flex-1 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary-hover transition-colors">
-                    Publicar
+                  <button type="submit" disabled={addReviewMutation.isPending} className="flex-1 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50">
+                    {addReviewMutation.isPending ? "Publicando..." : "Publicar"}
                   </button>
                 </div>
               </form>

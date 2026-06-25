@@ -4,6 +4,7 @@ export { useCombos, useReviewsByProduct, useAddReview, useDeleteReview, useValid
 export { useOrderRealtime, useOrdersRealtime } from "./use-order-realtime";
 export {
   useAdminStore,
+  useStoreConfig,
   useAdminOrders,
   useAdminProducts,
   useSaveProduct,

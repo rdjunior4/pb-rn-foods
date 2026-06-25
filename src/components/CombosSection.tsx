@@ -1,17 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { Tag, ShoppingBag, ArrowRight, Percent, Plus } from "lucide-react";
-import { getCombos } from "@/lib/admin-store";
+import { useCombos } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { toast } from "sonner";
 
 export function CombosSection() {
-  const combos = getCombos().filter((c) => c.active);
+  const { data: combos = [] } = useCombos();
   const { addItem } = useCart();
 
-  if (combos.length === 0) return null;
+  const activeCombos = combos.filter((c) => c.active);
+  if (activeCombos.length === 0) return null;
 
-  const handleAddCombo = (combo: typeof combos[0]) => {
+  const handleAddCombo = (combo: typeof activeCombos[0]) => {
     for (const item of combo.items) {
       addItem(item.productId, item.quantity, undefined, item.unitPrice);
     }
@@ -42,7 +43,7 @@ export function CombosSection() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {combos.slice(0, 4).map((combo) => (
+        {activeCombos.slice(0, 4).map((combo) => (
           <div
             key={combo.id}
             className="group relative bg-white rounded-xl border border-border/40 overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
@@ -57,7 +58,6 @@ export function CombosSection() {
             )}
 
             <div className="flex items-stretch">
-              {/* Product images grid */}
               <div className="w-2/5 bg-muted/30 p-3 flex items-center justify-center">
                 <div className="grid grid-cols-2 gap-1.5 w-full">
                   {combo.items.slice(0, 4).map((item, i) => (
@@ -78,7 +78,6 @@ export function CombosSection() {
                 </div>
               </div>
 
-              {/* Combo info */}
               <div className="w-3/5 p-4 flex flex-col justify-between">
                 <div>
                   <h3 className="font-bold text-foreground text-sm mb-1 group-hover:text-primary transition-colors">
@@ -88,7 +87,6 @@ export function CombosSection() {
                     {combo.description}
                   </p>
 
-                  {/* Items list */}
                   <div className="space-y-1 mb-3">
                     {combo.items.map((item, i) => (
                       <div key={i} className="flex items-center justify-between text-[11px]">
@@ -101,7 +99,6 @@ export function CombosSection() {
                   </div>
                 </div>
 
-                {/* Price */}
                 <div className="flex items-end justify-between border-t border-border/30 pt-3">
                   <div>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">De</p>
@@ -113,22 +110,21 @@ export function CombosSection() {
                   </div>
                 </div>
 
-                  {/* Savings badge + Add button */}
-                  <div className="mt-2 flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                      <Tag className="h-3 w-3" />
-                      {combo.discountType === "fixed"
-                        ? `Economize ${formatCurrency(combo.discountValue)}`
-                        : `Economize ${combo.discountPercent}%`}
-                    </span>
-                    <button
-                      onClick={() => handleAddCombo(combo)}
-                      className="inline-flex items-center gap-1 bg-primary text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-hover transition-colors active:scale-95"
-                    >
-                      <Plus className="h-3 w-3" />
-                      Adicionar
-                    </button>
-                  </div>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                    <Tag className="h-3 w-3" />
+                    {combo.discountType === "fixed"
+                      ? `Economize ${formatCurrency(combo.discountValue)}`
+                      : `Economize ${combo.discountPercent}%`}
+                  </span>
+                  <button
+                    onClick={() => handleAddCombo(combo)}
+                    className="inline-flex items-center gap-1 bg-primary text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-hover transition-colors active:scale-95"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Adicionar
+                  </button>
+                </div>
               </div>
             </div>
           </div>

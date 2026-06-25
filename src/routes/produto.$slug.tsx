@@ -6,8 +6,7 @@ import {
   CheckCircle2, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useProductBySlug, useProductsByCategory } from "@/lib/hooks";
-import { getCategoryById } from "@/lib/data";
+import { useProductBySlug, useProductsByCategory, useCategories } from "@/lib/hooks";
 import { useCart } from "@/lib/cart-context";
 import { useWishlist } from "@/lib/wishlist-context";
 import { ProductCard } from "@/components/ProductCard";
@@ -22,6 +21,7 @@ export const Route = createFileRoute("/produto/$slug")({
 function ProductPage() {
   const { slug } = Route.useParams();
   const { data: product, isLoading } = useProductBySlug(slug);
+  const { data: categories = [] } = useCategories();
   const { addItem, getItemQuantity } = useCart();
   const { isFavorite, toggleFavorite } = useWishlist();
   const [qty, setQty] = useState(1);
@@ -60,7 +60,7 @@ function ProductPage() {
     );
   }
 
-  const category = getCategoryById(product.categoryId);
+  const category = categories.find((c) => c.id === product.categoryId);
   const favorite = isFavorite(product.id);
 
   const currentPrice = selectedVariant ? selectedVariant.unitPrice : product.price;

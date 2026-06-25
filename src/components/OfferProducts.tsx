@@ -1,8 +1,9 @@
 import { ProductSection } from "./ProductSection";
-import { getProducts } from "@/lib/data";
+import { useProducts } from "@/lib/hooks";
 
 export function OfferProducts() {
-  const offerProducts = getProducts().filter((p) => p.discount && p.discount >= 10).slice(0, 6);
+  const { data: products = [] } = useProducts();
+  const offerProducts = products.filter((p) => p.discount && p.discount >= 10).slice(0, 6);
   return (
     <ProductSection
       title="Ofertas para o seu negócio"

@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { CheckCircle, Package, Home, ClipboardList, MapPin, CreditCard, Phone, FileText, ArrowRight, Store } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
-import { loadOrders, loadStore } from "@/lib/admin-store";
-import type { Order } from "@/lib/types";
-import { formatCurrency } from "@/lib/format";
+import { useMemo } from "react";
+import { useOrderById, useAdminDistributors } from "@/lib/hooks";
 import { CustomerLayout } from "@/components/CustomerLayout";
+import { formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/pedido-confirmado")({
   component: PedidoConfirmado,
@@ -15,19 +14,12 @@ export const Route = createFileRoute("/pedido-confirmado")({
 
 function PedidoConfirmado() {
   const { id } = Route.useSearch();
-  const [order, setOrder] = useState<Order | null>(null);
-  const distributors = useMemo(() => loadStore().distributors, []);
+  const { data: order } = useOrderById(id);
+  const { data: distributors = [] } = useAdminDistributors();
   const orderDist = useMemo(() => {
     if (!order?.distributorId) return null;
     return distributors.find((d) => d.id === order.distributorId) || null;
   }, [order, distributors]);
-
-  useEffect(() => {
-    if (id) {
-      const found = loadOrders().find((o) => o.id === id);
-      setOrder(found || null);
-    }
-  }, [id]);
 
   return (
     <CustomerLayout variant="gradient" maxWidth="600">

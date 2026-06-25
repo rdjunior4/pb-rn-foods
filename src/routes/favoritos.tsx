@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
 import { useWishlist } from "@/lib/wishlist-context";
 import { useCart } from "@/lib/cart-context";
-import { getProductById } from "@/lib/data";
+import { useProducts } from "@/lib/hooks";
 import { toast } from "sonner";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency } from "@/lib/format";
@@ -14,19 +14,21 @@ export const Route = createFileRoute("/favoritos")({
 function FavoritosPage() {
   const { items, toggleFavorite } = useWishlist();
   const { addItem } = useCart();
+  const { data: products = [] } = useProducts();
+  const productMap = new Map(products.map((p) => [p.id, p]));
 
-  const products = items
-    .map((id) => getProductById(id))
+  const favProducts = items
+    .map((id) => productMap.get(id))
     .filter(Boolean);
 
   return (
     <CustomerLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Lista de desejos</h1>
-        <p className="text-muted-foreground text-sm mt-1">{products.length} {products.length === 1 ? "produto salvo" : "produtos salvos"}</p>
+        <p className="text-muted-foreground text-sm mt-1">{favProducts.length} {favProducts.length === 1 ? "produto salvo" : "produtos salvos"}</p>
       </div>
 
-      {products.length === 0 ? (
+      {favProducts.length === 0 ? (
         <div className="text-center py-24">
           <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-rose-50 to-rose-100/50 mb-8">
             <Heart className="h-12 w-12 text-rose-300" />
@@ -43,7 +45,7 @@ function FavoritosPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {products.map((p) => (
+          {favProducts.map((p) => (
             <div key={p!.id} className="group rounded-2xl border border-border/40 bg-card p-5 hover:shadow-md transition-all">
               <div className="flex gap-4">
                 <Link to="/produto/$slug" params={{ slug: p!.slug }} className="shrink-0">

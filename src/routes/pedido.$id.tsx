@@ -12,8 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
-import { useOrderById, useOrderRealtime } from "@/lib/hooks";
-import { loadStore } from "@/lib/admin-store";
+import { useOrderById, useOrderRealtime, useAdminDistributors } from "@/lib/hooks";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { statusConfig, statusSteps } from "@/lib/constants";
@@ -27,7 +26,7 @@ function PedidoDetail() {
   const { data: order, isLoading } = useOrderById(id);
   useOrderRealtime(id);
 
-  const distributors = useMemo(() => loadStore().distributors, []);
+  const { data: distributors = [] } = useAdminDistributors();
   const orderDist = useMemo(() => {
     if (!order?.distributorId) return null;
     return distributors.find((d) => d.id === order.distributorId) || null;

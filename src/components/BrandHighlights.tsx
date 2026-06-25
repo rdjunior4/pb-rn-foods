@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { getBrands } from "@/lib/data";
-import { loadStoreConfig } from "@/lib/store-config";
+import { useBrands, useStoreConfig } from "@/lib/hooks";
 
 export function BrandHighlights() {
-  const allBrands = getBrands();
-  const config = loadStoreConfig();
+  const { data: allBrands = [] } = useBrands();
+  const { data: config } = useStoreConfig();
 
-  const featured = config.featuredBrandIds.length > 0
-    ? allBrands.filter((b) => config.featuredBrandIds.includes(b.id) && b.active)
+  const featuredBrandIds = config?.featuredBrandIds ?? [];
+  const featured = featuredBrandIds.length > 0
+    ? allBrands.filter((b) => featuredBrandIds.includes(b.id) && b.active)
     : allBrands.filter((b) => b.active);
 
   if (featured.length === 0) return null;

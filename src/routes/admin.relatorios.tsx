@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { loadStore, loadOrders } from "@/lib/admin-store";
+import { useAdminStore, useAdminOrders, useAdminCategories, useAdminBrands } from "@/lib/hooks";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { getCategories, getBrands } from "@/lib/data";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { Download, TrendingUp, TrendingDown, Package, ShoppingCart, DollarSign, BarChart3 } from "lucide-react";
 
@@ -13,10 +12,11 @@ export const Route = createFileRoute("/admin/relatorios")({
 const CHART_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#ec4899", "#6366f1", "#14b8a6"];
 
 function AdminRelatorios() {
-  const store = loadStore();
-  const orders = loadOrders();
-  const categories = getCategories();
-  const brands = getBrands();
+  const { data: store } = useAdminStore();
+  const { data: orders = [] } = useAdminOrders();
+  const { data: categories = [] } = useAdminCategories();
+  const { data: brands = [] } = useAdminBrands();
+  const products = store?.products ?? [];
 
   const [period, setPeriod] = useState<"7d" | "30d" | "90d" | "all">("30d");
 
@@ -41,7 +41,7 @@ function AdminRelatorios() {
     const map = new Map<string, number>();
     for (const o of completedOrders) {
       for (const item of o.items) {
-        const product = store.products.find((p) => p.id === item.productId);
+        const product = products.find((p) => p.id === item.productId);
         const catId = product?.categoryId || "outros";
         const catName = categories.find((c) => c.id === catId)?.name || "Outros";
         map.set(catName, (map.get(catName) || 0) + item.price * item.quantity);
@@ -50,13 +50,13 @@ function AdminRelatorios() {
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [completedOrders, store.products, categories]);
+  }, [completedOrders, products, categories]);
 
   const revenueByBrand = useMemo(() => {
     const map = new Map<string, number>();
     for (const o of completedOrders) {
       for (const item of o.items) {
-        const product = store.products.find((p) => p.id === item.productId);
+        const product = products.find((p) => p.id === item.productId);
         const brandName = product?.brand || "Sem marca";
         map.set(brandName, (map.get(brandName) || 0) + item.price * item.quantity);
       }
@@ -65,7 +65,7 @@ function AdminRelatorios() {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 10);
-  }, [completedOrders, store.products]);
+  }, [completedOrders, products]);
 
   const topProducts = useMemo(() => {
     const map = new Map<string, { name: string; qty: number; revenue: number }>();

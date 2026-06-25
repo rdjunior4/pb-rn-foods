@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { loadOrders, saveOrders, loadStore } from "@/lib/admin-store";
+import { useAdminOrders, useAdminDistributors } from "@/lib/hooks";
+import { saveOrders } from "@/lib/admin-store";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { SELECT_CLASSES } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
@@ -24,7 +26,9 @@ export const Route = createFileRoute("/admin/logistica")({
 });
 
 function AdminLogistica() {
-  const [orders, setOrders] = useState<Order[]>(() => loadOrders());
+  const { data: orders = [], refetch } = useAdminOrders();
+  const { data: distributorsRaw = [] } = useAdminDistributors();
+  const distributors = useMemo(() => distributorsRaw.filter((d) => d.active), [distributorsRaw]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "shipping" | "all">("all");
   const [distributorFilter, setDistributorFilter] = useState<string>("all");
@@ -32,8 +36,6 @@ function AdminLogistica() {
   const [editCarrier, setEditCarrier] = useState("");
   const [editTracking, setEditTracking] = useState("");
   const [editEstDelivery, setEditEstDelivery] = useState("");
-
-  const distributors = useMemo(() => loadStore().distributors.filter((d) => d.active), []);
 
   const shippingOrders = useMemo(() => {
     let result = orders.filter((o) => o.status !== "cancelled");
@@ -70,7 +72,7 @@ function AdminLogistica() {
     };
   }, [orders]);
 
-  const handleSaveShipping = (orderId: string) => {
+  const handleSaveShipping = async (orderId: string) => {
     const updated = orders.map((o) => {
       if (o.id !== orderId) return o;
       return {
@@ -82,7 +84,17 @@ function AdminLogistica() {
       };
     });
     saveOrders(updated);
-    setOrders(updated);
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabase();
+      if (supabase) {
+        await supabase.from("orders").update({
+          shipping_carrier: editCarrier || null,
+          tracking_code: editTracking || null,
+          estimated_delivery: editEstDelivery || null,
+        }).eq("id", orderId);
+      }
+    }
+    refetch();
     setEditingId(null);
     setEditCarrier("");
     setEditTracking("");

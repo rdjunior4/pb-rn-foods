@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { loadStore, saveStore, generateId } from "@/lib/admin-store";
 import { loadStoreConfig, saveStoreConfig } from "@/lib/store-config";
+import { useAdminStore, useStoreConfig } from "@/lib/hooks";
+import { apiSaveBanner, apiDeleteBanner, apiReorderBanners } from "@/lib/api/admin-writes";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import type { Banner } from "@/lib/types";
 import type { StoreConfig } from "@/lib/store-config";
 import { readFileAsDataURL } from "@/lib/utils";
@@ -36,8 +39,10 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function BannersSection() {
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [config, setConfig] = useState<StoreConfig>(() => loadStoreConfig());
+  const { data: storeData, refetch: refetchStore } = useAdminStore();
+  const { data: initialConfig, refetch: refetchConfig } = useStoreConfig();
+  const [banners, setBanners] = useState<Banner[]>(storeData?.banners ?? []);
+  const [config, setConfig] = useState<StoreConfig>(initialConfig ?? loadStoreConfig());
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -63,13 +68,14 @@ export function BannersSection() {
   const mobileFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setBanners(loadStore().banners);
-    setConfig(loadStoreConfig());
-  }, []);
+    if (storeData) setBanners(storeData.banners);
+    if (initialConfig) setConfig(initialConfig);
+  }, [storeData, initialConfig]);
 
-  const refresh = () => {
-    setBanners(loadStore().banners);
-    setConfig(loadStoreConfig());
+  const refresh = async () => {
+    const [s, c] = await Promise.all([refetchStore(), refetchConfig()]);
+    if (s.data) setBanners(s.data.banners);
+    if (c.data) setConfig(c.data);
   };
 
   const resetForm = () => {
@@ -186,7 +192,7 @@ export function BannersSection() {
     setMobileUploading(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!image.trim() && !imageFile) {
       toast.error("Selecione ou insira uma imagem");
       return;
@@ -210,9 +216,10 @@ export function BannersSection() {
           showSubtitle,
           showCta,
         };
+        if (isSupabaseConfigured()) await apiSaveBanner(store.banners[idx]);
       }
     } else {
-      store.banners.push({
+      const newBanner: Banner = {
         id: generateId(),
         title,
         subtitle,
@@ -226,7 +233,9 @@ export function BannersSection() {
         showCta,
         order: store.banners.length,
         createdAt: new Date().toISOString(),
-      });
+      };
+      store.banners.push(newBanner);
+      if (isSupabaseConfigured()) await apiSaveBanner(newBanner);
     }
     saveStore(store);
     refresh();
@@ -234,22 +243,24 @@ export function BannersSection() {
     toast.success(editingId ? "Banner atualizado" : "Banner criado");
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteId) return;
     const store = loadStore();
     store.banners = store.banners.filter((b) => b.id !== deleteId);
     saveStore(store);
+    if (isSupabaseConfigured()) await apiDeleteBanner(deleteId);
     refresh();
     setDeleteId(null);
     toast.success("Banner removido");
   };
 
-  const toggleActive = (id: string) => {
+  const toggleActive = async (id: string) => {
     const store = loadStore();
     const idx = store.banners.findIndex((b) => b.id === id);
     if (idx !== -1) {
       store.banners[idx].active = !store.banners[idx].active;
       saveStore(store);
+      if (isSupabaseConfigured()) await apiSaveBanner(store.banners[idx]);
       refresh();
     }
   };
@@ -260,21 +271,23 @@ export function BannersSection() {
     setConfig(next);
   };
 
-  const moveUp = (idx: number) => {
+  const moveUp = async (idx: number) => {
     if (idx === 0) return;
     const store = loadStore();
     [store.banners[idx], store.banners[idx - 1]] = [store.banners[idx - 1], store.banners[idx]];
     store.banners.forEach((b, i) => (b.order = i));
     saveStore(store);
+    if (isSupabaseConfigured()) await apiReorderBanners(store.banners.map((b) => b.id));
     refresh();
   };
 
-  const moveDown = (idx: number) => {
+  const moveDown = async (idx: number) => {
     const store = loadStore();
     if (idx === store.banners.length - 1) return;
     [store.banners[idx], store.banners[idx + 1]] = [store.banners[idx + 1], store.banners[idx]];
     store.banners.forEach((b, i) => (b.order = i));
     saveStore(store);
+    if (isSupabaseConfigured()) await apiReorderBanners(store.banners.map((b) => b.id));
     refresh();
   };
 

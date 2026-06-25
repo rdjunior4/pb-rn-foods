@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { loadOrders, saveOrders } from "@/lib/admin-store";
+import { useAdminOrders, useAdminAdvanceOrder } from "@/lib/hooks";
 import { formatCurrency, formatDate, formatDocAuto, formatPhone } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
 import {
@@ -48,7 +48,8 @@ interface CustomerSummary {
 }
 
 function AdminClientes() {
-  const [orders, setOrders] = useState<Order[]>(() => loadOrders());
+  const { data: orders = [], refetch } = useAdminOrders();
+  const advanceOrderMutation = useAdminAdvanceOrder();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"pipeline" | "table">("pipeline");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
@@ -136,30 +137,31 @@ function AdminClientes() {
     return groups;
   }, [filtered]);
 
-  const refresh = () => setOrders(loadOrders());
+  const refresh = () => refetch();
 
   const handleAdvanceStatus = (orderId: string) => {
-    const order = orders.find((o) => o.id === orderId);
-    if (!order) return;
-    const next = nextStatus[order.status];
-    if (!next) return;
-    const updated = orders.map((o) =>
-      o.id === orderId ? { ...o, status: next, updatedAt: new Date().toISOString() } : o,
-    );
-    saveOrders(updated);
-    setOrders(updated);
-    setAdvancingOrderId(null);
-    toast.success(`Pedido atualizado para "${statusConfig[next].label}"`);
-    if (selectedCustomer) {
-      const updatedOrders = updated.filter(
-        (o) => o.customerEmail.toLowerCase() === selectedCustomer.email.toLowerCase(),
-      );
-      setSelectedCustomer({
-        ...selectedCustomer,
-        latestOrderStatus: updatedOrders[0]?.status || selectedCustomer.latestOrderStatus,
-        orders: updatedOrders,
-      });
-    }
+    advanceOrderMutation.mutate(orderId, {
+      onSuccess: (order) => {
+        refetch();
+        setAdvancingOrderId(null);
+        toast.success(`Pedido atualizado para "${statusConfig[order.status].label}"`);
+        if (selectedCustomer) {
+          const updatedOrders = orders.map((o) =>
+            o.id === orderId ? order : o,
+          ).filter(
+            (o) => o.customerEmail.toLowerCase() === selectedCustomer.email.toLowerCase(),
+          );
+          setSelectedCustomer({
+            ...selectedCustomer,
+            latestOrderStatus: order.status,
+            orders: updatedOrders,
+          });
+        }
+      },
+      onError: (err) => {
+        toast.error(`Erro: ${err.message}`);
+      },
+    });
   };
 
   const statusCounts = useMemo(() => {

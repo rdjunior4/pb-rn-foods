@@ -1,6 +1,6 @@
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { getProductById } from "@/lib/data";
+import { useProducts } from "@/lib/hooks";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/format";
@@ -18,9 +18,12 @@ interface CartDrawerProps {
 export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
   const { items, totalItems, updateQuantity, removeItem, clearCart } = useCart();
   const navigate = useNavigate();
+  const { data: products = [] } = useProducts();
+
+  const productMap = new Map(products.map((p) => [p.id, p]));
 
   const total = items.reduce((sum, item) => {
-    const product = getProductById(item.productId);
+    const product = productMap.get(item.productId);
     return sum + (product ? product.price * item.quantity : 0);
   }, 0);
 
@@ -81,7 +84,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
 
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
               {items.map((item) => {
-                const product = getProductById(item.productId);
+                const product = productMap.get(item.productId);
                 if (!product) return null;
                 return (
                   <div

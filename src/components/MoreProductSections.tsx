@@ -1,9 +1,11 @@
 import { ProductSection } from "./ProductSection";
-import { getProductsByCategory, getCategories } from "@/lib/data";
+import { useProductsByCategory, useCategories } from "@/lib/hooks";
 
 export function MoreSavingsProducts() {
-  const cat = getCategories().find((c) => c.slug === "mercearia");
-  const prods = cat ? getProductsByCategory(cat.id).slice(0, 6) : [];
+  const { data: categories = [] } = useCategories();
+  const cat = categories.find((c) => c.slug === "mercearia");
+  const { data: products = [] } = useProductsByCategory(cat?.id ?? "");
+  const prods = products.slice(0, 6);
   return (
     <ProductSection
       title="Mais vendidos da mercearia"
@@ -15,8 +17,10 @@ export function MoreSavingsProducts() {
 }
 
 export function BeveragesProducts() {
-  const cat = getCategories().find((c) => c.slug === "bebidas");
-  const prods = cat ? getProductsByCategory(cat.id).slice(0, 6) : [];
+  const { data: categories = [] } = useCategories();
+  const cat = categories.find((c) => c.slug === "bebidas");
+  const { data: products = [] } = useProductsByCategory(cat?.id ?? "");
+  const prods = products.slice(0, 6);
   return (
     <ProductSection
       title="Bebidas em alta"
@@ -28,9 +32,11 @@ export function BeveragesProducts() {
 }
 
 export function MeatsAndDairyProducts() {
+  const { data: categories = [] } = useCategories();
   const cats = ["carnes", "aves-pescados", "embutidos", "laticinios", "frios-queijos"];
-  const catIds = cats.map((s) => getCategories().find((c) => c.slug === s)?.id).filter(Boolean);
-  const prods = catIds.flatMap((id) => getProductsByCategory(id!)).slice(0, 6);
+  const catIds = cats.map((s) => categories.find((c) => c.slug === s)?.id).filter(Boolean);
+  const { data: allProducts = [] } = useProductsByCategory(catIds[0] ?? "");
+  const prods = allProducts.slice(0, 6);
   return (
     <ProductSection
       title="Frios, carnes e laticínios"
@@ -42,8 +48,10 @@ export function MeatsAndDairyProducts() {
 }
 
 export function CleaningProducts() {
-  const cat = getCategories().find((c) => c.slug === "limpeza-higiene");
-  const prods = cat ? getProductsByCategory(cat.id).slice(0, 6) : [];
+  const { data: categories = [] } = useCategories();
+  const cat = categories.find((c) => c.slug === "limpeza-higiene");
+  const { data: products = [] } = useProductsByCategory(cat?.id ?? "");
+  const prods = products.slice(0, 6);
   return (
     <ProductSection
       title="Limpeza e higiene"

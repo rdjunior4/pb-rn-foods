@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { loadStoreConfig, saveStoreConfig } from "@/lib/store-config";
-import { getBrands } from "@/lib/data";
+import { useAdminBrands } from "@/lib/hooks";
 import type { StoreConfig } from "@/lib/store-config";
 import { Sparkles } from "lucide-react";
 
 export function BrandsSection() {
   const [config, setConfig] = useState<StoreConfig>(() => loadStoreConfig());
-  const allBrands = getBrands();
+  const { data: allBrands = [] } = useAdminBrands();
 
   const toggleBrand = (brandId: string) => {
     const next = config.featuredBrandIds.includes(brandId)

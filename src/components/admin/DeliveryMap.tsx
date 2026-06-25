@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, useMap } from "react-leaflet";
 import { geocodeAddress } from "@/lib/geocode";
 import { formatCurrency } from "@/lib/format";
-import { loadStore } from "@/lib/admin-store";
+import { useAdminDistributors } from "@/lib/hooks";
 import { pointInDistributorCoverage } from "@/lib/distributor-utils";
 import { PinMarker } from "@/components/admin/PinMarker";
 import type { Order, OrderStatus, Distributor } from "@/lib/types";
@@ -117,7 +117,8 @@ export function DeliveryMap({ orders }: DeliveryMapProps) {
   const [activeTab, setActiveTab] = useState<string>("todas");
   const [cityCoords, setCityCoords] = useState<Record<string, { lat: number; lng: number }>>({});
 
-  const distributors = useMemo(() => loadStore().distributors.filter((d) => d.active), []);
+  const { data: allDistributors = [] } = useAdminDistributors();
+  const distributors = useMemo(() => allDistributors.filter((d) => d.active), [allDistributors]);
 
   const visibleDistributors = useMemo(() => {
     if (activeTab === "todas") return distributors;

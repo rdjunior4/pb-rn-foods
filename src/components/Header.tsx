@@ -19,12 +19,13 @@ import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { getCategories } from "@/lib/data";
+import { useCategories } from "@/lib/hooks";
 
 export function Header() {
   const { totalItems } = useCart();
   const { user, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
+  const { data: categories = [] } = useCategories();
   const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -230,7 +231,7 @@ export function Header() {
             <div>
               <h3 className="px-2 text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-2">Categorias</h3>
               <div className="space-y-0.5">
-                {getCategories().map((c) => (
+                {categories.map((c) => (
                   <SheetClose key={c.id} asChild>
                     <Link
                       to="/categoria/$slug"

@@ -1,7 +1,7 @@
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Youtube, Linkedin, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { getCategories } from "@/lib/data";
+import { useCategories } from "@/lib/hooks";
 
 const helpers = [
   { label: "Sobre nós", to: "/pagina/sobre" },
@@ -26,6 +26,7 @@ const social = [
 ];
 
 export function Footer() {
+  const { data: categories = [] } = useCategories();
   return (
     <footer className="mt-20 bg-brand-black">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px]">
@@ -81,7 +82,7 @@ export function Footer() {
           <div className="lg:col-span-3">
             <h4 className="text-white font-semibold text-sm mb-5">Categorias</h4>
             <ul className="space-y-3">
-              {getCategories().slice(0, 5).map((c) => (
+              {categories.slice(0, 5).map((c) => (
                 <li key={c.id}>
                   <Link to="/categoria/$slug" params={{ slug: c.slug }} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
                     <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />

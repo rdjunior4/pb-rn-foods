@@ -13,10 +13,10 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
-import { getProductById } from "@/lib/data";
-import { saveOrders, loadOrders, generateOrderId, loadStore, validateCoupon, incrementCouponUsage, decrementStockForOrder, syncFromSupabase } from "@/lib/admin-store";
+import { useProducts, useAdminDistributors } from "@/lib/hooks";
+import { saveOrders, loadOrders, generateOrderId, validateCoupon, incrementCouponUsage, decrementStockForOrder, syncFromSupabase } from "@/lib/admin-store";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { apiSaveOrder, apiDecrementStock } from "@/lib/api";
+import { apiSaveOrder, apiDecrementStock, apiValidateCoupon, apiIncrementCouponUsage } from "@/lib/api";
 import type { Order, Coupon } from "@/lib/types";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency, formatDoc, formatPhone } from "@/lib/format";
@@ -40,6 +40,9 @@ function CheckoutPage() {
   const { items, clearCart, totalItems } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { data: allProducts = [] } = useProducts();
+  const { data: allDistributors = [] } = useAdminDistributors();
+  const productMap = new Map(allProducts.map((p) => [p.id, p]));
 
   const [cep, setCep] = useState("");
   const [address, setAddress] = useState("");
@@ -62,7 +65,7 @@ function CheckoutPage() {
 
   const cartProducts = items
     .map((item) => {
-      const product = getProductById(item.productId);
+      const product = productMap.get(item.productId);
       if (!product) return null;
       const variant = item.variantId ? product.variants.find((v) => v.id === item.variantId) : undefined;
       return {
@@ -87,7 +90,7 @@ function CheckoutPage() {
   }, [appliedCoupon, total]);
   const orderTotal = Math.max(0, total - couponDiscount + shippingCost);
 
-  const distributors = useMemo(() => loadStore().distributors.filter((d) => d.active), []);
+  const distributors = useMemo(() => allDistributors.filter((d) => d.active), [allDistributors]);
   const detectedDistributor = useMemo(() => {
     const cityName = city || location?.city;
     if (location?.latitude && location?.longitude) {
@@ -155,11 +158,16 @@ function CheckoutPage() {
     }
   };
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
     setCouponLoading(true);
     setCouponError("");
-    const result = validateCoupon(couponInput, total, user?.id);
+    let result;
+    if (isSupabaseConfigured()) {
+      result = await apiValidateCoupon(couponInput, total, user?.id);
+    } else {
+      result = validateCoupon(couponInput, total, user?.id);
+    }
     setCouponLoading(false);
     if (!result.ok) {
       setCouponError(result.error || "Cupom inválido.");
@@ -284,7 +292,11 @@ function CheckoutPage() {
       }
 
       if (appliedCoupon) {
-        incrementCouponUsage(appliedCoupon.id);
+        if (useSupabase) {
+          await apiIncrementCouponUsage(appliedCoupon.id);
+        } else {
+          incrementCouponUsage(appliedCoupon.id);
+        }
       }
 
       if (useSupabase) {

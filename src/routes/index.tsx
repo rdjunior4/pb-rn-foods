@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
 import { CategoryNav } from "@/components/CategoryNav";
 import { HeroBanner } from "@/components/HeroBanner";
 import { BrandHighlights } from "@/components/BrandHighlights";
@@ -16,9 +15,9 @@ import { Newsletter } from "@/components/Newsletter";
 import { CategoryCards } from "@/components/CategoryCards";
 import { ProductSection } from "@/components/ProductSection";
 import { CustomerLayout } from "@/components/CustomerLayout";
-import { loadStoreConfig } from "@/lib/store-config";
-import { getProducts, getProductsByCategory, getCategories } from "@/lib/data";
+import { useProducts, useCategories, useStoreConfig } from "@/lib/hooks";
 import type { StoreSection } from "@/lib/store-config";
+import type { Product, Category } from "@/lib/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,7 +39,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-function renderSection(section: StoreSection) {
+function renderSection(
+  section: StoreSection,
+  products: Product[],
+  categories: Category[],
+) {
   if (!section.active) return null;
 
   switch (section.type) {
@@ -54,7 +57,7 @@ function renderSection(section: StoreSection) {
       return <BenefitsBar key={section.id} />;
 
     case "offer-products": {
-      const products = getProducts()
+      const offerProducts = products
         .filter((p) => p.discount && p.discount >= 10)
         .slice(0, section.maxProducts || 6);
       return (
@@ -64,7 +67,7 @@ function renderSection(section: StoreSection) {
           subtitle={section.subtitle || "Condições exclusivas válidas por tempo limitado"}
           linkLabel="Ver todas as ofertas"
           linkTo="/buscar?q=oferta"
-          products={products}
+          products={offerProducts}
           variant={section.variant === "featured" ? "featured" : (section.variant as "default" | "alt") || "featured"}
         />
       );
@@ -72,15 +75,15 @@ function renderSection(section: StoreSection) {
 
     case "category-products": {
       if (!section.categorySlug) return null;
-      const cat = getCategories().find((c) => c.slug === section.categorySlug);
+      const cat = categories.find((c) => c.slug === section.categorySlug);
       if (!cat) return null;
-      const products = getProductsByCategory(cat.id).slice(0, section.maxProducts || 6);
+      const catProducts = products.filter((p) => p.categoryId === cat.id).slice(0, section.maxProducts || 6);
       return (
         <ProductSection
           key={section.id}
           title={section.title || cat.name}
           linkTo={`/categoria/${cat.slug}`}
-          products={products}
+          products={catProducts}
           variant={(section.variant as "default" | "alt") || "default"}
         />
       );
@@ -116,17 +119,16 @@ function renderSection(section: StoreSection) {
 }
 
 function Index() {
-  const [sections, setSections] = useState<StoreSection[]>([]);
+  const { data: products = [] } = useProducts();
+  const { data: categories = [] } = useCategories();
+  const { data: config } = useStoreConfig();
 
-  useEffect(() => {
-    const config = loadStoreConfig();
-    setSections(config.sections || []);
-  }, []);
+  const sections = config?.sections ?? [];
 
   return (
     <CustomerLayout fullWidth stickyNav={<CategoryNav />}>
       {sections.length > 0 ? (
-        sections.map((section) => renderSection(section))
+        sections.map((section) => renderSection(section, products, categories))
       ) : (
         <>
           <HeroBanner />

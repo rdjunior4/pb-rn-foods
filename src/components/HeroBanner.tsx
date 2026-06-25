@@ -1,8 +1,7 @@
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { loadStore } from "@/lib/admin-store";
-import { loadStoreConfig } from "@/lib/store-config";
+import { useAdminStore, useStoreConfig } from "@/lib/hooks";
 import defaultHeroImg from "@/assets/hero-warehouse.jpg";
 import type { Banner } from "@/lib/types";
 
@@ -18,20 +17,30 @@ function useIsMobile() {
 }
 
 export function HeroBanner() {
+  const { data: store } = useAdminStore();
+  const { data: config } = useStoreConfig();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [current, setCurrent] = useState(0);
-  const [config, setConfig] = useState(() => loadStoreConfig());
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    setBanners(loadStore().banners.sort((a, b) => a.order - b.order));
-    setConfig(loadStoreConfig());
-  }, []);
+    if (store?.banners) {
+      setBanners(store.banners.sort((a, b) => a.order - b.order));
+    }
+  }, [store?.banners]);
 
-  if (!config.heroEnabled) return null;
+  if (config && !config.heroEnabled) return null;
+
+  const carouselEnabled = config?.carouselEnabled ?? true;
+  const carouselInterval = config?.carouselInterval ?? 6000;
+  const heroTitle = config?.heroTitle ?? "P&B RN Foods — Atacado e Distribuidora";
+  const heroSubtitle = config?.heroSubtitle ?? "Produtos de qualidade com os melhores preços para o seu negócio";
+  const heroCtaText = config?.heroCtaText ?? "Explorar catálogo";
+  const heroCtaLink = config?.heroCtaLink ?? "/buscar";
+  const heroSecondaryCtaEnabled = config?.heroSecondaryCtaEnabled ?? true;
 
   const activeBanners = banners.filter((b) => b.active);
-  const shouldCarousel = config.carouselEnabled && activeBanners.length > 1;
+  const shouldCarousel = carouselEnabled && activeBanners.length > 1;
   const displayBanner =
     activeBanners.length > 0 ? (shouldCarousel ? activeBanners[current] : activeBanners[0]) : null;
 
@@ -39,10 +48,10 @@ export function HeroBanner() {
   const showSubtitle = displayBanner ? displayBanner.showSubtitle !== false : true;
   const showCta = displayBanner ? displayBanner.showCta !== false : true;
 
-  const hasTitle = showTitle && (displayBanner?.title || config.heroTitle);
-  const hasSubtitle = showSubtitle && (displayBanner?.subtitle || config.heroSubtitle);
+  const hasTitle = showTitle && (displayBanner?.title || heroTitle);
+  const hasSubtitle = showSubtitle && (displayBanner?.subtitle || heroSubtitle);
   const hasCta = displayBanner ? displayBanner.showCta !== false : true;
-  const hasSecondaryCta = config.heroSecondaryCtaEnabled;
+  const hasSecondaryCta = heroSecondaryCtaEnabled;
 
   const hasAnyText = hasTitle || hasSubtitle || hasCta || hasSecondaryCta;
 
@@ -54,7 +63,7 @@ export function HeroBanner() {
     <section className="w-full">
       <AutoCarousel
         enabled={shouldCarousel}
-        interval={config.carouselInterval || 6000}
+        interval={carouselInterval}
         onNext={nextSlide}
       />
       <div className="group relative overflow-hidden bg-brand-black min-h-[300px] sm:min-h-[350px] lg:h-[450px] flex items-center">
@@ -76,23 +85,23 @@ export function HeroBanner() {
           <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] py-10 sm:py-14 lg:py-16">
             {hasTitle && (
               <h1 className="max-w-[45%] text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-white">
-                {displayBanner?.title || config.heroTitle}
+                {displayBanner?.title || heroTitle}
               </h1>
             )}
 
             {hasSubtitle && (
               <p className="mt-4 max-w-xl text-sm sm:text-base text-white/60 leading-relaxed">
-                {displayBanner?.subtitle || config.heroSubtitle}
+                {displayBanner?.subtitle || heroSubtitle}
               </p>
             )}
 
             <div className="mt-6 flex flex-wrap gap-3">
               {hasCta && (
                 <Link
-                  to={(displayBanner?.link || config.heroCtaLink || "/buscar") as any}
+                  to={(displayBanner?.link || heroCtaLink || "/buscar") as any}
                   className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover transition-all text-primary-foreground font-semibold rounded px-6 py-3 text-sm shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]"
                 >
-                  {displayBanner?.ctaText || config.heroCtaText || "Explorar catálogo"}
+                  {displayBanner?.ctaText || heroCtaText}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               )}

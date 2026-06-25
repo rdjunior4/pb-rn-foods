@@ -17,13 +17,43 @@ import {
   deleteCombo,
   generateId,
 } from "../admin-store";
+import { loadStoreConfig } from "../store-config";
+import type { StoreConfig } from "../store-config";
 import type { Product, Category, Brand, Order, Coupon, ProductReview, StockMovement, Distributor, Combo } from "../types";
+import {
+  apiSaveProduct,
+  apiDeleteProduct,
+  apiBulkDeleteProducts,
+  apiSaveCategory,
+  apiDeleteCategory,
+  apiSaveBrand,
+  apiDeleteBrand,
+  apiSaveDistributor,
+  apiDeleteDistributor,
+  apiSaveCombo,
+  apiDeleteCombo,
+  apiSaveBanner,
+  apiDeleteBanner,
+  apiSaveCoupon,
+  apiDeleteCoupon,
+  apiAddStockMovement,
+} from "../api/admin-writes";
+import { apiUpdateOrderStatus } from "../api/orders";
+import { isSupabaseConfigured } from "../supabase";
 
 // ─── Dashboard ───
 export function useAdminStore() {
   return useQuery({
     queryKey: ["admin", "store"] as const,
     queryFn: () => loadStore(),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useStoreConfig() {
+  return useQuery({
+    queryKey: queryKeys.storeConfig.all,
+    queryFn: () => loadStoreConfig(),
     staleTime: 30 * 1000,
   });
 }
@@ -54,6 +84,7 @@ export function useSaveProduct() {
       if (idx >= 0) store.products[idx] = product;
       else store.products.push(product);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiSaveProduct(product);
       return product;
     },
     onSuccess: () => {
@@ -70,6 +101,7 @@ export function useDeleteProduct() {
       const store = loadStore();
       store.products = store.products.filter((p) => p.id !== id);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiDeleteProduct(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.products.all });
@@ -85,6 +117,7 @@ export function useBulkDeleteProducts() {
       const store = loadStore();
       store.products = store.products.filter((p) => !ids.includes(p.id));
       saveStore(store);
+      if (isSupabaseConfigured()) await apiBulkDeleteProducts(ids);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.products.all });
@@ -111,6 +144,7 @@ export function useSaveCategory() {
       if (idx >= 0) store.categories[idx] = category;
       else store.categories.push(category);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiSaveCategory(category);
       return category;
     },
     onSuccess: () => {
@@ -130,6 +164,7 @@ export function useDeleteCategory() {
       });
       store.categories = store.categories.filter((c) => c.id !== id);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiDeleteCategory(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.categories.all });
@@ -157,6 +192,7 @@ export function useSaveBrand() {
       if (idx >= 0) store.brands[idx] = brand;
       else store.brands.push(brand);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiSaveBrand(brand);
       return brand;
     },
     onSuccess: () => {
@@ -173,6 +209,7 @@ export function useDeleteBrand() {
       const store = loadStore();
       store.brands = store.brands.filter((b) => b.id !== id);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiDeleteBrand(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.brands.all });
@@ -200,6 +237,7 @@ export function useAdminAdvanceOrder() {
       order.status = next as Order["status"];
       order.updatedAt = new Date().toISOString();
       saveOrders(orders);
+      if (isSupabaseConfigured()) await apiUpdateOrderStatus(orderId, order.status);
       return order;
     },
     onSuccess: () => {
@@ -218,6 +256,7 @@ export function useAdminCancelOrder() {
       order.status = "cancelled";
       order.updatedAt = new Date().toISOString();
       saveOrders(orders);
+      if (isSupabaseConfigured()) await apiUpdateOrderStatus(orderId, "cancelled");
       return order;
     },
     onSuccess: () => {
@@ -240,6 +279,7 @@ export function useSaveCoupon() {
   return useMutation({
     mutationFn: async (coupon: Coupon) => {
       saveCoupon(coupon);
+      if (isSupabaseConfigured()) await apiSaveCoupon(coupon);
       return coupon;
     },
     onSuccess: () => {
@@ -253,6 +293,7 @@ export function useDeleteCoupon() {
   return useMutation({
     mutationFn: async (id: string) => {
       deleteCoupon(id);
+      if (isSupabaseConfigured()) await apiDeleteCoupon(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.coupons.all });
@@ -309,6 +350,8 @@ export function useAdjustStock() {
       product.stock = Math.max(0, newStock);
       saveStore(store);
 
+      if (isSupabaseConfigured()) await apiSaveProduct(product);
+
       const movement: StockMovement = {
         id: `smv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         productId: product.id,
@@ -321,6 +364,7 @@ export function useAdjustStock() {
         createdAt: new Date().toISOString(),
       };
       addStockMovement(movement);
+      if (isSupabaseConfigured()) await apiAddStockMovement(movement);
       return movement;
     },
     onSuccess: () => {
@@ -349,6 +393,7 @@ export function useSaveDistributor() {
       if (idx >= 0) store.distributors[idx] = distributor;
       else store.distributors.push(distributor);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiSaveDistributor(distributor);
       return distributor;
     },
     onSuccess: () => {
@@ -365,6 +410,7 @@ export function useDeleteDistributor() {
       const store = loadStore();
       store.distributors = store.distributors.filter((d) => d.id !== id);
       saveStore(store);
+      if (isSupabaseConfigured()) await apiDeleteDistributor(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.distributors.all });
@@ -382,6 +428,7 @@ export function useToggleDistributor() {
       if (dist) {
         dist.active = !dist.active;
         saveStore(store);
+        if (isSupabaseConfigured()) await apiSaveDistributor(dist);
       }
       return dist;
     },
@@ -406,6 +453,7 @@ export function useSaveCombo() {
   return useMutation({
     mutationFn: async (combo: Combo) => {
       saveCombo(combo);
+      if (isSupabaseConfigured()) await apiSaveCombo(combo);
       return combo;
     },
     onSuccess: () => {
@@ -419,6 +467,7 @@ export function useDeleteCombo() {
   return useMutation({
     mutationFn: async (id: string) => {
       deleteCombo(id);
+      if (isSupabaseConfigured()) await apiDeleteCombo(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.combos.all });

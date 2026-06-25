@@ -1,9 +1,8 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LayoutDashboard, Package, Image, LogOut, Menu, X, ShoppingBag, Tags, ChevronLeft, ChevronRight, Award, Users, BarChart3, Truck, Store, MapPin, PackagePlus, Ticket, Star, Boxes, FileText } from "lucide-react";
 import { Logo } from "@/components/Logo";
-import { useState } from "react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },

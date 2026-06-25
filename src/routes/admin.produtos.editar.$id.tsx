@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { loadStore, saveStore, slugify, generateId } from "@/lib/admin-store";
+import { slugify, generateId } from "@/lib/admin-store";
+import { useAdminProducts, useSaveProduct, useDeleteProduct } from "@/lib/hooks";
 import { ArrowLeft, Trash2, Package, AlertTriangle } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { toast } from "sonner";
@@ -24,9 +25,11 @@ function EditProduct() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const { data: products = [] } = useAdminProducts();
+  const saveProductMutation = useSaveProduct();
+  const deleteProductMutation = useDeleteProduct();
 
-  const store = loadStore();
-  const product = store.products.find((p) => p.id === id);
+  const product = products.find((p) => p.id === id);
 
   if (!product) {
     return (
@@ -48,17 +51,13 @@ function EditProduct() {
   }
 
   const onSubmit = async (data: ProductFormData) => {
-    const store = loadStore();
-    const idx = store.products.findIndex((p) => p.id === id);
-    if (idx === -1) return;
-
     const price = parseFloat(data.price);
     const oldPrice = data.oldPrice ? parseFloat(data.oldPrice) : null;
     const stock = parseInt(data.stock) || 0;
     const discount = oldPrice && oldPrice > price ? Math.round((1 - price / oldPrice) * 100) : null;
 
-    store.products[idx] = {
-      ...store.products[idx],
+    const updated: Product = {
+      ...product,
       name: data.name,
       description: data.description,
       slug: slugify(data.name),
@@ -68,7 +67,7 @@ function EditProduct() {
       oldPrice,
       unit: data.unit,
       image: data.image || `https://picsum.photos/seed/${slugify(data.name)}/400/400`,
-      images: data.images || (data.image ? [data.image] : store.products[idx].images),
+      images: data.images || (data.image ? [data.image] : product.images),
       discount,
       stock,
       featured: data.featured,
@@ -78,8 +77,8 @@ function EditProduct() {
         .filter((t) => t.quantityPerPackage && t.packagePrice)
         .map((t, i) => {
           const qty = parseInt(t.quantityPerPackage) || 1;
-          const price = parseFloat(t.packagePrice) || 0;
-          const unitPrice = qty > 0 ? price / qty : 0;
+          const p = parseFloat(t.packagePrice) || 0;
+          const unitPrice = qty > 0 ? p / qty : 0;
           const basePrice = parseFloat(data.price) || 0;
           return {
             id: `tier-${Date.now()}-${i}`,
@@ -91,35 +90,43 @@ function EditProduct() {
         }),
     };
 
-    saveStore(store);
-    toast.success("Produto atualizado com sucesso!");
-    navigate({ to: "/admin/produtos" });
+    saveProductMutation.mutate(updated, {
+      onSuccess: () => {
+        toast.success("Produto atualizado com sucesso!");
+        navigate({ to: "/admin/produtos" });
+      },
+      onError: (err) => {
+        toast.error(`Erro ao salvar: ${err.message}`);
+      },
+    });
   };
 
   const handleDelete = () => {
-    const store = loadStore();
-    store.products = store.products.filter((p) => p.id !== id);
-    saveStore(store);
-    toast.success("Produto removido");
-    navigate({ to: "/admin/produtos" });
+    deleteProductMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Produto removido");
+        navigate({ to: "/admin/produtos" });
+      },
+      onError: (err) => {
+        toast.error(`Erro ao excluir: ${err.message}`);
+      },
+    });
   };
 
   const handleDuplicate = () => {
-    const store = loadStore();
-    const original = store.products.find((p) => p.id === id);
-    if (!original) return;
-
     const duplicate: Product = {
-      ...original,
+      ...product,
       id: generateId(),
-      name: `${original.name} (Cópia)`,
-      slug: slugify(`${original.name} cópia`),
+      name: `${product.name} (Cópia)`,
+      slug: slugify(`${product.name} cópia`),
     };
 
-    store.products.push(duplicate);
-    saveStore(store);
-    toast.success("Produto duplicado com sucesso!");
-    navigate({ to: `/admin/produtos/editar/${duplicate.id}` });
+    saveProductMutation.mutate(duplicate, {
+      onSuccess: () => {
+        toast.success("Produto duplicado com sucesso!");
+        navigate({ to: `/admin/produtos/editar/${duplicate.id}` });
+      },
+    });
   };
 
   return (

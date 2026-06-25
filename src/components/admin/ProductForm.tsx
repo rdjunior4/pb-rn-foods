@@ -6,7 +6,7 @@ import {
   Percent, ShoppingCart, Check, Pencil, AlertTriangle,
 } from "lucide-react";
 import { useState, useRef } from "react";
-import { getCategories, getBrands } from "@/lib/data";
+import { useAdminCategories, useAdminBrands } from "@/lib/hooks";
 import { unitLabels, SELECT_CLASSES } from "@/lib/constants";
 import { readFileAsDataURL } from "@/lib/utils";
 
@@ -65,6 +65,8 @@ export function ProductForm({
   const [savedTiers, setSavedTiers] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const { data: categories = [] } = useAdminCategories();
+  const { data: brands = [] } = useAdminBrands();
 
   const {
     register,
@@ -203,7 +205,7 @@ export function ProductForm({
         : "bg-red-500";
 
   const categoryName =
-    getCategories().find((c) => c.id === watchedCategoryId)?.name || "";
+    categories.find((c) => c.id === watchedCategoryId)?.name || "";
 
   const validDetails = (watchedDetails || []).filter((d: { value: string }) => d?.value?.trim()).map((d) => d.value);
   const validSpecs = (watchedSpecs || []).filter(
@@ -251,7 +253,7 @@ export function ProductForm({
               Categoria
             </label>
             <select {...register("categoryId")} className={selectClass}>
-              {getCategories().map((c) => (
+              {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
@@ -268,7 +270,7 @@ export function ProductForm({
               className={selectClass}
             >
               <option value="">Selecione a marca</option>
-              {getBrands()
+              {brands
                 .filter((b) => b.active)
                 .map((b) => (
                   <option key={b.id} value={b.name}>

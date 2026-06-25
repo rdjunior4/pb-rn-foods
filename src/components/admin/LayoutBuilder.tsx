@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { loadStoreConfig, saveStoreConfig, generateSectionId, sectionTypeLabels } from "@/lib/store-config";
 import type { StoreConfig, StoreSection, SectionType } from "@/lib/store-config";
-import { getCategories } from "@/lib/data";
+import { useAdminCategories } from "@/lib/hooks";
+import type { Category } from "@/lib/types";
 import {
   GripVertical, Eye, EyeOff, Trash2, Settings, X,
   Image, Award, ShieldCheck, Tag, Package, Mail,
@@ -230,7 +231,7 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("components");
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
-  const categories = getCategories();
+  const { data: categories = [] } = useAdminCategories();
 
   const sections = config.sections || [];
 
@@ -514,7 +515,7 @@ function SectionSettings({
   onUpdate,
 }: {
   section: StoreSection;
-  categories: ReturnType<typeof getCategories>;
+  categories: Category[];
   onUpdate: (updates: Partial<StoreSection>) => void;
 }) {
   const Icon = sectionIcons[section.type] || Package;
