@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
-import { loadOrders, saveOrders, loadStore } from "@/lib/admin-store";
+import { useAdminOrders, useAdminAdvanceOrder, useAdminCancelOrder, useAdminDistributors } from "@/lib/hooks";
 import { SELECT_CLASSES } from "@/lib/constants";
 import {
   ShoppingBag,
@@ -18,6 +18,7 @@ import {
   CreditCard,
   Phone,
   FileText,
+  Loader2,
 } from "lucide-react";
 import type { Order, OrderStatus } from "@/lib/types";
 import { toast } from "sonner";
@@ -43,7 +44,10 @@ export const Route = createFileRoute("/admin/pedidos")({
 const ITEMS_PER_PAGE = ITEMS_PER_PAGE_ADMIN;
 
 function AdminOrders() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const { data: orders = [], isLoading } = useAdminOrders();
+  const { data: distributors = [] } = useAdminDistributors();
+  const advanceMutation = useAdminAdvanceOrder();
+  const cancelMutation = useAdminCancelOrder();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
@@ -58,12 +62,6 @@ function AdminOrders() {
     const timer = setTimeout(() => setDebouncedSearch(search), 250);
     return () => clearTimeout(timer);
   }, [search]);
-
-  useEffect(() => {
-    setOrders(loadOrders());
-  }, []);
-
-  const refresh = () => setOrders(loadOrders());
 
   const filtered = orders.filter((o) => {
     const matchesSearch =
@@ -91,29 +89,23 @@ function AdminOrders() {
   }, [totalPages, page]);
 
   const handleAdvanceStatus = (id: string) => {
-    const updated = orders.map((o) => {
-      if (o.id !== id) return o;
-      const next = nextStatus[o.status];
-      if (!next) return o;
-      return { ...o, status: next, updatedAt: new Date().toISOString() };
+    advanceMutation.mutate(id, {
+      onSuccess: (order: Order) => {
+        toast.success(`Pedido atualizado para "${statusConfig[order.status].label}"`);
+        setConfirmAction(null);
+      },
+      onError: (err) => toast.error(err.message),
     });
-    saveOrders(updated);
-    refresh();
-    setConfirmAction(null);
-    const order = updated.find((o) => o.id === id);
-    if (order) toast.success(`Pedido atualizado para "${statusConfig[order.status].label}"`);
   };
 
   const handleCancel = (id: string) => {
-    const updated = orders.map((o) =>
-      o.id === id && o.status !== "delivered" && o.status !== "cancelled"
-        ? { ...o, status: "cancelled" as OrderStatus, updatedAt: new Date().toISOString() }
-        : o,
-    );
-    saveOrders(updated);
-    refresh();
-    setConfirmAction(null);
-    toast.success("Pedido cancelado");
+    cancelMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Pedido cancelado");
+        setConfirmAction(null);
+      },
+      onError: (err) => toast.error(err.message),
+    });
   };
 
   useEffect(() => {
@@ -129,7 +121,10 @@ function AdminOrders() {
 
   const selectedOrder = selectedId ? orders.find((o) => o.id === selectedId) : null;
   const confirmOrder = confirmAction ? orders.find((o) => o.id === confirmAction.orderId) : null;
-  const distributors = useMemo(() => loadStore().distributors, []);
+  const distributorsMap = useMemo(() => {
+    const map = new Map(distributors.map((d) => [d.id, d]));
+    return map;
+  }, [distributors]);
 
   return (
     <div className="space-y-6">
@@ -438,7 +433,7 @@ function AdminOrders() {
                 </div>
                 <p className="text-sm text-zinc-700">{selectedOrder.shippingAddress}</p>
                 {selectedOrder.distributorId && (() => {
-                  const dist = distributors.find((d) => d.id === selectedOrder.distributorId);
+                  const dist = distributorsMap.get(selectedOrder.distributorId);
                   if (!dist) return null;
                   return (
                     <div className="flex items-center gap-2.5 mt-3 pt-3 border-t border-zinc-200">

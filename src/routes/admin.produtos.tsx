@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useMatches } from "@tanstack/react-router";
-import { loadStore, saveStore } from "@/lib/admin-store";
+import { useAdminProducts, useAdminCategories, useAdminBrands, useDeleteProduct, useBulkDeleteProducts } from "@/lib/hooks";
 import { SELECT_CLASSES } from "@/lib/constants";
 import { useState, useEffect, useMemo } from "react";
 import {
@@ -14,11 +14,11 @@ import {
   AlertTriangle,
   MoreHorizontal,
   Filter,
+  Loader2,
 } from "lucide-react";
 import type { Product, Category } from "@/lib/types";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/format";
-import { getBrands } from "@/lib/data";
 import { getPageRange } from "@/lib/pagination";
 import { ITEMS_PER_PAGE, PLACEHOLDER_IMAGE } from "@/lib/constants";
 import {
@@ -42,8 +42,11 @@ type SortDir = "asc" | "desc";
 function AdminProducts() {
   const matches = useMatches();
   const hasChildRoute = matches.some((m) => m.pathname.includes("/admin/produtos/novo") || m.pathname.includes("/admin/produtos/editar"));
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: products = [], isLoading: productsLoading } = useAdminProducts();
+  const { data: categories = [] } = useAdminCategories();
+  const { data: brands = [] } = useAdminBrands();
+  const deleteProductMutation = useDeleteProduct();
+  const bulkDeleteMutation = useBulkDeleteProducts();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -59,19 +62,6 @@ function AdminProducts() {
     const timer = setTimeout(() => setDebouncedSearch(search), 250);
     return () => clearTimeout(timer);
   }, [search]);
-
-  useEffect(() => {
-    const store = loadStore();
-    setProducts(store.products);
-    setCategories(store.categories);
-  }, []);
-
-  const refresh = () => {
-    const store = loadStore();
-    setProducts(store.products);
-    setCategories(store.categories);
-    setSelected(new Set());
-  };
 
   const catMap = useMemo(() => {
     const map = new Map<string, Category>();
@@ -144,22 +134,23 @@ function AdminProducts() {
   };
 
   const handleBulkDelete = () => {
-    const store = loadStore();
-    store.products = store.products.filter((p) => !selected.has(p.id));
-    saveStore(store);
-    refresh();
-    setBulkDelete(false);
-    toast.success(`${selected.size} produto(s) removido(s)`);
+    bulkDeleteMutation.mutate(Array.from(selected), {
+      onSuccess: () => {
+        setSelected(new Set());
+        setBulkDelete(false);
+        toast.success(`${selected.size} produto(s) removido(s)`);
+      },
+    });
   };
 
   const handleSingleDelete = () => {
     if (!deleteId) return;
-    const store = loadStore();
-    store.products = store.products.filter((p) => p.id !== deleteId);
-    saveStore(store);
-    refresh();
-    setDeleteId(null);
-    toast.success("Produto removido");
+    deleteProductMutation.mutate(deleteId, {
+      onSuccess: () => {
+        setDeleteId(null);
+        toast.success("Produto removido");
+      },
+    });
   };
 
   const deleteProduct = deleteId ? products.find((p) => p.id === deleteId) : null;
@@ -182,6 +173,12 @@ function AdminProducts() {
         <Outlet />
       ) : (
         <>
+      {productsLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        </div>
+      )}
+      {!productsLoading && (<>
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
@@ -241,7 +238,7 @@ function AdminProducts() {
               className={SELECT_CLASSES.compact}
             >
               <option value="all">Todas as marcas</option>
-              {getBrands()
+              {brands
                 .filter((b) => b.active)
                 .map((b) => (
                   <option key={b.id} value={b.name}>
@@ -472,6 +469,7 @@ function AdminProducts() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </>)}
         </>
       )}
     </div>

@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Tag, ArrowUpDown, Search, ShoppingBag, Package, X, Check, GripVertical, Percent } from "lucide-react";
-import { getCombos, saveCombo, deleteCombo, generateId } from "@/lib/admin-store";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Tag, ArrowUpDown, Search, ShoppingBag, Package, X, Check, GripVertical, Percent, Loader2 } from "lucide-react";
+import { useAdminCombos, useSaveCombo, useDeleteCombo, useAdminProducts } from "@/lib/hooks";
+import { generateId } from "@/lib/admin-store";
 import { SELECT_CLASSES } from "@/lib/constants";
-import { getProducts } from "@/lib/data";
 import { formatCurrency } from "@/lib/format";
 import type { Combo, ComboItem } from "@/lib/types";
 import { toast } from "sonner";
@@ -24,15 +24,17 @@ export const Route = createFileRoute("/admin/combos")({
 });
 
 function AdminCombosPage() {
-  const [combos, setCombos] = useState<Combo[]>(() => getCombos());
+  const { data: combos = [], isLoading } = useAdminCombos();
+  const { data: allProducts = [] } = useAdminProducts();
+  const saveComboMutation = useSaveCombo();
+  const deleteComboMutation = useDeleteCombo();
+
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "discount" | "createdAt">("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Combo | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-
-  const allProducts = getProducts();
 
   const filtered = useMemo(() => {
     let list = combos;
@@ -49,23 +51,27 @@ function AdminCombosPage() {
     return list;
   }, [combos, search, sortBy, sortDir]);
 
-  const refresh = () => setCombos(getCombos());
-
   const handleDelete = () => {
     if (!deleteId) return;
-    deleteCombo(deleteId);
-    refresh();
-    setDeleteId(null);
-    toast.success("Combo removido");
+    deleteComboMutation.mutate(deleteId, {
+      onSuccess: () => {
+        setDeleteId(null);
+        toast.success("Combo removido");
+      },
+    });
   };
 
   const toggleActive = (combo: Combo) => {
-    saveCombo({ ...combo, active: !combo.active });
-    refresh();
+    saveComboMutation.mutate({ ...combo, active: !combo.active });
   };
 
   return (
     <div className="space-y-6">
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Combos</h1>
@@ -239,11 +245,13 @@ function AdminCombosPage() {
           combo={editing}
           products={allProducts}
           onSave={(combo) => {
-            saveCombo(combo);
-            refresh();
-            setEditing(null);
-            setIsCreating(false);
-            toast.success(editing ? "Combo atualizado" : "Combo criado");
+            saveComboMutation.mutate(combo, {
+              onSuccess: () => {
+                setEditing(null);
+                setIsCreating(false);
+                toast.success(editing ? "Combo atualizado" : "Combo criado");
+              },
+            });
           }}
           onCancel={() => { setEditing(null); setIsCreating(false); }}
         />

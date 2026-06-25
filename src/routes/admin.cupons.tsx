@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo, useEffect } from "react";
-import { Plus, Pencil, Trash2, Ticket, Search, X, Percent, DollarSign, Truck } from "lucide-react";
-import { loadCoupons, saveCoupon, deleteCoupon, generateId } from "@/lib/admin-store";
+import { useState, useMemo } from "react";
+import { Plus, Pencil, Trash2, Ticket, Search, X, Percent, DollarSign, Truck, Loader2 } from "lucide-react";
+import { useAdminCoupons, useSaveCoupon, useDeleteCoupon } from "@/lib/hooks";
+import { generateId } from "@/lib/admin-store";
 import { SELECT_CLASSES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/format";
 import type { Coupon, CouponType } from "@/lib/types";
@@ -24,17 +25,14 @@ const typeIcons: Record<CouponType, typeof Percent> = {
 };
 
 function CouponsPage() {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const { data: coupons = [], isLoading } = useAdminCoupons();
+  const saveCouponMutation = useSaveCoupon();
+  const deleteCouponMutation = useDeleteCoupon();
+
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Coupon | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setCoupons(loadCoupons());
-  }, []);
-
-  const refresh = () => setCoupons(loadCoupons());
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -42,23 +40,32 @@ function CouponsPage() {
   }, [coupons, search]);
 
   const handleSave = (coupon: Coupon) => {
-    saveCoupon(coupon);
-    refresh();
-    setModalOpen(false);
-    setEditing(null);
-    toast.success(editing ? "Cupom atualizado!" : "Cupom criado!");
+    saveCouponMutation.mutate(coupon, {
+      onSuccess: () => {
+        setModalOpen(false);
+        setEditing(null);
+        toast.success(editing ? "Cupom atualizado!" : "Cupom criado!");
+      },
+    });
   };
 
   const handleDelete = () => {
     if (!deleteId) return;
-    deleteCoupon(deleteId);
-    refresh();
-    setDeleteId(null);
-    toast.success("Cupom excluído!");
+    deleteCouponMutation.mutate(deleteId, {
+      onSuccess: () => {
+        setDeleteId(null);
+        toast.success("Cupom excluído!");
+      },
+    });
   };
 
   return (
     <div>
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        </div>
+      )}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Cupons de Desconto</h1>

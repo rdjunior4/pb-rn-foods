@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useMemo } from "react";
-import { Star, Trash2, Search } from "lucide-react";
-import { loadReviews, deleteReview, loadStore } from "@/lib/admin-store";
+import { useState, useMemo } from "react";
+import { Star, Trash2, Search, Loader2 } from "lucide-react";
+import { useAdminReviews, useAdminDeleteReview, useAdminProducts } from "@/lib/hooks";
 import type { ProductReview } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -10,17 +10,12 @@ export const Route = createFileRoute("/admin/avaliacoes")({
 });
 
 function ReviewsAdminPage() {
-  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const { data: reviews = [], isLoading } = useAdminReviews();
+  const { data: products = [] } = useAdminProducts();
+  const deleteReviewMutation = useAdminDeleteReview();
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState(0);
-
-  useEffect(() => {
-    setReviews(loadReviews());
-  }, []);
-
-  const refresh = () => setReviews(loadReviews());
-
-  const products = useMemo(() => loadStore().products, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -39,9 +34,11 @@ function ReviewsAdminPage() {
   }, [reviews, search, filter, products]);
 
   const handleDelete = (id: string) => {
-    deleteReview(id);
-    refresh();
-    toast.success("Avaliação removida!");
+    deleteReviewMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Avaliação removida!");
+      },
+    });
   };
 
   const productName = (productId: string) => {
@@ -51,6 +48,11 @@ function ReviewsAdminPage() {
 
   return (
     <div>
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        </div>
+      )}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-zinc-900">Avaliações</h1>
         <p className="text-sm text-zinc-500 mt-1">{reviews.length} avaliação(ões) no total</p>

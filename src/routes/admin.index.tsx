@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { loadStore, loadOrders } from "@/lib/admin-store";
+import { useAdminStore, useAdminOrders } from "@/lib/hooks";
 import {
   Package,
   TrendingUp,
@@ -20,6 +20,7 @@ import {
   Tags,
   Award,
   BarChart3,
+  Loader2,
 } from "lucide-react";
 import {
   XAxis,
@@ -113,8 +114,21 @@ const statusLabel: Record<OrderStatus, string> = {
 };
 
 function AdminDashboard() {
-  const store = loadStore();
-  const orders = loadOrders();
+  const { data: store, isLoading: storeLoading } = useAdminStore();
+  const { data: orders = [], isLoading: ordersLoading } = useAdminOrders();
+
+  const isLoading = storeLoading || ordersLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+        <span className="ml-3 text-zinc-500">Carregando dashboard...</span>
+      </div>
+    );
+  }
+
+  if (!store) return null;
 
   const [period, setPeriod] = useState<Period>("30d");
   const [customStart, setCustomStart] = useState(() => {

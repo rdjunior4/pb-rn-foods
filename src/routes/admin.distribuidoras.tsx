@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useCallback, useRef, useEffect } from "react";
-import { loadStore, saveStore, generateId } from "@/lib/admin-store";
+import { useAdminStore, useSaveDistributor, useDeleteDistributor, useToggleDistributor } from "@/lib/hooks";
+import { generateId } from "@/lib/admin-store";
 import { SELECT_CLASSES } from "@/lib/constants";
 import type { Distributor, CoverageMode } from "@/lib/types";
 import {
@@ -49,7 +50,11 @@ const NORtheastCities = [
 ];
 
 function AdminDistribuidoras() {
-  const [store, setStore] = useState(() => loadStore());
+  const { data: store, isLoading } = useAdminStore();
+  const saveDistributorMutation = useSaveDistributor();
+  const deleteDistributorMutation = useDeleteDistributor();
+  const toggleDistributorMutation = useToggleDistributor();
+
   const [editing, setEditing] = useState<Distributor | null>(null);
   const [showForm, setShowForm] = useState(false);
 
@@ -280,30 +285,28 @@ function AdminDistribuidoras() {
       return;
     }
 
-    const s = { ...store };
-
     if (editing) {
-      s.distributors = s.distributors.map((d) =>
-        d.id === editing.id
-          ? {
-              ...d,
-              name: name.trim(),
-              city: city.trim() || d.city,
-              state: stateUf.trim().toUpperCase() || d.state,
-              address: address.trim(),
-              cep: cep.replace(/\D/g, ""),
-              latitude: lat,
-              longitude: lng,
-              color,
-              coverageMode,
-              coverageRadiusKm: parseFloat(coverageRadiusKm) || 100,
-              coverageCities: [...coverageCities],
-            }
-          : d,
-      );
-      toast.success("Distribuidora atualizada");
+      saveDistributorMutation.mutate({
+        ...editing,
+        name: name.trim(),
+        city: city.trim() || editing.city,
+        state: stateUf.trim().toUpperCase() || editing.state,
+        address: address.trim(),
+        cep: cep.replace(/\D/g, ""),
+        latitude: lat,
+        longitude: lng,
+        color,
+        coverageMode,
+        coverageRadiusKm: parseFloat(coverageRadiusKm) || 100,
+        coverageCities: [...coverageCities],
+      }, {
+        onSuccess: () => {
+          toast.success("Distribuidora atualizada");
+          resetForm();
+        },
+      });
     } else {
-      const newDist: Distributor = {
+      saveDistributorMutation.mutate({
         id: generateId(),
         name: name.trim(),
         city: city.trim() || "Não informado",
@@ -318,35 +321,25 @@ function AdminDistribuidoras() {
         coverageCities: [...coverageCities],
         active: true,
         createdAt: new Date().toISOString(),
-      };
-      s.distributors = [...s.distributors, newDist];
-      toast.success("Distribuidora criada");
+      }, {
+        onSuccess: () => {
+          toast.success("Distribuidora criada");
+          resetForm();
+        },
+      });
     }
-
-    saveStore(s);
-    setStore(s);
-    resetForm();
   };
 
   const handleToggle = (id: string) => {
-    const s = {
-      ...store,
-      distributors: store.distributors.map((d) =>
-        d.id === id ? { ...d, active: !d.active } : d,
-      ),
-    };
-    saveStore(s);
-    setStore(s);
+    toggleDistributorMutation.mutate(id);
   };
 
   const handleDelete = (id: string) => {
-    const s = {
-      ...store,
-      distributors: store.distributors.filter((d) => d.id !== id),
-    };
-    saveStore(s);
-    setStore(s);
-    toast.success("Distribuidora removida");
+    deleteDistributorMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Distribuidora removida");
+      },
+    });
   };
 
   const center: [number, number] = (() => {
@@ -361,8 +354,15 @@ function AdminDistribuidoras() {
   const hasCoords = !isNaN(lat) && !isNaN(lng);
   const radiusMeters = (parseFloat(coverageRadiusKm) || 0) * 1000;
 
+  const distributors = store?.distributors || [];
+
   return (
     <div className="space-y-6">
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Distribuidoras</h1>
@@ -380,7 +380,7 @@ function AdminDistribuidoras() {
 
       {!showForm && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {store.distributors.map((d) => (
+          {distributors.map((d) => (
             <div
               key={d.id}
               className={`bg-white rounded-xl border border-zinc-200 p-5 transition-all hover:shadow-md ${!d.active ? "opacity-50" : ""}`}
@@ -458,7 +458,7 @@ function AdminDistribuidoras() {
         </div>
       )}
 
-      {store.distributors.length === 0 && !showForm && (
+      {distributors.length === 0 && !showForm && (
         <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
           <MapPin className="h-10 w-10 text-zinc-300 mx-auto mb-3" />
           <p className="text-sm font-medium text-zinc-900">Nenhuma distribuidora</p>

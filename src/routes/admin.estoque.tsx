@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useMemo } from "react";
-import { Boxes, AlertTriangle, Search, TrendingDown, TrendingUp, Edit3, History, X } from "lucide-react";
-import { loadStore, saveStore, loadStockMovements, addStockMovement } from "@/lib/admin-store";
-import { generateId } from "@/lib/admin-store";
+import { useState, useMemo } from "react";
+import { Boxes, AlertTriangle, Search, TrendingDown, TrendingUp, Edit3, History, X, Loader2 } from "lucide-react";
+import { useAdminProducts, useAdminStockMovements, useAdjustStock } from "@/lib/hooks";
 import type { Product, StockMovement } from "@/lib/types";
 import { SELECT_CLASSES } from "@/lib/constants";
 import { toast } from "sonner";
@@ -12,22 +11,14 @@ export const Route = createFileRoute("/admin/estoque")({
 });
 
 function StockPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [movements, setMovements] = useState<StockMovement[]>([]);
+  const { data: products = [], isLoading } = useAdminProducts();
+  const { data: movements = [] } = useAdminStockMovements();
+  const adjustStockMutation = useAdjustStock();
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "low" | "out" | "ok">("all");
   const [adjustProduct, setAdjustProduct] = useState<Product | null>(null);
   const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
-
-  useEffect(() => {
-    setProducts(loadStore().products);
-    setMovements(loadStockMovements());
-  }, []);
-
-  const refresh = () => {
-    setProducts(loadStore().products);
-    setMovements(loadStockMovements());
-  };
 
   const LOW_THRESHOLD = 10;
 
@@ -54,33 +45,23 @@ function StockPage() {
   }, [products]);
 
   const handleAdjust = (product: Product, newStock: number, reason: string) => {
-    const store = loadStore();
-    const idx = store.products.findIndex((p) => p.id === product.id);
-    if (idx < 0) return;
-
-    const prevStock = store.products[idx].stock;
-    const diff = newStock - prevStock;
-    store.products[idx].stock = newStock;
-    saveStore(store);
-
-    const movement: StockMovement = {
-      id: generateId(),
-      productId: product.id,
-      productName: product.name,
-      type: newStock > prevStock ? "in" : newStock < prevStock ? "out" : "adjust",
-      quantity: Math.abs(diff),
-      previousStock: prevStock,
-      newStock,
-      reason: reason || "Ajuste manual",
-      createdAt: new Date().toISOString(),
-    };
-    addStockMovement(movement);
-    refresh();
-    toast.success(`Estoque atualizado: ${product.name} → ${newStock} un.`);
+    adjustStockMutation.mutate(
+      { productId: product.id, newStock, reason: reason || "Ajuste manual" },
+      {
+        onSuccess: () => {
+          toast.success(`Estoque atualizado: ${product.name} → ${newStock} un.`);
+        },
+      },
+    );
   };
 
   return (
     <div>
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        </div>
+      )}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-zinc-900">Controle de Estoque</h1>
         <p className="text-sm text-zinc-500 mt-1">Gerencie estoque, ajustes e movimentações</p>

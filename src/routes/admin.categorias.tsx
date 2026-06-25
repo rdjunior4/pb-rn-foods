@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { loadStore, saveStore, generateId, slugify } from "@/lib/admin-store";
+import { useState, useMemo } from "react";
+import { useAdminCategories, useAdminProducts, useSaveCategory, useDeleteCategory } from "@/lib/hooks";
+import { generateId, slugify } from "@/lib/admin-store";
 import {
   Tags, Plus, Pencil, Trash2, AlertTriangle, X, Search, LayoutGrid, List,
   Package, ShoppingCart, Beef, Wine, Milk, Egg, Soup, Droplets, Shirt, Home,
@@ -14,7 +15,7 @@ import {
   ClipboardList, BarChart3, User, Briefcase, Film, Video, Mic, Radio, Tv,
   Play, Pause, Volume2, Disc3, Folder, FileText, Clipboard, Award, Trophy,
   Tent, TreePine, Mountain, Waves, Anchor, Compass, Map, Navigation, Fish,
-  Umbrella, Snowflake, Sun, Moon, Sunrise, CloudRain, Bird,
+  Umbrella, Snowflake, Sun, Moon, Sunrise, CloudRain, Bird, Loader2,
 } from "lucide-react";
 import type { Category } from "@/lib/types";
 import { toast } from "sonner";
@@ -64,8 +65,10 @@ const iconGroups = [
 const iconOptions = Object.keys(iconMap);
 
 function AdminCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
+  const { data: categories = [], isLoading } = useAdminCategories();
+  const { data: products = [] } = useAdminProducts();
+  const saveMutation = useSaveCategory();
+  const deleteMutation = useDeleteCategory();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -77,25 +80,13 @@ function AdminCategories() {
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("Package");
 
-  useEffect(() => {
-    const store = loadStore();
-    setCategories(store.categories);
+  const productCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    store.products.forEach((p) => {
+    products.forEach((p) => {
       counts[p.categoryId] = (counts[p.categoryId] || 0) + 1;
     });
-    setProductCounts(counts);
-  }, []);
-
-  const refresh = () => {
-    const store = loadStore();
-    setCategories(store.categories);
-    const counts: Record<string, number> = {};
-    store.products.forEach((p) => {
-      counts[p.categoryId] = (counts[p.categoryId] || 0) + 1;
-    });
-    setProductCounts(counts);
-  };
+    return counts;
+  }, [products]);
 
   const resetForm = () => {
     setName("");
@@ -118,38 +109,42 @@ function AdminCategories() {
       toast.error("O nome é obrigatório");
       return;
     }
-    const store = loadStore();
     const slug = slugify(name);
 
     if (editingId) {
-      const idx = store.categories.findIndex((c) => c.id === editingId);
-      if (idx !== -1) {
-        const existing = store.categories.find((c) => c.slug === slug && c.id !== editingId);
-        if (existing) {
-          toast.error("Já existe uma categoria com esse nome");
-          return;
-        }
-        store.categories[idx] = { ...store.categories[idx], name: name.trim(), slug, icon };
-      }
-    } else {
-      const existing = store.categories.find((c) => c.slug === slug);
+      const existing = categories.find((c) => c.slug === slug && c.id !== editingId);
       if (existing) {
         toast.error("Já existe uma categoria com esse nome");
         return;
       }
-      store.categories.push({
+      const cat = categories.find((c) => c.id === editingId);
+      if (cat) {
+        saveMutation.mutate({ ...cat, name: name.trim(), slug, icon }, {
+          onSuccess: () => {
+            resetForm();
+            toast.success("Categoria atualizada");
+          },
+        });
+      }
+    } else {
+      const existing = categories.find((c) => c.slug === slug);
+      if (existing) {
+        toast.error("Já existe uma categoria com esse nome");
+        return;
+      }
+      saveMutation.mutate({
         id: generateId(),
         name: name.trim(),
         slug,
         icon,
         productCount: 0,
+      }, {
+        onSuccess: () => {
+          resetForm();
+          toast.success("Categoria criada");
+        },
       });
     }
-
-    saveStore(store);
-    refresh();
-    resetForm();
-    toast.success(editingId ? "Categoria atualizada" : "Categoria criada");
   };
 
   const deleteCategory = categories.find((c) => c.id === deleteId);
@@ -157,21 +152,16 @@ function AdminCategories() {
 
   const handleDelete = () => {
     if (!deleteId) return;
-    const store = loadStore();
-    if (deleteProductCount > 0) {
-      store.products = store.products.map((p) =>
-        p.categoryId === deleteId ? { ...p, categoryId: "" } : p,
-      );
-    }
-    store.categories = store.categories.filter((c) => c.id !== deleteId);
-    saveStore(store);
-    refresh();
-    setDeleteId(null);
-    toast.success(
-      deleteProductCount > 0
-        ? `Categoria removida. ${deleteProductCount} produto(s) ficarão sem categoria.`
-        : "Categoria removida",
-    );
+    deleteMutation.mutate(deleteId, {
+      onSuccess: () => {
+        setDeleteId(null);
+        toast.success(
+          deleteProductCount > 0
+            ? `Categoria removida. ${deleteProductCount} produto(s) ficarão sem categoria.`
+            : "Categoria removida",
+        );
+      },
+    });
   };
 
   const filteredCategories = categories.filter((c) =>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useRef } from "react";
-import { loadStore, saveStore, generateId, slugify } from "@/lib/admin-store";
+import { useAdminStore, useAdminBrands, useSaveBrand, useDeleteBrand } from "@/lib/hooks";
+import { generateId, slugify, loadStore, saveStore } from "@/lib/admin-store";
 import {
   Package,
   Plus,
@@ -12,6 +13,7 @@ import {
   X,
   Upload,
   Info,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Brand } from "@/lib/types";
@@ -23,7 +25,11 @@ export const Route = createFileRoute("/admin/marcas")({
 });
 
 function AdminMarcas() {
-  const [store, setStore] = useState(() => loadStore());
+  const { data: store, isLoading } = useAdminStore();
+  const { data: brands = [] } = useAdminBrands();
+  const saveBrand = useSaveBrand();
+  const deleteBrandMutation = useDeleteBrand();
+
   const [search, setSearch] = useState("");
   const [editBrand, setEditBrand] = useState<Brand | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -34,15 +40,10 @@ function AdminMarcas() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filtered = store.brands.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()));
-
-  const save = (s: typeof store) => {
-    setStore(s);
-    saveStore(s);
-  };
+  const filtered = brands.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()));
 
   const getProductCount = (brandName: string) =>
-    store.products.filter((p) => p.brand === brandName).length;
+    (store?.products || []).filter((p) => p.brand === brandName).length;
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -84,28 +85,33 @@ function AdminMarcas() {
     }
 
     const finalLogo = formLogo.trim() || logoPreview || "";
-    const s = { ...store };
 
     if (editBrand) {
-      const idx = s.brands.findIndex((b) => b.id === editBrand.id);
-      if (idx === -1) return;
-      const oldName = s.brands[idx].name;
-      s.brands[idx] = {
-        ...s.brands[idx],
+      const oldName = brands.find((b) => b.id === editBrand.id)?.name;
+      const updatedBrand: Brand = {
+        ...editBrand,
         name: formName.trim(),
         slug: slugify(formName),
         logo: finalLogo,
       };
-      s.products = s.products.map((p) =>
-        p.brand === oldName ? { ...p, brand: formName.trim() } : p,
-      );
+      saveBrand.mutate(updatedBrand, {
+        onSuccess: () => {
+          if (oldName && oldName !== formName.trim()) {
+            const s = loadStore();
+            s.products = s.products.map((p) =>
+              p.brand === oldName ? { ...p, brand: formName.trim() } : p,
+            );
+            saveStore(s);
+          }
+        },
+      });
       toast.success("Marca atualizada");
     } else {
-      if (s.brands.some((b) => b.name.toLowerCase() === formName.trim().toLowerCase())) {
+      if (brands.some((b) => b.name.toLowerCase() === formName.trim().toLowerCase())) {
         toast.error("Já existe uma marca com esse nome");
         return;
       }
-      s.brands.push({
+      saveBrand.mutate({
         id: generateId(),
         name: formName.trim(),
         slug: slugify(formName),
@@ -116,7 +122,6 @@ function AdminMarcas() {
       toast.success("Marca criada");
     }
 
-    save(s);
     resetForm();
   };
 
@@ -145,27 +150,27 @@ function AdminMarcas() {
       toast.error(`Não é possível excluir. ${count} produto(s) usam esta marca.`);
       return;
     }
-    const s = { ...store };
-    s.brands = s.brands.filter((b) => b.id !== brand.id);
-    save(s);
+    deleteBrandMutation.mutate(brand.id);
     toast.success("Marca excluída");
   };
 
   const toggleActive = (brand: Brand) => {
-    const s = { ...store };
-    const idx = s.brands.findIndex((b) => b.id === brand.id);
-    if (idx !== -1) {
-      s.brands[idx] = { ...s.brands[idx], active: !s.brands[idx].active };
-      save(s);
-    }
+    saveBrand.mutate({ ...brand, active: !brand.active });
   };
 
   return (
     <div className="space-y-6">
+      {isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        </div>
+      )}
+      {!isLoading && (
+      <>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Marcas</h1>
-          <p className="text-sm text-zinc-500 mt-1">{store.brands.length} marca(s) cadastrada(s)</p>
+          <p className="text-sm text-zinc-500 mt-1">{brands.length} marca(s) cadastrada(s)</p>
         </div>
         <button
           onClick={() => {
@@ -402,6 +407,8 @@ function AdminMarcas() {
             </tbody>
           </table>
         </div>
+      )}
+      </>
       )}
     </div>
   );
