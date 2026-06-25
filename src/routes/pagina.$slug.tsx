@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { getPage } from "@/lib/pages-store";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { CustomerLayout } from "@/components/CustomerLayout";
 
 export const Route = createFileRoute("/pagina/$slug")({
@@ -22,16 +23,18 @@ function StaticPageView() {
     );
   }
 
-  const html = page.content
-    .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-8 mb-3">$1</h2>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
-    .split("\n\n")
-    .map((block) => {
-      if (block.startsWith("<h")) return block;
-      return `<p class="text-sm text-muted-foreground leading-relaxed mb-3">${block.replace(/\n/g, "<br/>")}</p>`;
-    })
-    .join("\n");
+  const html = sanitizeHtml(
+    page.content
+      .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-8 mb-3">$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+      .split("\n\n")
+      .map((block) => {
+        if (block.startsWith("<h")) return block;
+        return `<p class="text-sm text-muted-foreground leading-relaxed mb-3">${block.replace(/\n/g, "<br/>")}</p>`;
+      })
+      .join("\n")
+  );
 
   return (
     <CustomerLayout maxWidth="800">

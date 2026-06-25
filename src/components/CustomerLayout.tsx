@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { TopBar } from "./TopBar";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { GeoConsentDialog } from "./GeoConsentDialog";
 
 interface CustomerLayoutProps {
   children: ReactNode;
@@ -37,6 +38,7 @@ export function CustomerLayout({
           : "bg-gray-50"
       }`}
     >
+      <GeoConsentDialog onConsent={() => {}} />
       <TopBar />
       <div className="sticky top-0 z-50">
         <Header />

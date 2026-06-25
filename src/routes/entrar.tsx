@@ -145,7 +145,7 @@ function LoginPage() {
       toast.error(result.error || "Erro ao solicitar recuperação.");
       return;
     }
-    toast.success("Código enviado! Verifique seu e-mail (demo: código exibido abaixo).");
+    toast.success("Código enviado! Verifique seu e-mail.");
     setResetStep("code");
   };
 

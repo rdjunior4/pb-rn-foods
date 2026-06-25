@@ -122,23 +122,23 @@ RETURNS BOOLEAN AS $$
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 -- Trigger: criar profile automaticamente no signup (depende de profiles)
+-- SECURITY: role sempre forçado como 'customer' — admin é criado via SQL direto
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
   v_name TEXT := '';
   v_document TEXT := '';
   v_doc_type document_type := 'cpf';
-  v_role user_role := 'customer';
 BEGIN
   IF NEW.raw_user_meta_data IS NOT NULL THEN
-    v_name := NEW.raw_user_meta_data->>'name';
-    v_document := NEW.raw_user_meta_data->>'document';
+    v_name := COALESCE(NEW.raw_user_meta_data->>'name', '');
+    v_document := COALESCE(NEW.raw_user_meta_data->>'document', '');
     v_doc_type := COALESCE(NEW.raw_user_meta_data->>'document_type', 'cpf')::document_type;
-    v_role := COALESCE(NEW.raw_user_meta_data->>'role', 'customer')::user_role;
+    -- SECURITY: Ignorar role do metadata — sempre criar como customer
   END IF;
 
   INSERT INTO profiles (id, email, name, document, document_type, role)
-  VALUES (NEW.id, NEW.email, v_name, v_document, v_doc_type, v_role)
+  VALUES (NEW.id, COALESCE(NEW.email, ''), v_name, v_document, v_doc_type, 'customer')
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 EXCEPTION WHEN OTHERS THEN
@@ -554,8 +554,14 @@ ALTER TABLE password_reset_codes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "profiles_select_own_or_admin" ON profiles
   FOR SELECT USING (auth.uid() = id OR is_admin());
 
+-- SECURITY: WITH CHECK garante que usuário só pode atualizar seus próprios campos
+-- e NUNCA pode alterar o campo 'role' (só admin pode)
 CREATE POLICY "profiles_update_own" ON profiles
-  FOR UPDATE USING (auth.uid() = id OR is_admin());
+  FOR UPDATE USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id AND role = 'customer');
+
+CREATE POLICY "profiles_update_admin" ON profiles
+  FOR UPDATE USING (is_admin());
 
 CREATE POLICY "profiles_insert_admin" ON profiles
   FOR INSERT WITH CHECK (is_admin());
@@ -806,17 +812,18 @@ CREATE POLICY "newsletter_delete_admin" ON newsletter_subscribers
 
 -- -----------------------------------------------------------
 -- 6.18. PASSWORD_RESET_CODES
+-- SECURITY: Apenas service_role (Edge Functions) podem acessar
 -- -----------------------------------------------------------
-CREATE POLICY "reset_codes_select_own" ON password_reset_codes
-  FOR SELECT USING (true);
+CREATE POLICY "reset_codes_select_service" ON password_reset_codes
+  FOR SELECT USING (false);
 
-CREATE POLICY "reset_codes_insert_public" ON password_reset_codes
-  FOR INSERT WITH CHECK (true);
+CREATE POLICY "reset_codes_insert_service" ON password_reset_codes
+  FOR INSERT WITH CHECK (false);
 
-CREATE POLICY "reset_codes_update_public" ON password_reset_codes
-  FOR UPDATE USING (true);
+CREATE POLICY "reset_codes_update_service" ON password_reset_codes
+  FOR UPDATE USING (false);
 
-CREATE POLICY "reset_codes_delete_admin" ON password_reset_codes
+CREATE POLICY "reset_codes_delete_service" ON password_reset_codes
   FOR DELETE USING (is_admin());
 
 -- ============================================================

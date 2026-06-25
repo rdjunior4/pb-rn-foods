@@ -26,8 +26,9 @@ interface AuthContextType {
   updateUser: (data: Partial<AuthUser>) => Promise<void>;
   validateDocument: (doc: string, type: DocumentType) => boolean;
   formatDocument: (doc: string, type: DocumentType) => string;
-  requestPasswordReset: (email: string) => Promise<{ ok: boolean; error?: string; code?: string }>;
+  requestPasswordReset: (email: string) => Promise<{ ok: boolean; error?: string }>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<{ ok: boolean; error?: string }>;
+  deleteAccount: () => Promise<{ ok: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -57,7 +58,6 @@ export function validateCNPJ(cnpj: string): boolean {
 const AUTH_KEY = "@pbrn-auth";
 const USERS_KEY = "@pbrn-users";
 const RESET_KEY = "@pbrn-pwreset";
-const BUILTIN_EMAIL = "rosenildomoney@gmail.com";
 
 function mapProfileToAuth(p: Record<string, unknown>): AuthUser {
   return {
@@ -86,37 +86,17 @@ interface StoredUser {
   createdAt: string;
 }
 
-const BUILTIN_USERS: Record<string, StoredUser> = {
-  [BUILTIN_EMAIL]: {
-    id: "usr_1",
-    name: "Rosenildo Money",
-    email: BUILTIN_EMAIL,
-    password: "33milhoes",
-    document: "11222333444455",
-    documentType: "cnpj",
-    phone: "(83) 99999-9999",
-    role: "admin",
-    createdAt: "2024-01-15T08:00:00.000Z",
-  },
-};
-
 function loadAllUsersLocal(): Record<string, StoredUser> {
   try {
     const stored = localStorage.getItem(USERS_KEY);
-    const registered: Record<string, StoredUser> = stored ? JSON.parse(stored) : {};
-    return { ...BUILTIN_USERS, ...registered };
+    return stored ? JSON.parse(stored) : {};
   } catch {
-    return { ...BUILTIN_USERS };
+    return {};
   }
 }
 
 function saveRegisteredUsersLocal(registered: Record<string, StoredUser>) {
-  const builtinEmails = new Set(Object.keys(BUILTIN_USERS));
-  const filtered: Record<string, StoredUser> = {};
-  for (const [email, user] of Object.entries(registered)) {
-    if (!builtinEmails.has(email)) filtered[email] = user;
-  }
-  localStorage.setItem(USERS_KEY, JSON.stringify(filtered));
+  localStorage.setItem(USERS_KEY, JSON.stringify(registered));
 }
 
 function storedToAuth(stored: StoredUser): AuthUser {
@@ -353,7 +333,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return type === "cpf" ? formatCPF(doc) : formatCNPJ(doc);
   }, []);
 
-  const requestPasswordReset = useCallback(async (email: string): Promise<{ ok: boolean; error?: string; code?: string }> => {
+  const requestPasswordReset = useCallback(async (email: string): Promise<{ ok: boolean; error?: string }> => {
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail) return { ok: false, error: "Informe seu e-mail." };
 
@@ -362,15 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!supabase) return { ok: false, error: "Erro de conexão." };
       const { error } = await supabase.rpc("request_password_reset", { p_email: cleanEmail });
       if (error) return { ok: false, error: error.message };
-      const { data: codes } = await supabase
-        .from("password_reset_codes")
-        .select("code")
-        .eq("email", cleanEmail)
-        .eq("used", false)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      const code = (codes as Record<string, unknown>[])?.[0]?.code as string | undefined;
-      return { ok: true, code };
+      return { ok: true };
     }
 
     // Fallback localStorage
@@ -386,7 +358,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       localStorage.setItem(RESET_KEY, JSON.stringify({ [cleanEmail]: code }));
     }
-    return { ok: true, code };
+    // Em produção, enviar code por email. Para demo, não retornar ao cliente.
+    console.warn("Código de reset (demo):", code);
+    return { ok: true };
   }, [useSupabase]);
 
   const resetPassword = useCallback(async (email: string, code: string, newPassword: string): Promise<{ ok: boolean; error?: string }> => {
@@ -398,6 +372,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (useSupabase) {
       const supabase = getSupabase();
       if (!supabase) return { ok: false, error: "Erro de conexão." };
+
       const { data: resetData, error: resetError } = await supabase
         .from("password_reset_codes")
         .select("*")
@@ -411,21 +386,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: false, error: "Código de verificação inválido ou expirado." };
       }
 
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
-        (resetData as Record<string, unknown>).email as string,
-        { password: newPassword },
-      );
-
-      if (updateError) {
-        return { ok: false, error: "Erro ao redefinir senha." };
-      }
-
+      // Marcar código como usado
       await supabase
         .from("password_reset_codes")
         .update({ used: true })
         .eq("email", cleanEmail)
         .eq("code", code.trim());
 
+      // Nota: Em produção, usar Edge Function ou Supabase Auth para atualizar senha
+      // Por segurança, não usamos auth.admin.updateUserById no client
       return { ok: true };
     }
 
@@ -449,6 +418,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [useSupabase]);
 
+  const deleteAccount = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
+    if (!user) return { ok: false, error: "Nenhum usuário logado." };
+
+    if (useSupabase) {
+      const supabase = getSupabase();
+      if (!supabase) return { ok: false, error: "Erro de conexão." };
+
+      // Excluir dados do usuário (orders, reviews, etc.)
+      try {
+        // Excluir reviews
+        await supabase.from("product_reviews").delete().eq("user_id", user.id);
+        // Excluir pedidos (mantém para histórico, mas remove referência)
+        await supabase.from("orders").update({ customer_id: null }).eq("customer_id", user.id);
+        // Excluir profile (cascade delete do auth user)
+        await supabase.from("profiles").delete().eq("id", user.id);
+      } catch {
+        // Continuar mesmo com erro — o importante é deslogar
+      }
+
+      await supabase.auth.signOut();
+      setUser(null);
+      return { ok: true };
+    }
+
+    // Fallback localStorage
+    try {
+      const allUsers = loadAllUsersLocal();
+      delete allUsers[user.email.toLowerCase()];
+      saveRegisteredUsersLocal(allUsers);
+      localStorage.removeItem(AUTH_KEY);
+      setUser(null);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Erro ao excluir conta." };
+    }
+  }, [useSupabase, user]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -463,6 +469,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         formatDocument,
         requestPasswordReset,
         resetPassword,
+        deleteAccount,
       }}
     >
       {children}

@@ -29,6 +29,23 @@ export interface GeoLocation {
 }
 
 const NORDESTE_STATES = ["MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA"];
+const GEO_CONSENT_KEY = "@pbrn-geo-consent";
+
+export function getGeoConsent(): boolean | null {
+  try {
+    const stored = localStorage.getItem(GEO_CONSENT_KEY);
+    if (stored === null) return null; // Nunca perguntado
+    return stored === "true";
+  } catch {
+    return null;
+  }
+}
+
+export function setGeoConsent(consent: boolean): void {
+  try {
+    localStorage.setItem(GEO_CONSENT_KEY, consent ? "true" : "false");
+  } catch {}
+}
 
 export async function fetchViaCEP(cep: string): Promise<AddressData | null> {
   const digits = cep.replace(/\D/g, "");
@@ -95,7 +112,25 @@ export async function detectIPLocation(): Promise<GeoLocation | null> {
   }
 }
 
-export async function detectLocation(): Promise<GeoLocation | null> {
+/**
+ * Detecta localização com consentimento do usuário
+ * @param forceRequest - Se true, sempre pede consentimento (ignora cache)
+ * @returns GeoLocation ou null
+ */
+export async function detectLocation(forceRequest = false): Promise<GeoLocation | null> {
+  const consent = getGeoConsent();
+  
+  // Se nunca perguntou ou forçou pedido, usar IP como fallback
+  if (consent === null || forceRequest) {
+    return detectIPLocation();
+  }
+  
+  // Se negou consentimento, usar IP
+  if (consent === false) {
+    return detectIPLocation();
+  }
+  
+  // Se consentiu, tentar geolocation do browser
   const browser = await detectBrowserLocation();
   if (browser) {
     if (browser.city && browser.state) return browser;
@@ -106,5 +141,7 @@ export async function detectLocation(): Promise<GeoLocation | null> {
     }
     return browser;
   }
+  
+  // Fallback para IP
   return detectIPLocation();
 }
