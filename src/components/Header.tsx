@@ -53,17 +53,19 @@ export function Header() {
     >
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] py-3">
         <div className="flex items-center justify-between gap-3">
-          <button
-            aria-label="Menu"
-            onClick={() => setMenuOpen(true)}
-            className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all shrink-0"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              aria-label="Menu"
+              onClick={() => setMenuOpen(true)}
+              className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all shrink-0"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
 
-          <Link to="/" className="shrink-0">
-            <Logo />
-          </Link>
+            <Link to="/" className="shrink-0">
+              <Logo />
+            </Link>
+          </div>
 
           <form onSubmit={handleSearch} className="hidden sm:block flex-1 mx-4 lg:mx-8">
             <div className="relative">
