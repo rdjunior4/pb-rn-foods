@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import { formatCPF, formatCNPJ, type DocumentType } from "./format";
 import { setUserContext } from "./sentry";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
+import { checkRateLimit, recordAttempt, resetRateLimit, formatRemainingTime } from "./rate-limit";
 
 export type { DocumentType };
 
@@ -200,6 +201,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cleanPass = password.trim();
     if (!cleanEmail || !cleanPass) return false;
 
+    // Rate limiting
+    const { allowed, remainingMs } = checkRateLimit("login", cleanEmail);
+    if (!allowed) {
+      console.warn(`Login bloqueado por rate limit. Tente novamente em ${formatRemainingTime(remainingMs)}`);
+      return false;
+    }
+
     if (useSupabase) {
       const supabase = getSupabase();
       if (!supabase) return false;
@@ -207,7 +215,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: cleanEmail,
         password: cleanPass,
       });
-      if (error || !data.user) return false;
+      if (error || !data.user) {
+        recordAttempt("login", cleanEmail);
+        return false;
+      }
+      resetRateLimit("login", cleanEmail);
       await fetchProfile(data.user.id);
       await claimGuestOrdersSupabase(cleanEmail, data.user.id);
       return true;
@@ -217,11 +229,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const allUsers = loadAllUsersLocal();
     const match = allUsers[cleanEmail];
     if (match && match.password === cleanPass) {
+      resetRateLimit("login", cleanEmail);
       const authUser = storedToAuth(match);
       setUser(authUser);
       claimGuestOrdersLocal(cleanEmail, authUser.id, authUser.name);
       return true;
     }
+    recordAttempt("login", cleanEmail);
     return false;
   }, [useSupabase]);
 
@@ -337,18 +351,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail) return { ok: false, error: "Informe seu e-mail." };
 
+    // Rate limiting
+    const { allowed, remainingMs } = checkRateLimit("reset", cleanEmail);
+    if (!allowed) {
+      return { ok: false, error: `Muitas tentativas. Aguarde ${formatRemainingTime(remainingMs)}.` };
+    }
+
     if (useSupabase) {
       const supabase = getSupabase();
       if (!supabase) return { ok: false, error: "Erro de conexão." };
       const { error } = await supabase.rpc("request_password_reset", { p_email: cleanEmail });
       if (error) return { ok: false, error: error.message };
+      recordAttempt("reset", cleanEmail);
       return { ok: true };
     }
 
     // Fallback localStorage
     const allUsers = loadAllUsersLocal();
     if (!allUsers[cleanEmail]) {
-      return { ok: false, error: "E-mail não cadastrado." };
+      // Por segurança, não informar se o email existe ou não
+      recordAttempt("reset", cleanEmail);
+      return { ok: true };
     }
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     try {
@@ -358,6 +381,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       localStorage.setItem(RESET_KEY, JSON.stringify({ [cleanEmail]: code }));
     }
+    recordAttempt("reset", cleanEmail);
     // Em produção, enviar code por email. Para demo, não retornar ao cliente.
     console.warn("Código de reset (demo):", code);
     return { ok: true };
@@ -393,6 +417,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("email", cleanEmail)
         .eq("code", code.trim());
 
+      resetRateLimit("reset", cleanEmail);
       // Nota: Em produção, usar Edge Function ou Supabase Auth para atualizar senha
       // Por segurança, não usamos auth.admin.updateUserById no client
       return { ok: true };
@@ -412,6 +437,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       saveRegisteredUsersLocal(allUsers);
       delete resets[cleanEmail];
       localStorage.setItem(RESET_KEY, JSON.stringify(resets));
+      resetRateLimit("reset", cleanEmail);
       return { ok: true };
     } catch {
       return { ok: false, error: "Erro ao redefinir senha." };

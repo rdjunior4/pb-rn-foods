@@ -126,7 +126,7 @@ function LoginPage() {
           return;
         }
         if (!(await login(email, password))) {
-          setError("E-mail ou senha inválidos");
+          setError("E-mail ou senha inválidos. Se o problema persistir, aguarde 15 minutos.");
           return;
         }
       }
