@@ -73,10 +73,8 @@ export function EditProfileSheet({ open, onOpenChange }: EditProfileSheetProps) 
     if (!validate()) return;
 
     setSaving(true);
-    // Simula delay de API
-    await new Promise((r) => setTimeout(r, 500));
 
-    updateUser({
+    await updateUser({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.replace(/\D/g, "").length >= 10 ? phone : undefined,

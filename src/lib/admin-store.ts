@@ -1,5 +1,6 @@
 import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed, Combo, Coupon, ProductReview, StockMovement } from "./types";
 import { products as seedProducts, categories as seedCategories, brands as seedBrands } from "./data";
+import { getSupabase, isSupabaseConfigured } from "./supabase";
 
 const STORAGE_KEY = "@pbrn-admin";
 const ORDERS_KEY = "@pbrn-orders";
@@ -381,4 +382,251 @@ export function decrementStockForOrder(
   const allMovements = loadStockMovements();
   allMovements.unshift(...movements);
   saveStockMovements(allMovements.slice(0, 500));
+}
+
+// ============================================================
+// SUPABASE SYNC
+// Sincroniza dados do Supabase para o cache local (localStorage)
+// Mantém leituras síncronas, escritas vão para Supabase + cache
+// ============================================================
+
+let syncPromise: Promise<void> | null = null;
+
+export function syncFromSupabase(): Promise<void> {
+  if (syncPromise) return syncPromise;
+  if (!isSupabaseConfigured()) return Promise.resolve();
+
+  syncPromise = (async () => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    try {
+      const [cats, brs, prods, dists, combs, bans, cpns, revs, movs, ords] = await Promise.all([
+        supabase.from("categories").select("*").order("sort_order"),
+        supabase.from("brands").select("*").order("name"),
+        supabase.from("products").select("*, product_variants(*)").order("created_at", { ascending: false }),
+        supabase.from("distributors").select("*").order("created_at"),
+        supabase.from("combos").select("*, combo_items(*)").eq("active", true).order("sort_order"),
+        supabase.from("banners").select("*").order("sort_order"),
+        supabase.from("coupons").select("*").order("created_at", { ascending: false }),
+        supabase.from("product_reviews").select("*").order("created_at", { ascending: false }),
+        supabase.from("stock_movements").select("*").order("created_at", { ascending: false }).limit(500),
+        supabase.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }),
+      ]);
+
+      const store: AdminStore = {
+        products: (prods.data || []).map(mapDbProduct),
+        banners: (bans.data || []).map(mapDbBanner),
+        categories: (cats.data || []).map((c: Record<string, unknown>) => ({
+          id: c.id as string,
+          slug: c.slug as string,
+          name: c.name as string,
+          icon: c.icon as string,
+          productCount: 0,
+        })),
+        brands: (brs.data || []).map((b: Record<string, unknown>) => ({
+          id: b.id as string,
+          name: b.name as string,
+          slug: b.slug as string,
+          logo: b.logo as string,
+          active: b.active as boolean,
+          createdAt: b.created_at as string,
+        })),
+        distributors: (dists.data || []).map(mapDbDistributor),
+        combos: (combs.data || []).map(mapDbCombo),
+      };
+      saveStore(store);
+
+      if (ords.data) {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(ords.data.map(mapDbOrder)));
+      }
+      if (cpns.data) {
+        localStorage.setItem(COUPONS_KEY, JSON.stringify(cpns.data.map(mapDbCoupon)));
+      }
+      if (revs.data) {
+        localStorage.setItem(REVIEWS_KEY, JSON.stringify(revs.data.map(mapDbReview)));
+      }
+      if (movs.data) {
+        localStorage.setItem(STOCK_KEY, JSON.stringify(movs.data.map(mapDbMovement)));
+      }
+    } catch (err) {
+      console.error("[syncFromSupabase] erro:", err);
+    } finally {
+      syncPromise = null;
+    }
+  })();
+
+  return syncPromise;
+}
+
+// ---- Mappers (DB row → app type) ----
+
+function mapDbProduct(db: Record<string, unknown>): Product {
+  return {
+    id: db.id as string,
+    slug: db.slug as string,
+    name: db.name as string,
+    description: (db.description as string) || "",
+    details: (db.details as string[]) || [],
+    specs: (db.specs as { label: string; value: string }[]) || [],
+    categoryId: (db.category_id as string) || "",
+    brand: (db.brand_name as string) || "",
+    price: Number(db.price) || 0,
+    oldPrice: db.old_price ? Number(db.old_price) : null,
+    unit: (db.unit as string) || "un",
+    image: (db.image as string) || "",
+    images: (db.images as string[]) || [],
+    discount: db.discount ? Number(db.discount) : null,
+    stock: Number(db.stock) || 0,
+    featured: Boolean(db.featured),
+    variants: ((db.product_variants as Record<string, unknown>[]) || []).map((v) => ({
+      id: v.id as string,
+      label: v.label as string,
+      unitPrice: Number(v.unit_price) || 0,
+      oldPrice: v.old_price ? Number(v.old_price) : null,
+      boxPrice: v.box_price ? Number(v.box_price) : null,
+      boxQuantity: v.box_quantity as number | undefined,
+      stock: Number(v.stock) || 0,
+      sku: v.sku as string | undefined,
+      unit: (v.unit as string) || "un",
+    })),
+    pricingTiers: (db.pricing_tiers as Product["pricingTiers"]) || [],
+  };
+}
+
+function mapDbBanner(db: Record<string, unknown>): Banner {
+  return {
+    id: db.id as string,
+    title: (db.title as string) || "",
+    subtitle: (db.subtitle as string) || "",
+    image: (db.image as string) || "",
+    mobileImage: db.mobile_image as string | undefined,
+    link: (db.link as string) || "",
+    ctaText: (db.cta_text as string) || "",
+    active: db.active as boolean,
+    showTitle: db.show_title as boolean,
+    showSubtitle: db.show_subtitle as boolean,
+    showCta: db.show_cta as boolean,
+    order: Number(db.sort_order) || 0,
+    createdAt: db.created_at as string,
+  };
+}
+
+function mapDbDistributor(db: Record<string, unknown>): Distributor {
+  return {
+    id: db.id as string,
+    name: db.name as string,
+    city: db.city as string,
+    state: db.state as string,
+    address: (db.address as string) || "",
+    cep: (db.cep as string) || "",
+    latitude: Number(db.latitude) || 0,
+    longitude: Number(db.longitude) || 0,
+    coverageMode: db.coverage_mode as "radius" | "city",
+    coverageRadiusKm: Number(db.coverage_radius_km) || 100,
+    coverageCities: (db.coverage_cities as string[]) || [],
+    color: (db.color as string) || "#ef4444",
+    active: db.active as boolean,
+    createdAt: db.created_at as string,
+  };
+}
+
+function mapDbCombo(db: Record<string, unknown>): Combo {
+  return {
+    id: db.id as string,
+    name: db.name as string,
+    description: (db.description as string) || "",
+    items: ((db.combo_items as Record<string, unknown>[]) || []).map((i) => ({
+      productId: (i.product_id as string) || "",
+      productName: i.product_name as string,
+      image: (i.image as string) || "",
+      quantity: Number(i.quantity) || 1,
+      unitPrice: Number(i.unit_price) || 0,
+    })),
+    originalTotal: Number(db.original_total) || 0,
+    comboPrice: Number(db.combo_price) || 0,
+    discountType: db.discount_type as "percent" | "fixed",
+    discountValue: Number(db.discount_value) || 0,
+    discountPercent: Number(db.discount_percent) || 0,
+    badge: db.badge as string | undefined,
+    active: db.active as boolean,
+    order: Number(db.sort_order) || 0,
+    createdAt: db.created_at as string,
+  };
+}
+
+function mapDbOrder(db: Record<string, unknown>): Order {
+  return {
+    id: db.id as string,
+    customerId: (db.customer_id as string) || "guest",
+    customerName: db.customer_name as string,
+    customerEmail: db.customer_email as string,
+    customerDocument: (db.customer_document as string) || "",
+    customerPhone: db.customer_phone as string | undefined,
+    items: ((db.order_items as Record<string, unknown>[]) || []).map((i) => ({
+      productId: (i.product_id as string) || "",
+      productName: i.product_name as string,
+      quantity: Number(i.quantity) || 1,
+      price: Number(i.price) || 0,
+      image: (i.image as string) || "",
+    })),
+    subtotal: Number(db.subtotal) || 0,
+    discount: Number(db.discount) || 0,
+    shippingCost: Number(db.shipping_cost) || 0,
+    total: Number(db.total) || 0,
+    couponCode: db.coupon_code as string | undefined,
+    status: db.status as Order["status"],
+    paymentMethod: db.payment_method as string,
+    shippingAddress: db.shipping_address as string,
+    shippingCarrier: db.shipping_carrier as string | undefined,
+    trackingCode: db.tracking_code as string | undefined,
+    estimatedDelivery: db.estimated_delivery as string | undefined,
+    latitude: db.latitude as number | undefined,
+    longitude: db.longitude as number | undefined,
+    distributorId: db.distributor_id as string | undefined,
+    createdAt: db.created_at as string,
+    updatedAt: db.updated_at as string,
+  };
+}
+
+function mapDbCoupon(db: Record<string, unknown>): Coupon {
+  return {
+    id: db.id as string,
+    code: db.code as string,
+    type: db.type as Coupon["type"],
+    value: Number(db.value),
+    minOrderValue: Number(db.min_order_value),
+    maxUses: Number(db.max_uses),
+    usedCount: Number(db.used_count),
+    active: db.active as boolean,
+    expiresAt: db.expires_at as string | null,
+    perUserLimit: Number(db.per_user_limit),
+    createdAt: db.created_at as string,
+  };
+}
+
+function mapDbReview(db: Record<string, unknown>): ProductReview {
+  return {
+    id: db.id as string,
+    productId: db.product_id as string,
+    userId: db.user_id as string,
+    userName: db.user_name as string,
+    rating: Number(db.rating),
+    comment: db.comment as string,
+    createdAt: db.created_at as string,
+  };
+}
+
+function mapDbMovement(db: Record<string, unknown>): StockMovement {
+  return {
+    id: db.id as string,
+    productId: db.product_id as string,
+    productName: db.product_name as string,
+    type: db.type as "in" | "out" | "adjust",
+    quantity: Number(db.quantity),
+    previousStock: Number(db.previous_stock),
+    newStock: Number(db.new_stock),
+    reason: db.reason as string,
+    createdAt: db.created_at as string,
+  };
 }

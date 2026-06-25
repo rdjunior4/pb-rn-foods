@@ -1,4 +1,5 @@
 import type { Banner } from "./types";
+import { getSupabase, isSupabaseConfigured } from "./supabase";
 
 export interface BenefitItem {
   id: string;
@@ -138,7 +139,7 @@ export function loadStoreConfig(): StoreConfig {
     const stored = localStorage.getItem(CONFIG_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      return {
+      const config = {
         ...defaultConfig,
         ...parsed,
         heroEnabled: parsed.heroEnabled ?? true,
@@ -151,9 +152,24 @@ export function loadStoreConfig(): StoreConfig {
         featuredBrandIds: parsed.featuredBrandIds || [],
         sections: parsed.sections || defaultSections,
       };
+      return config;
     }
   } catch {}
+  syncConfigFromSupabase();
   return { ...defaultConfig };
+}
+
+async function syncConfigFromSupabase() {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+  try {
+    const { data } = await supabase.from("store_config").select("config").eq("id", 1).single();
+    if (data?.config) {
+      const config = { ...defaultConfig, ...(data.config as object) };
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+    }
+  } catch {}
 }
 
 export function saveStoreConfig(config: StoreConfig): void {

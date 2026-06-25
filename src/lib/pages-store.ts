@@ -1,3 +1,5 @@
+import { getSupabase, isSupabaseConfigured } from "./supabase";
+
 export interface StaticPage {
   slug: string;
   title: string;
@@ -141,7 +143,26 @@ export function loadPages(): StaticPage[] {
     }
   } catch {}
   localStorage.setItem(PAGES_KEY, JSON.stringify(defaultPages));
+  syncPagesFromSupabase();
   return defaultPages;
+}
+
+async function syncPagesFromSupabase() {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+  try {
+    const { data } = await supabase.from("pages").select("*");
+    if (data && data.length > 0) {
+      const pages: StaticPage[] = data.map((p: Record<string, unknown>) => ({
+        slug: p.slug as string,
+        title: p.title as string,
+        content: p.content as string,
+        updatedAt: p.updated_at as string,
+      }));
+      localStorage.setItem(PAGES_KEY, JSON.stringify(pages));
+    }
+  } catch {}
 }
 
 export function savePages(pages: StaticPage[]): void {

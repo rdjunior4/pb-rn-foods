@@ -14,7 +14,9 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { getProductById } from "@/lib/data";
-import { saveOrders, loadOrders, generateOrderId, loadStore, validateCoupon, incrementCouponUsage, decrementStockForOrder } from "@/lib/admin-store";
+import { saveOrders, loadOrders, generateOrderId, loadStore, validateCoupon, incrementCouponUsage, decrementStockForOrder, syncFromSupabase } from "@/lib/admin-store";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { apiSaveOrder, apiDecrementStock } from "@/lib/api";
 import type { Order, Coupon } from "@/lib/types";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency, formatDoc, formatPhone } from "@/lib/format";
@@ -197,7 +199,7 @@ function CheckoutPage() {
     );
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const phoneDigits = phone.replace(/\D/g, "");
     const docDigits = docNumber.replace(/\D/g, "");
     if (phoneDigits.length < 10) {
@@ -221,7 +223,6 @@ function CheckoutPage() {
       return;
     }
 
-    const orders = loadOrders();
     const orderId = generateOrderId();
     const newOrder: Order = {
       id: orderId,
@@ -256,25 +257,47 @@ function CheckoutPage() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    orders.push(newOrder);
-    saveOrders(orders);
 
-    decrementStockForOrder(
-      cartProducts.map((p) => ({
-        productId: p!.id,
-        variantId: p!.variantId,
-        quantity: p!.quantity,
-        productName: p!.name,
-      })),
-      orderId,
-    );
+    const useSupabase = isSupabaseConfigured();
 
-    if (appliedCoupon) {
-      incrementCouponUsage(appliedCoupon.id);
+    try {
+      if (useSupabase) {
+        await apiSaveOrder(newOrder);
+        await apiDecrementStock(orderId, cartProducts.map((p) => ({
+          productId: p!.id,
+          variantId: p!.variantId,
+          quantity: p!.quantity,
+        })));
+      } else {
+        const orders = loadOrders();
+        orders.push(newOrder);
+        saveOrders(orders);
+        decrementStockForOrder(
+          cartProducts.map((p) => ({
+            productId: p!.id,
+            variantId: p!.variantId,
+            quantity: p!.quantity,
+            productName: p!.name,
+          })),
+          orderId,
+        );
+      }
+
+      if (appliedCoupon) {
+        incrementCouponUsage(appliedCoupon.id);
+      }
+
+      if (useSupabase) {
+        syncFromSupabase();
+      }
+
+      clearCart();
+      toast.success("Pedido realizado com sucesso!");
+      navigate({ to: "/pedido-confirmado", search: { id: orderId } });
+    } catch (err) {
+      console.error("[checkout] erro ao salvar pedido:", err);
+      toast.error("Erro ao processar pedido. Tente novamente.");
     }
-    clearCart();
-    toast.success("Pedido realizado com sucesso!");
-    navigate({ to: "/pedido-confirmado", search: { id: orderId } });
   };
 
   return (

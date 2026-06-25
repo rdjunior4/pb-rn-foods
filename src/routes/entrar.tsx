@@ -111,7 +111,7 @@ function LoginPage() {
           );
           return;
         }
-        const result = register(name, email, password, raw, documentType);
+        const result = await register(name, email, password, raw, documentType);
         if (!result.ok) {
           setError(result.error || "Erro ao criar conta.");
           return;
@@ -125,7 +125,7 @@ function LoginPage() {
           setError("Informe sua senha");
           return;
         }
-        if (!login(email, password)) {
+        if (!(await login(email, password))) {
           setError("E-mail ou senha inválidos");
           return;
         }
@@ -135,12 +135,12 @@ function LoginPage() {
     }
   };
 
-  const handleRequestReset = () => {
+  const handleRequestReset = async () => {
     if (!resetEmail.trim()) {
       toast.error("Informe seu e-mail.");
       return;
     }
-    const result = requestPasswordReset(resetEmail);
+    const result = await requestPasswordReset(resetEmail);
     if (!result.ok) {
       toast.error(result.error || "Erro ao solicitar recuperação.");
       return;
@@ -149,7 +149,7 @@ function LoginPage() {
     setResetStep("code");
   };
 
-  const handleConfirmReset = () => {
+  const handleConfirmReset = async () => {
     if (!resetCode.trim() || !resetNewPassword.trim()) {
       toast.error("Preencha o código e a nova senha.");
       return;
@@ -158,7 +158,7 @@ function LoginPage() {
       toast.error("A senha deve ter pelo menos 4 caracteres.");
       return;
     }
-    const result = resetPassword(resetEmail, resetCode, resetNewPassword);
+    const result = await resetPassword(resetEmail, resetCode, resetNewPassword);
     if (!result.ok) {
       toast.error(result.error || "Erro ao redefinir senha.");
       return;
