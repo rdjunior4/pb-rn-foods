@@ -1,5 +1,4 @@
 import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed, Combo, Coupon, ProductReview, StockMovement } from "./types";
-import { products as seedProducts, categories as seedCategories, brands as seedBrands } from "./data";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 
 const STORAGE_KEY = "@pbrn-admin";
@@ -76,16 +75,10 @@ const defaultDistributors: Distributor[] = [
 
 function getInitialStore(): AdminStore {
   return {
-    products: seedProducts.map((p) => ({
-      ...p,
-      description: p.description || "",
-      images: p.images || (p.image ? [p.image] : []),
-      variants: p.variants || [],
-      pricingTiers: p.pricingTiers || [],
-    })),
+    products: [],
     banners: [],
-    categories: seedCategories.map((c) => ({ ...c })),
-    brands: seedBrands.map((b) => ({ ...b })),
+    categories: [],
+    brands: [],
     distributors: defaultDistributors.map((d) => ({ ...d })),
     combos: [],
   };
@@ -97,7 +90,7 @@ export function loadStore(): AdminStore {
     if (stored) {
       const parsed = JSON.parse(stored) as AdminStore;
       if (parsed.products && parsed.banners !== undefined && parsed.categories !== undefined) {
-        if (!parsed.brands) parsed.brands = seedBrands.map((b) => ({ ...b }));
+        if (!parsed.brands) parsed.brands = [];
         if (!parsed.distributors) parsed.distributors = defaultDistributors.map((d) => ({ ...d }));
         else {
           parsed.distributors = parsed.distributors.map((d: any) => ({
@@ -127,8 +120,8 @@ export function loadStore(): AdminStore {
         return parsed;
       }
       if (parsed.products && parsed.banners !== undefined) {
-        parsed.categories = seedCategories.map((c) => ({ ...c }));
-        parsed.brands = seedBrands.map((b) => ({ ...b }));
+        parsed.categories = [];
+        parsed.brands = [];
         parsed.distributors = defaultDistributors.map((d) => ({ ...d }));
         if (!parsed.combos) parsed.combos = [];
         parsed.banners = parsed.banners.map((b: any) => ({

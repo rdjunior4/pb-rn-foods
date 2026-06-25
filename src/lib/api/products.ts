@@ -1,35 +1,25 @@
 import { getSupabase, isSupabaseConfigured } from "../supabase";
-import type { Product, Category, Brand, ProductSeed } from "../types";
-import { products as seedProducts, categories as seedCategories, brands as seedBrands } from "../data";
-
-function normalizeProduct(p: ProductSeed): Product {
-  return {
-    ...p,
-    description: p.description || "",
-    images: p.images || (p.image ? [p.image] : []),
-    variants: p.variants || [],
-    pricingTiers: p.pricingTiers || [],
-  };
-}
+import type { Product, Category, Brand } from "../types";
+import { getProducts, getCategories, getBrands } from "../data";
 
 export async function apiGetProducts(): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return seedProducts.map(normalizeProduct);
+    return getProducts();
   }
   const { data, error } = await supabase
     .from("products")
     .select("*, product_variants(*)")
     .eq("active", true)
     .order("created_at", { ascending: false });
-  if (error || !data) return seedProducts.map(normalizeProduct);
+  if (error || !data) return getProducts();
   return data.map(mapDbProduct);
 }
 
 export async function apiGetProductBySlug(slug: string): Promise<Product | null> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return seedProducts.find((p) => p.slug === slug) as Product || null;
+    return getProducts().find((p) => p.slug === slug) || null;
   }
   const { data, error } = await supabase
     .from("products")
@@ -43,7 +33,7 @@ export async function apiGetProductBySlug(slug: string): Promise<Product | null>
 export async function apiGetProductById(id: string): Promise<Product | null> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return seedProducts.find((p) => p.id === id) as Product || null;
+    return getProducts().find((p) => p.id === id) || null;
   }
   const { data, error } = await supabase
     .from("products")
@@ -57,7 +47,7 @@ export async function apiGetProductById(id: string): Promise<Product | null> {
 export async function apiGetProductsByCategory(categoryId: string): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return seedProducts.filter((p) => p.categoryId === categoryId).map(normalizeProduct);
+    return getProducts().filter((p) => p.categoryId === categoryId);
   }
   const { data, error } = await supabase
     .from("products")
@@ -71,7 +61,7 @@ export async function apiGetProductsByCategory(categoryId: string): Promise<Prod
 export async function apiGetFeaturedProducts(): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return seedProducts.filter((p) => p.featured).map(normalizeProduct);
+    return getProducts().filter((p) => p.featured);
   }
   const { data, error } = await supabase
     .from("products")
@@ -86,9 +76,9 @@ export async function apiSearchProducts(query: string): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
     const q = query.toLowerCase();
-    return seedProducts
-      .filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q))
-      .map(normalizeProduct);
+    return getProducts().filter(
+      (p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
+    );
   }
   const { data, error } = await supabase
     .from("products")
@@ -102,13 +92,13 @@ export async function apiSearchProducts(query: string): Promise<Product[]> {
 export async function apiGetCategories(): Promise<Category[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return seedCategories;
+    return getCategories();
   }
   const { data, error } = await supabase
     .from("categories")
     .select("*")
     .order("sort_order", { ascending: true });
-  if (error || !data) return seedCategories;
+  if (error || !data) return getCategories();
   return data.map((c: Record<string, unknown>) => ({
     id: c.id as string,
     slug: c.slug as string,
@@ -121,14 +111,14 @@ export async function apiGetCategories(): Promise<Category[]> {
 export async function apiGetBrands(): Promise<Brand[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return seedBrands;
+    return getBrands();
   }
   const { data, error } = await supabase
     .from("brands")
     .select("*")
     .eq("active", true)
     .order("name");
-  if (error || !data) return seedBrands;
+  if (error || !data) return getBrands();
   return data.map((b: Record<string, unknown>) => ({
     id: b.id as string,
     name: b.name as string,
