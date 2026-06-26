@@ -370,6 +370,16 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                   Criar conta
                 </button>
               )}
+
+              {tab === "register" && (
+                <button
+                  type="button"
+                  onClick={() => switchTab("login")}
+                  className="w-full h-11 rounded-xl border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
+                >
+                  Entrar na conta
+                </button>
+              )}
             </form>
             </div>
           </div>
