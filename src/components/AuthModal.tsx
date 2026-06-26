@@ -280,18 +280,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               </div>
 
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Senha</label>
-                  {tab === "login" && (
-                    <button
-                      type="button"
-                      onClick={() => setShowReset(true)}
-                      className="text-xs font-medium text-primary hover:text-primary-hover transition-colors"
-                    >
-                      Esqueci minha senha
-                    </button>
-                  )}
-                </div>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Senha</label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
@@ -332,6 +321,16 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                   </>
                 )}
               </button>
+
+              {tab === "login" && (
+                <button
+                  type="button"
+                  onClick={() => setShowReset(true)}
+                  className="w-full text-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors mt-3"
+                >
+                  Esqueci minha senha
+                </button>
+              )}
             </form>
 
             <div className="mt-6 relative">
