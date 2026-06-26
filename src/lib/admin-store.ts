@@ -16,62 +16,7 @@ export interface AdminStore {
   combos: Combo[];
 }
 
-const defaultDistributors: Distributor[] = [
-  {
-    id: "dist_pb",
-    name: "PB Foods",
-    city: "João Pessoa",
-    state: "PB",
-    address: "Av. Presidente Bandeira, 200",
-    cep: "58013-000",
-    latitude: -7.12,
-    longitude: -34.86,
-    coverageMode: "city",
-    coverageRadiusKm: 120,
-    coverageCities: [
-      "João Pessoa",
-      "Campina Grande",
-      "Santa Rita",
-      "Patos",
-      "Bayeux",
-      "Sousa",
-      "Cajazeiras",
-      "Guarabira",
-      "Sapé",
-      "Queimadas",
-    ],
-    color: "#ef4444",
-    active: true,
-    createdAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "dist_rn",
-    name: "RN Foods",
-    city: "Caicó",
-    state: "RN",
-    address: "Praça Augusto Severo, 100",
-    cep: "59300-000",
-    latitude: -6.46,
-    longitude: -36.59,
-    coverageMode: "city",
-    coverageRadiusKm: 150,
-    coverageCities: [
-      "Caicó",
-      "Natal",
-      "Mossoró",
-      "Parnamirim",
-      "São Gonçalo do Amarante",
-      "Macaíba",
-      "Ceará-Mirim",
-      "Açu",
-      "Currais Novos",
-      "São José de Mipibu",
-    ],
-    color: "#3b82f6",
-    active: true,
-    createdAt: "2026-01-01T00:00:00.000Z",
-  },
-];
+const defaultDistributors: Distributor[] = [];
 
 function getInitialStore(): AdminStore {
   return {
