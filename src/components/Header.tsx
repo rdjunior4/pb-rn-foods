@@ -99,7 +99,7 @@ export function Header() {
                   <div className="hidden sm:block text-left leading-tight">
                     <div className="text-sm font-semibold text-white">Minha conta</div>
                     <div className="text-[11px] text-white/70">
-                      {isLoggedIn ? user!.name : "Entrar"}
+                      {isLoggedIn ? user!.name : "Cadastre-se ou faça Login"}
                     </div>
                   </div>
                 </button>
@@ -261,7 +261,7 @@ export function Header() {
                   ) : (
                     <button onClick={() => { setAuthTab("login"); setAuthOpen(true); }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors w-full text-left">
                       <User className="h-4 w-4" />
-                      Entrar
+                      Cadastre-se ou faça Login
                     </button>
                   )}
                 </SheetClose>
