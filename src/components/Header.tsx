@@ -96,11 +96,14 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded border border-border/40 bg-primary hover:bg-primary-hover transition-colors group shrink-0">
                   <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                  <div className="hidden sm:block text-left leading-tight">
-                    <div className="text-sm font-semibold text-white">Minha conta</div>
-                    <div className="text-[11px] text-white/70">
+                  <div className="text-left leading-tight">
+                    <div className="text-sm font-semibold text-white hidden sm:block">Minha conta</div>
+                    <div className="text-[11px] text-white/70 hidden sm:block">
                       {isLoggedIn ? user!.name : "Cadastre-se ou faça Login"}
                     </div>
+                    <span className="text-xs font-medium text-white sm:hidden">
+                      {isLoggedIn ? "Conta" : "Acessar"}
+                    </span>
                   </div>
                 </button>
               </DropdownMenuTrigger>

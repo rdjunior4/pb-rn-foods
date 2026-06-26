@@ -70,6 +70,16 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
     }
   }, [open]);
 
+  useEffect(() => {
+    if (open) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [open]);
+
   const reset = useCallback(() => {
     setName("");
     setEmail("");
@@ -163,7 +173,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const DocIcon = docLabels[documentType].icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
         className="w-full max-w-[900px] max-h-[90vh] overflow-y-auto rounded-2xl bg-card shadow-2xl border border-border/40 flex flex-col lg:flex-row animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
@@ -335,7 +345,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
       {/* Forgot password modal */}
       {showReset && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
           onClick={() => setShowReset(false)}
         >
           <div
