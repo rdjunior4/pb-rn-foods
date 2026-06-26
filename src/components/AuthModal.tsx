@@ -181,11 +181,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[900px] max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-[900px] lg:max-w-md max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-white shrink-0 min-h-[180px] lg:min-h-[420px] overflow-hidden">
+        {/* Left panel - branding (mobile only) */}
+        <div className="relative lg:hidden bg-white shrink-0 min-h-[180px] overflow-hidden">
           <img
             src={heroDesktopImg}
             alt=""
@@ -201,7 +201,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
           >
             <X className="h-4 w-4" />
           </button>
-          <div className="px-6 sm:px-8 lg:px-10 py-10 lg:py-12">
+          <div className="px-6 sm:px-8 lg:px-10 py-8 lg:py-10">
             <div className="w-full max-w-sm mx-auto">
             <div className="mb-8 text-center sm:text-left">
               <div className="flex items-center gap-4 mb-3">
