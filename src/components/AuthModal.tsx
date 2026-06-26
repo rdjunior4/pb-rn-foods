@@ -8,10 +8,6 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  Store,
-  Package,
-  Truck,
-  ShieldCheck,
   X,
   KeyRound,
   CheckCircle,
@@ -173,48 +169,18 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-brand-black p-8 sm:p-10 flex flex-col justify-between min-h-[180px] lg:min-h-[520px] shrink-0 overflow-hidden">
+        <div className="relative lg:w-[40%] bg-brand-black shrink-0 overflow-hidden min-h-[180px] lg:min-h-[520px]">
           <img
             src={heroDesktopImg}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-colors"
+            className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/30 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-colors backdrop-blur-sm"
           >
             <X className="h-4 w-4" />
           </button>
-
-          <div className="relative z-10">
-            <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm ring-1 ring-white/10 mb-5">
-              <Store className="h-5 w-5 text-white" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">
-              {tab === "register" ? "Crie sua conta" : "Bem-vindo de volta"}
-            </h2>
-            <p className="mt-2 text-white/60 text-sm leading-relaxed">
-              {tab === "register"
-                ? "Cadastre-se com CPF ou CNPJ e tenha acesso a condições especiais."
-                : "Acesse sua conta para continuar comprando no atacado."}
-            </p>
-          </div>
-
-          <div className="relative z-10 space-y-4 mt-6 lg:mt-0 hidden sm:block">
-            {[
-              { icon: Package, text: "Compra no atacado com preços especiais" },
-              { icon: Truck, text: "Entrega em toda região Nordeste" },
-              { icon: ShieldCheck, text: "Condições exclusivas para CNPJ" },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10">
-                  <item.icon className="h-3.5 w-3.5 text-white" />
-                </span>
-                <span className="text-xs text-white/70">{item.text}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Right panel - form */}
