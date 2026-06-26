@@ -19,7 +19,7 @@ import {
 import { useAuth, type DocumentType } from "@/lib/auth-context";
 import { formatDoc } from "@/lib/format";
 import { toast } from "sonner";
-import heroDesktopImg from "/hero-desktop.png";
+const heroDesktopImg = "/hero-desktop.png";
 
 interface AuthModalProps {
   open: boolean;
@@ -72,10 +72,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
 
   useEffect(() => {
     if (open) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
+      const doc = window.document;
+      const prev = doc.body.style.overflow;
+      doc.body.style.overflow = "hidden";
       return () => {
-        document.body.style.overflow = prev;
+        doc.body.style.overflow = prev;
       };
     }
   }, [open]);

@@ -102,7 +102,7 @@ export function Header() {
                       {isLoggedIn ? user!.name : "Cadastre-se ou faça Login"}
                     </div>
                     <span className="text-xs font-medium text-white sm:hidden">
-                      {isLoggedIn ? "Conta" : "Acessar"}
+                      {isLoggedIn ? "Conta" : "Cadastre-se ou faça Login"}
                     </span>
                   </div>
                 </button>
