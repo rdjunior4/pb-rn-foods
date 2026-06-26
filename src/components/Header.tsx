@@ -98,12 +98,11 @@ export function Header() {
                   <User className="h-5 w-5 sm:h-6 sm:w-6 text-white shrink-0" />
                   <div className="text-left leading-tight">
                     {isLoggedIn ? (
-                      <div className="text-[11px] text-white/70">
-                        <span className="text-sm font-semibold text-white">{user!.name}</span>
-                      </div>
+                      <span className="text-sm font-semibold text-white">{user!.name}</span>
                     ) : (
-                      <div className="text-[11px] text-white/80 leading-[1.15] max-w-[68px] sm:max-w-none sm:whitespace-nowrap">
-                        Cadastre-se<br className="sm:hidden" /> ou faça Login
+                      <div className="text-white leading-[1.15] max-w-[68px] sm:max-w-none">
+                        <span className="text-sm font-bold text-white">Cadastre-se</span><br />
+                        <span className="text-[11px] text-white/80">Ou faça login</span>
                       </div>
                     )}
                   </div>
