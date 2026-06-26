@@ -82,10 +82,6 @@ export function HeroBanner() {
         )}
 
         {hasAnyText && (
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-black/95 via-brand-black/70 to-brand-black/10" />
-        )}
-
-        {showOverlay && (
           <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] py-10 sm:py-14 lg:py-16">
             {hasTitle && (
               <h1 className="max-w-[45%] text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-white">
