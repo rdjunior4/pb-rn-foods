@@ -185,11 +185,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-white shrink-0 min-h-[180px] lg:min-h-0 lg:h-full">
+        <div className="relative lg:w-[40%] bg-white shrink-0 min-h-[180px] lg:min-h-0 lg:h-full rounded-none">
           <img
             src={heroDesktopImg}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover rounded-none"
           />
         </div>
 
