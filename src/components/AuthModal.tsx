@@ -176,11 +176,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[900px] max-h-[90vh] overflow-y-auto bg-card shadow-2xl border border-border/40 flex flex-col lg:flex-row animate-in fade-in zoom-in-95 duration-200 rounded-2xl overflow-hidden"
+        className="w-full max-w-[900px] max-h-[90vh] lg:h-[520px] overflow-hidden bg-card shadow-2xl border border-border/40 flex flex-col lg:flex-row animate-in fade-in zoom-in-95 duration-200 rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-brand-black shrink-0 overflow-hidden min-h-[180px] lg:min-h-0 lg:self-stretch">
+        <div className="relative lg:w-[40%] bg-brand-black shrink-0 overflow-hidden min-h-[180px] lg:min-h-0 lg:h-full">
           <img
             src={heroDesktopImg}
             alt=""
@@ -189,7 +189,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         </div>
 
         {/* Right panel - form */}
-        <div className="flex-1 p-6 sm:p-8 lg:p-10 relative">
+        <div className="flex-1 p-6 sm:p-8 lg:p-10 relative overflow-y-auto">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -206,7 +206,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 )}
               </div>
               <h1 className="text-xl font-bold tracking-tight">
-                {tab === "register" ? "Cadastro" : "Login"}
+                {tab === "register" ? "Crie a sua conta" : "Acesse a sua conta"}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
                 {tab === "register" ? "Preencha seus dados para começar" : "Digite seus dados de acesso"}
