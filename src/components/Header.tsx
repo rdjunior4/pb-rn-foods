@@ -94,15 +94,18 @@ export function Header() {
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-2 sm:px-3 rounded border border-border/40 bg-primary hover:bg-primary-hover transition-colors group shrink-0 py-1.5">
+                <button className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded border border-border/40 bg-primary hover:bg-primary-hover transition-colors group shrink-0">
                   <User className="h-5 w-5 sm:h-6 sm:w-6 text-white shrink-0" />
                   <div className="text-left leading-tight">
                     {isLoggedIn ? (
-                      <span className="text-sm font-semibold text-white">{user!.name}</span>
+                      <div className="hidden sm:block">
+                        <div className="text-sm font-semibold text-white">{user!.name}</div>
+                        <div className="text-[11px] text-white/70">Minha conta</div>
+                      </div>
                     ) : (
-                      <div className="text-white leading-[1.1] max-w-[68px] sm:max-w-none">
-                        <span className="text-xs sm:text-sm font-bold text-white">Cadastre-se</span><br />
-                        <span className="text-[10px] sm:text-[11px] text-white/80">Ou faça login</span>
+                      <div className="leading-tight">
+                        <div className="text-sm font-bold text-white whitespace-nowrap">Cadastre-se</div>
+                        <div className="text-[11px] text-white/70 whitespace-nowrap">Ou faça login</div>
                       </div>
                     )}
                   </div>
