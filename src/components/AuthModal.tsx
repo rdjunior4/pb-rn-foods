@@ -359,6 +359,16 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                   Esqueci minha senha
                 </button>
               )}
+
+              {tab === "login" && (
+                <button
+                  type="button"
+                  onClick={() => switchTab("register")}
+                  className="w-full h-11 rounded-xl border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
+                >
+                  Criar conta
+                </button>
+              )}
             </form>
           </div>
         </div>
