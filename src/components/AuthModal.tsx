@@ -169,22 +169,22 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-brand-black shrink-0 overflow-hidden min-h-[180px] lg:min-h-[520px]">
+        <div className="relative lg:w-[40%] bg-brand-black shrink-0 overflow-hidden min-h-[180px] lg:min-h-[520px] lg:rounded-l-2xl">
           <img
             src={heroDesktopImg}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
           />
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/30 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/50 transition-colors backdrop-blur-sm"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
         {/* Right panel - form */}
-        <div className="flex-1 p-6 sm:p-8 lg:p-10">
+        <div className="flex-1 p-6 sm:p-8 lg:p-10 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
           <div className="w-full max-w-sm mx-auto">
             <div className="mb-6">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 mb-4 ring-1 ring-primary/10">
