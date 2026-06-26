@@ -125,17 +125,7 @@ function AdminDashboard() {
   const [customEnd, setCustomEnd] = useState(() => new Date().toISOString().slice(0, 10));
 
   const isLoading = storeLoading || ordersLoading;
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-        <span className="ml-3 text-zinc-500">Carregando dashboard...</span>
-      </div>
-    );
-  }
-
-  if (!store) return null;
+  const safeStore = store ?? { products: [], banners: [], categories: [], brands: [], distributors: [], combos: [] };
 
   const { start, end } = getPeriodRange(period, customStart, customEnd);
   const { prevStart, prevEnd } = getPreviousPeriod(start, end);
@@ -199,9 +189,9 @@ function AdminDashboard() {
     const catMap = new Map<string, number>();
     paidOrders.forEach((o) => {
       o.items.forEach((item) => {
-        const prod = store.products.find((p) => p.id === item.productId);
+        const prod = safeStore.products.find((p) => p.id === item.productId);
         const catId = prod?.categoryId || "";
-        const catObj = store.categories.find((c) => c.id === catId);
+        const catObj = safeStore.categories.find((c) => c.id === catId);
         const cat = catObj?.name || "Outros";
         catMap.set(cat, (catMap.get(cat) || 0) + item.price * item.quantity);
       });
@@ -210,7 +200,7 @@ function AdminDashboard() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6)
       .map(([name, receita]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), receita }));
-  }, [paidOrders, store.products]);
+  }, [paidOrders, safeStore.products, safeStore.categories]);
 
   const revenueByDay = useMemo(() => {
     const map = new Map<string, number>();
@@ -262,6 +252,17 @@ function AdminDashboard() {
     });
     return counts;
   }, [filteredOrders]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+        <span className="ml-3 text-zinc-500">Carregando dashboard...</span>
+      </div>
+    );
+  }
+
+  if (!store) return null;
 
   const stockData = store.products
     .filter((p) => p.stock <= 10)

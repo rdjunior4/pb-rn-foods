@@ -394,33 +394,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (useSupabase) {
-      const supabase = getSupabase();
-      if (!supabase) return { ok: false, error: "Erro de conexão." };
+      try {
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-password`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ email: cleanEmail, code: code.trim(), newPassword }),
+        });
 
-      const { data: resetData, error: resetError } = await supabase
-        .from("password_reset_codes")
-        .select("*")
-        .eq("email", cleanEmail)
-        .eq("code", code.trim())
-        .eq("used", false)
-        .gt("expires_at", new Date().toISOString())
-        .single();
+        const data = await res.json();
+        if (!res.ok) {
+          return { ok: false, error: data.error || "Erro ao redefinir senha." };
+        }
 
-      if (resetError || !resetData) {
-        return { ok: false, error: "Código de verificação inválido ou expirado." };
+        resetRateLimit("reset", cleanEmail);
+        return { ok: true };
+      } catch {
+        return { ok: false, error: "Erro de conexão ao redefinir senha." };
       }
-
-      // Marcar código como usado
-      await supabase
-        .from("password_reset_codes")
-        .update({ used: true })
-        .eq("email", cleanEmail)
-        .eq("code", code.trim());
-
-      resetRateLimit("reset", cleanEmail);
-      // Nota: Em produção, usar Edge Function ou Supabase Auth para atualizar senha
-      // Por segurança, não usamos auth.admin.updateUserById no client
-      return { ok: true };
     }
 
     // Fallback localStorage

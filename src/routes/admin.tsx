@@ -34,15 +34,19 @@ function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(() => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
     const stored = localStorage.getItem("@pbrn-admin-sidebar");
-    return stored === "collapsed";
-  });
+    if (stored === "collapsed") setCollapsed(true);
+  }, []);
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
       const next = !prev;
-      localStorage.setItem("@pbrn-admin-sidebar", next ? "collapsed" : "expanded");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("@pbrn-admin-sidebar", next ? "collapsed" : "expanded");
+      }
       return next;
     });
   };

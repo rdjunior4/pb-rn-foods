@@ -138,12 +138,10 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- 6. ADMIN USER
 --    O usuário admin deve ser criado via Supabase Dashboard
---    (Authentication > Users > Add user) com:
---    Email: rosenildomoney@gmail.com
---    Senha: 33milhoes
+--    (Authentication > Users > Add user) e ter o role atualizado:
 --
---    Após criar o usuário, executar:
---    UPDATE profiles SET role = 'admin' WHERE email = 'rosenildomoney@gmail.com';
+--    UPDATE profiles SET role = 'admin'
+--    WHERE id = '<uuid-do-usuario>';
 -- ============================================================
 
 -- ============================================================

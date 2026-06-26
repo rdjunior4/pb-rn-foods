@@ -103,6 +103,7 @@ export type OrderStatus =
 
 export interface OrderItem {
   productId: string;
+  variantId?: string;
   productName: string;
   quantity: number;
   price: number;

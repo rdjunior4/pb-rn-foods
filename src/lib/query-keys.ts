@@ -51,4 +51,17 @@ export const queryKeys = {
     all: ["pages"] as const,
     bySlug: (slug: string) => [...queryKeys.pages.all, "slug", slug] as const,
   },
+  admin: {
+    all: ["admin"] as const,
+    store: () => [...queryKeys.admin.all, "store"] as const,
+    products: () => [...queryKeys.admin.all, "products"] as const,
+    categories: () => [...queryKeys.admin.all, "categories"] as const,
+    brands: () => [...queryKeys.admin.all, "brands"] as const,
+    orders: () => [...queryKeys.admin.all, "orders"] as const,
+    coupons: () => [...queryKeys.admin.all, "coupons"] as const,
+    reviews: () => [...queryKeys.admin.all, "reviews"] as const,
+    stock: () => [...queryKeys.admin.all, "stock"] as const,
+    distributors: () => [...queryKeys.admin.all, "distributors"] as const,
+    combos: () => [...queryKeys.admin.all, "combos"] as const,
+  },
 } as const;

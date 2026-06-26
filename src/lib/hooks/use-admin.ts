@@ -44,7 +44,7 @@ import { isSupabaseConfigured } from "../supabase";
 // ─── Dashboard ───
 export function useAdminStore() {
   return useQuery({
-    queryKey: ["admin", "store"] as const,
+    queryKey: queryKeys.admin.store(),
     queryFn: () => loadStore(),
     staleTime: 30 * 1000,
   });
@@ -60,7 +60,7 @@ export function useStoreConfig() {
 
 export function useAdminOrders() {
   return useQuery({
-    queryKey: queryKeys.orders.all,
+    queryKey: queryKeys.admin.orders(),
     queryFn: () => loadOrders(),
     staleTime: 30 * 1000,
   });
@@ -69,7 +69,7 @@ export function useAdminOrders() {
 // ─── Products ───
 export function useAdminProducts() {
   return useQuery({
-    queryKey: queryKeys.products.all,
+    queryKey: queryKeys.admin.products(),
     queryFn: () => loadStore().products,
     staleTime: 30 * 1000,
   });
@@ -88,8 +88,8 @@ export function useSaveProduct() {
       return product;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.products.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -104,8 +104,8 @@ export function useDeleteProduct() {
       if (isSupabaseConfigured()) await apiDeleteProduct(id);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.products.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -120,8 +120,8 @@ export function useBulkDeleteProducts() {
       if (isSupabaseConfigured()) await apiBulkDeleteProducts(ids);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.products.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -129,7 +129,7 @@ export function useBulkDeleteProducts() {
 // ─── Categories ───
 export function useAdminCategories() {
   return useQuery({
-    queryKey: queryKeys.categories.all,
+    queryKey: queryKeys.admin.categories(),
     queryFn: () => loadStore().categories,
     staleTime: 30 * 1000,
   });
@@ -147,9 +147,9 @@ export function useSaveCategory() {
       if (isSupabaseConfigured()) await apiSaveCategory(category);
       return category;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.categories.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -167,9 +167,9 @@ export function useDeleteCategory() {
       if (isSupabaseConfigured()) await apiDeleteCategory(id);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.categories.all });
-      qc.invalidateQueries({ queryKey: queryKeys.products.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.categories() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -177,7 +177,7 @@ export function useDeleteCategory() {
 // ─── Brands ───
 export function useAdminBrands() {
   return useQuery({
-    queryKey: queryKeys.brands.all,
+    queryKey: queryKeys.admin.brands(),
     queryFn: () => loadStore().brands,
     staleTime: 30 * 1000,
   });
@@ -196,8 +196,8 @@ export function useSaveBrand() {
       return brand;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.brands.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.brands() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -212,8 +212,8 @@ export function useDeleteBrand() {
       if (isSupabaseConfigured()) await apiDeleteBrand(id);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.brands.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.brands() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -241,7 +241,7 @@ export function useAdminAdvanceOrder() {
       return order;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.orders.all });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.orders() });
     },
   });
 }
@@ -260,7 +260,7 @@ export function useAdminCancelOrder() {
       return order;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.orders.all });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.orders() });
     },
   });
 }
@@ -268,7 +268,7 @@ export function useAdminCancelOrder() {
 // ─── Coupons ───
 export function useAdminCoupons() {
   return useQuery({
-    queryKey: queryKeys.coupons.all,
+    queryKey: queryKeys.admin.coupons(),
     queryFn: () => loadCoupons(),
     staleTime: 30 * 1000,
   });
@@ -283,7 +283,7 @@ export function useSaveCoupon() {
       return coupon;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.coupons.all });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.coupons() });
     },
   });
 }
@@ -296,7 +296,7 @@ export function useDeleteCoupon() {
       if (isSupabaseConfigured()) await apiDeleteCoupon(id);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.coupons.all });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.coupons() });
     },
   });
 }
@@ -304,7 +304,7 @@ export function useDeleteCoupon() {
 // ─── Reviews ───
 export function useAdminReviews() {
   return useQuery({
-    queryKey: queryKeys.reviews.all,
+    queryKey: queryKeys.admin.reviews(),
     queryFn: () => loadReviews(),
     staleTime: 30 * 1000,
   });
@@ -317,7 +317,7 @@ export function useAdminDeleteReview() {
       deleteReview(id);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.reviews.all });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.reviews() });
     },
   });
 }
@@ -325,7 +325,7 @@ export function useAdminDeleteReview() {
 // ─── Stock ───
 export function useAdminStockMovements() {
   return useQuery({
-    queryKey: queryKeys.stock.all,
+    queryKey: queryKeys.admin.stock(),
     queryFn: () => loadStockMovements(),
     staleTime: 30 * 1000,
   });
@@ -368,9 +368,9 @@ export function useAdjustStock() {
       return movement;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.stock.all });
-      qc.invalidateQueries({ queryKey: queryKeys.products.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.stock() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -378,7 +378,7 @@ export function useAdjustStock() {
 // ─── Distributors ───
 export function useAdminDistributors() {
   return useQuery({
-    queryKey: queryKeys.distributors.all,
+    queryKey: queryKeys.admin.distributors(),
     queryFn: () => loadStore().distributors,
     staleTime: 30 * 1000,
   });
@@ -397,8 +397,8 @@ export function useSaveDistributor() {
       return distributor;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.distributors.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.distributors() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -413,8 +413,8 @@ export function useDeleteDistributor() {
       if (isSupabaseConfigured()) await apiDeleteDistributor(id);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.distributors.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.distributors() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -433,8 +433,8 @@ export function useToggleDistributor() {
       return dist;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.distributors.all });
-      qc.invalidateQueries({ queryKey: ["admin", "store"] });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.distributors() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -442,7 +442,7 @@ export function useToggleDistributor() {
 // ─── Combos ───
 export function useAdminCombos() {
   return useQuery({
-    queryKey: queryKeys.combos.all,
+    queryKey: queryKeys.admin.combos(),
     queryFn: () => getCombos(),
     staleTime: 30 * 1000,
   });
@@ -457,7 +457,7 @@ export function useSaveCombo() {
       return combo;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.combos.all });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.combos() });
     },
   });
 }
@@ -470,7 +470,7 @@ export function useDeleteCombo() {
       if (isSupabaseConfigured()) await apiDeleteCombo(id);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.combos.all });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.combos() });
     },
   });
 }

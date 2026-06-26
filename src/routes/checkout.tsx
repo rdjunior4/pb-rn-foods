@@ -16,7 +16,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useProducts, useAdminDistributors } from "@/lib/hooks";
 import { saveOrders, loadOrders, generateOrderId, validateCoupon, incrementCouponUsage, decrementStockForOrder, syncFromSupabase } from "@/lib/admin-store";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { apiSaveOrder, apiDecrementStock, apiValidateCoupon, apiIncrementCouponUsage } from "@/lib/api";
+import { apiSaveOrder, apiDecrementStock, apiValidateCoupon, apiIncrementCouponUsage, apiCreateOrderAtomic } from "@/lib/api";
 import type { Order, Coupon } from "@/lib/types";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency, formatDoc, formatPhone } from "@/lib/format";
@@ -62,6 +62,7 @@ function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cartProducts = items
     .map((item) => {
@@ -208,6 +209,8 @@ function CheckoutPage() {
   }
 
   const handleFinish = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const phoneDigits = phone.replace(/\D/g, "");
     const docDigits = docNumber.replace(/\D/g, "");
     if (phoneDigits.length < 10) {
@@ -270,12 +273,11 @@ function CheckoutPage() {
 
     try {
       if (useSupabase) {
-        await apiSaveOrder(newOrder);
-        await apiDecrementStock(orderId, cartProducts.map((p) => ({
-          productId: p!.id,
-          variantId: p!.variantId,
-          quantity: p!.quantity,
-        })));
+        const result = await apiCreateOrderAtomic(newOrder, appliedCoupon?.id);
+        if (!result.ok) {
+          toast.error(result.error || "Erro ao processar pedido.");
+          return;
+        }
       } else {
         const orders = loadOrders();
         orders.push(newOrder);
@@ -289,12 +291,7 @@ function CheckoutPage() {
           })),
           orderId,
         );
-      }
-
-      if (appliedCoupon) {
-        if (useSupabase) {
-          await apiIncrementCouponUsage(appliedCoupon.id);
-        } else {
+        if (appliedCoupon) {
           incrementCouponUsage(appliedCoupon.id);
         }
       }
@@ -309,6 +306,8 @@ function CheckoutPage() {
     } catch (err) {
       console.error("[checkout] erro ao salvar pedido:", err);
       toast.error("Erro ao processar pedido. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -547,10 +546,20 @@ function CheckoutPage() {
 
           <button
             onClick={handleFinish}
-            className="w-full rounded-xl bg-primary text-primary-foreground font-semibold py-4 hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+            disabled={isSubmitting}
+            className="w-full rounded-xl bg-primary text-primary-foreground font-semibold py-4 hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:pointer-events-none"
           >
-            Finalizar compra — {formatCurrency(orderTotal)}
-            <ArrowRight className="h-4 w-4" />
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              <>
+                Finalizar compra — {formatCurrency(orderTotal)}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </button>
         </div>
 

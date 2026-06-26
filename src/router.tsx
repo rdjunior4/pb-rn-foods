@@ -14,7 +14,7 @@ export const getRouter = () => {
         retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
       },
       mutations: {
-        retry: 1,
+        retry: 0,
       },
     },
   });

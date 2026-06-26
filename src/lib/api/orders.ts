@@ -80,6 +80,53 @@ export async function apiSaveOrder(order: Order): Promise<string> {
   return order.id;
 }
 
+export async function apiCreateOrderAtomic(
+  order: Order,
+  couponId?: string,
+): Promise<{ orderId: string; ok: boolean; error?: string }> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) {
+    throw new Error("Supabase não configurado");
+  }
+
+  const orderData = {
+    id: order.id,
+    customerId: order.customerId,
+    customerName: order.customerName,
+    customerEmail: order.customerEmail,
+    customerDocument: order.customerDocument,
+    customerPhone: order.customerPhone,
+    subtotal: order.subtotal,
+    discount: order.discount,
+    shippingCost: order.shippingCost,
+    total: order.total,
+    paymentMethod: order.paymentMethod,
+    shippingAddress: order.shippingAddress,
+    latitude: order.latitude,
+    longitude: order.longitude,
+    distributorId: order.distributorId,
+  };
+
+  const itemsData = order.items.map((item) => ({
+    productId: item.productId,
+    variantId: item.variantId || "",
+    productName: item.productName,
+    quantity: item.quantity,
+    price: item.price,
+    image: item.image,
+  }));
+
+  const { data, error } = await supabase.rpc("create_order_atomic", {
+    p_order: orderData,
+    p_items: itemsData,
+    p_coupon_code: order.couponCode || null,
+    p_coupon_id: couponId || null,
+  });
+
+  if (error) throw error;
+  return data as { orderId: string; ok: boolean; error?: string };
+}
+
 export async function apiUpdateOrderStatus(id: string, status: OrderStatus): Promise<void> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) return;
