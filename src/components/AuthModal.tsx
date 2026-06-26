@@ -197,52 +197,52 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
             <X className="h-4 w-4" />
           </button>
           <div className="w-full max-w-sm mx-auto">
-            <div className="mb-6">
-              <div className="flex items-center gap-3">
-                <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 ring-1 ring-primary/10">
+            <div className="mb-8 text-center sm:text-left">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                   {tab === "register" ? (
-                    <UserPlus className="h-5 w-5 text-primary" />
+                    <UserPlus className="h-6 w-6" />
                   ) : (
-                    <LogIn className="h-5 w-5 text-primary" />
+                    <LogIn className="h-6 w-6" />
                   )}
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold tracking-tight">
-                    {tab === "register" ? "Crie a sua conta" : "Acesse a sua conta"}
+                  <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+                    {tab === "register" ? "Criar conta" : "Entrar"}
                   </h1>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {tab === "register" ? "Preencha seus dados para começar" : "Digite seus dados de acesso"}
+                    {tab === "register" ? "Preencha seus dados para começar" : "Acesse sua conta para continuar"}
                   </p>
                 </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3.5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {tab === "register" && (
                 <>
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground/80">Nome completo</label>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome completo</label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full h-11 rounded-lg border border-border/40 bg-background pl-9 pr-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
+                        className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder="Seu nome completo"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground/80">CPF / CNPJ</label>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">CPF / CNPJ</label>
                     <div className="relative">
-                      <DocIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <DocIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                       <input
                         type="text"
                         value={document}
                         onChange={(e) => handleDocChange(e.target.value)}
-                        className="w-full h-11 rounded-lg border border-border/40 bg-background pl-9 pr-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
+                        className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder={docLabels[documentType].placeholder}
                       />
                     </div>
@@ -266,51 +266,53 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               )}
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80">E-mail</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">E-mail</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 rounded-lg border border-border/40 bg-background pl-9 pr-4 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="seu@email.com"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80">Senha</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Senha</label>
+                  {tab === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => setShowReset(true)}
+                      className="text-xs font-medium text-primary hover:text-primary-hover transition-colors"
+                    >
+                      Esqueci minha senha
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 rounded-lg border border-border/40 bg-background pl-9 pr-10 text-sm outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="********"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {tab === "login" && (
-                  <button
-                    type="button"
-                    onClick={() => setShowReset(true)}
-                    className="text-xs text-primary hover:text-primary-hover transition-colors"
-                  >
-                    Esqueci minha senha
-                  </button>
-                )}
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2.5">
+                <div className="flex items-center gap-2.5 text-sm text-destructive bg-destructive/5 border border-destructive/15 rounded-xl px-4 py-3">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />
                   {error}
                 </div>
@@ -319,7 +321,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 rounded-xl bg-gradient-to-r from-primary to-primary-hover text-primary-foreground font-semibold text-sm hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
@@ -332,17 +334,23 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               </button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                {tab === "register" ? "Já tem uma conta?" : "Não tem conta?"}{" "}
-                <button
-                  onClick={() => switchTab(tab === "register" ? "login" : "register")}
-                  className="text-primary font-semibold hover:text-primary-hover transition-colors"
-                >
-                  {tab === "register" ? "Fazer login" : "Cadastre-se"}
-                </button>
-              </p>
+            <div className="mt-6 relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border/40" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-card px-3 text-muted-foreground">
+                  {tab === "register" ? "Já tem uma conta?" : "Não tem conta?"}
+                </span>
+              </div>
             </div>
+
+            <button
+              onClick={() => switchTab(tab === "register" ? "login" : "register")}
+              className="w-full h-11 rounded-xl border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-4"
+            >
+              {tab === "register" ? "Fazer login" : "Criar conta"}
+            </button>
           </div>
         </div>
       </div>
