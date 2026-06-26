@@ -198,19 +198,23 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
           </button>
           <div className="w-full max-w-sm mx-auto">
             <div className="mb-6">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 mb-4 ring-1 ring-primary/10">
-                {tab === "register" ? (
-                  <UserPlus className="h-5 w-5 text-primary" />
-                ) : (
-                  <LogIn className="h-5 w-5 text-primary" />
-                )}
+              <div className="flex items-center gap-3">
+                <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 ring-1 ring-primary/10">
+                  {tab === "register" ? (
+                    <UserPlus className="h-5 w-5 text-primary" />
+                  ) : (
+                    <LogIn className="h-5 w-5 text-primary" />
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight">
+                    {tab === "register" ? "Crie a sua conta" : "Acesse a sua conta"}
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {tab === "register" ? "Preencha seus dados para começar" : "Digite seus dados de acesso"}
+                  </p>
+                </div>
               </div>
-              <h1 className="text-xl font-bold tracking-tight">
-                {tab === "register" ? "Crie a sua conta" : "Acesse a sua conta"}
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {tab === "register" ? "Preencha seus dados para começar" : "Digite seus dados de acesso"}
-              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3.5">
