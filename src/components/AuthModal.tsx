@@ -213,7 +213,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
           </button>
           <div className="px-6 sm:px-8 lg:px-10 py-8 lg:py-10">
             <div className="w-full max-w-sm mx-auto">
-            <div className="mb-8 text-center sm:text-left">
+            <div className="mb-8 text-left">
               <div className="flex items-center gap-4 mb-3">
                 <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                   {tab === "register" ? (
