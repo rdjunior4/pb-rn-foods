@@ -176,11 +176,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[900px] max-h-[90vh] overflow-y-auto rounded-2xl bg-card shadow-2xl border border-border/40 flex flex-col lg:flex-row animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-[900px] max-h-[90vh] overflow-y-auto bg-card shadow-2xl border border-border/40 flex flex-col lg:flex-row animate-in fade-in zoom-in-95 duration-200 rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-brand-black shrink-0 overflow-hidden min-h-[180px] lg:min-h-[520px] lg:rounded-l-2xl">
+        <div className="relative lg:w-[40%] bg-brand-black shrink-0 overflow-hidden min-h-[180px] lg:min-h-0 lg:self-stretch">
           <img
             src={heroDesktopImg}
             alt=""
