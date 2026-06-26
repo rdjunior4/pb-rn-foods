@@ -42,10 +42,12 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [document, setDocument] = useState("");
   const [documentType, setDocumentType] = useState<DocumentType>("cnpj");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -85,9 +87,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
     setName("");
     setEmail("");
     setPassword("");
+    setConfirmPassword("");
     setDocument("");
     setError("");
     setShowPassword(false);
+    setShowConfirmPassword(false);
     setShowReset(false);
     setResetStep("email");
     setResetEmail("");
@@ -114,6 +118,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         if (!email.trim()) { setError("Informe seu e-mail"); return; }
         if (!password) { setError("Informe uma senha"); return; }
         if (password.length < 4) { setError("A senha deve ter pelo menos 4 caracteres"); return; }
+        if (password !== confirmPassword) { setError("As senhas não conferem"); return; }
         if (!raw) { setError("Informe seu CPF ou CNPJ"); return; }
         if (!validateDocument(raw, documentType)) {
           setError(documentType === "cnpj" ? "CNPJ inválido. Verifique os dígitos." : "CPF inválido. Verifique os dígitos.");
@@ -299,6 +304,29 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                   </button>
                 </div>
               </div>
+
+              {tab === "register" && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Confirmar senha</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                      placeholder="********"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {error && (
                 <div className="flex items-center gap-2.5 text-sm text-destructive bg-destructive/5 border border-destructive/15 rounded-xl px-4 py-3">
