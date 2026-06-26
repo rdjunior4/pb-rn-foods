@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAdminStore, useStoreConfig } from "@/lib/hooks";
 import defaultHeroImg from "@/assets/hero-warehouse.jpg";
+import heroDesktopImg from "/hero-desktop.png";
 import type { Banner } from "@/lib/types";
 
 function useIsMobile() {
@@ -55,9 +56,18 @@ export function HeroBanner() {
 
   const hasAnyText = hasTitle || hasSubtitle || hasCta || hasSecondaryCta;
 
+  const useDesktopHero = !isMobile && !displayBanner;
+  const heroImage = useDesktopHero
+    ? heroDesktopImg
+    : (isMobile && displayBanner?.mobileImage)
+      ? displayBanner.mobileImage
+      : (displayBanner?.image || defaultHeroImg);
+
   const nextSlide = () => setCurrent((prev) => (prev + 1) % Math.max(activeBanners.length, 1));
   const prevSlide = () =>
     setCurrent((prev) => (prev - 1 + activeBanners.length) % Math.max(activeBanners.length, 1));
+
+  const showOverlay = !useDesktopHero && hasAnyText;
 
   return (
     <section className="w-full">
@@ -68,20 +78,20 @@ export function HeroBanner() {
       />
       <div className="group relative overflow-hidden bg-brand-black min-h-[300px] sm:min-h-[350px] lg:h-[450px] flex items-center">
         <img
-          src={(isMobile && displayBanner?.mobileImage) ? displayBanner.mobileImage : (displayBanner?.image || defaultHeroImg)}
-          alt={displayBanner?.title || ""}
+          src={heroImage}
+          alt={useDesktopHero ? "PB&RN Foods — Praticidade e segurança para o seu abastecimento" : (displayBanner?.title || "")}
           className={`absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-700 ${
-            hasAnyText ? "opacity-40" : "opacity-100"
+            showOverlay ? "opacity-40" : "opacity-100"
           }`}
           onError={(e) => {
             (e.target as HTMLImageElement).src = defaultHeroImg;
           }}
         />
-        {hasAnyText && (
+        {showOverlay && (
           <div className="absolute inset-0 bg-gradient-to-r from-brand-black/95 via-brand-black/70 to-brand-black/10" />
         )}
 
-        {hasAnyText && (
+        {showOverlay && (
           <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] py-10 sm:py-14 lg:py-16">
             {hasTitle && (
               <h1 className="max-w-[45%] text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-white">
