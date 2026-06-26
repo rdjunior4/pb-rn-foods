@@ -185,16 +185,16 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-white shrink-0 min-h-[180px] lg:min-h-0 lg:h-full rounded-none">
+        <div className="relative lg:w-[40%] bg-white shrink-0 min-h-[180px] lg:min-h-0 lg:h-full overflow-hidden">
           <img
             src={heroDesktopImg}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover rounded-none"
+            className="absolute inset-0 h-full w-full object-cover scale-[1.03]"
           />
         </div>
 
         {/* Right panel - form */}
-        <div className="flex-1 p-6 sm:p-8 lg:p-10 relative overflow-y-auto overflow-x-hidden flex items-center">
+        <div className="flex-1 p-6 sm:p-8 lg:p-10 relative overflow-y-auto overflow-x-hidden flex items-center py-8 lg:py-10">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
