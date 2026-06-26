@@ -23,6 +23,7 @@ import {
 import { useAuth, type DocumentType } from "@/lib/auth-context";
 import { formatDoc } from "@/lib/format";
 import { toast } from "sonner";
+import heroDesktopImg from "/hero-desktop.png";
 
 interface AuthModalProps {
   open: boolean;
@@ -172,18 +173,19 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - branding */}
-        <div className="relative lg:w-[40%] bg-gradient-to-br from-primary via-primary-hover to-primary p-8 sm:p-10 flex flex-col justify-between min-h-[180px] lg:min-h-[520px] shrink-0">
+        <div className="relative lg:w-[40%] bg-brand-black p-8 sm:p-10 flex flex-col justify-between min-h-[180px] lg:min-h-[520px] shrink-0 overflow-hidden">
+          <img
+            src={heroDesktopImg}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
           <button
             onClick={onClose}
             className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
-
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-white/[0.06]" />
-            <div className="absolute -bottom-12 -left-12 h-36 w-36 rounded-full bg-white/[0.04]" />
-          </div>
 
           <div className="relative z-10">
             <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm ring-1 ring-white/10 mb-5">
