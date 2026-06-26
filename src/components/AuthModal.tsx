@@ -361,42 +361,49 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
           onClick={() => setShowReset(false)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl bg-card border border-border/40 shadow-2xl p-6"
+            className="w-full max-w-sm rounded-2xl bg-card border border-border/40 shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 mb-5">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <KeyRound className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                <KeyRound className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-bold text-lg">Recuperar senha</h3>
-                <p className="text-xs text-muted-foreground">
+                <h3 className="text-lg font-extrabold tracking-tight">
+                  {resetStep === "email" && "Recuperar senha"}
+                  {resetStep === "code" && "Redefinir senha"}
+                  {resetStep === "done" && "Pronto!"}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-0.5">
                   {resetStep === "email" && "Digite seu e-mail cadastrado"}
                   {resetStep === "code" && "Insira o código e a nova senha"}
-                  {resetStep === "done" && "Senha redefinida!"}
+                  {resetStep === "done" && "Senha redefinida"}
                 </p>
               </div>
             </div>
 
             {resetStep === "email" && (
               <div className="space-y-4">
-                <input
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <div className="flex gap-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">E-mail</label>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                  />
+                </div>
+                <div className="flex gap-3">
                   <button
                     onClick={() => setShowReset(false)}
-                    className="flex-1 h-11 rounded-xl border border-border/40 text-sm font-medium hover:bg-accent transition-colors"
+                    className="flex-1 h-12 rounded-xl bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleRequestReset}
-                    className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
+                    className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
                   >
                     Enviar código
                   </button>
@@ -406,42 +413,50 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
 
             {resetStep === "code" && (
               <div className="space-y-4">
-                <input
-                  type="text"
-                  value={resetCode}
-                  onChange={(e) => setResetCode(e.target.value)}
-                  placeholder="Código de 6 dígitos"
-                  maxLength={6}
-                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-center text-lg tracking-widest"
-                />
-                <input
-                  type="password"
-                  value={resetNewPassword}
-                  onChange={(e) => setResetNewPassword(e.target.value)}
-                  placeholder="Nova senha"
-                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <div className="flex gap-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Código</label>
+                  <input
+                    type="text"
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value)}
+                    placeholder="000000"
+                    maxLength={6}
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40 text-center text-lg tracking-[0.3em] font-mono"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nova senha</label>
+                  <input
+                    type="password"
+                    value={resetNewPassword}
+                    onChange={(e) => setResetNewPassword(e.target.value)}
+                    placeholder="********"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                  />
+                </div>
+                <div className="flex gap-3">
                   <button
                     onClick={() => setResetStep("email")}
-                    className="flex-1 h-11 rounded-xl border border-border/40 text-sm font-medium hover:bg-accent transition-colors"
+                    className="flex-1 h-12 rounded-xl bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
                   >
                     Voltar
                   </button>
                   <button
                     onClick={handleConfirmReset}
-                    className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
+                    className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
                   >
-                    Redefinir senha
+                    Redefinir
                   </button>
                 </div>
               </div>
             )}
 
             {resetStep === "done" && (
-              <div className="text-center py-4">
-                <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto mb-3" />
-                <p className="text-sm font-medium">Senha redefinida com sucesso!</p>
+              <div className="text-center py-6">
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 mb-4">
+                  <CheckCircle className="h-8 w-8 text-emerald-500" />
+                </div>
+                <p className="text-sm font-semibold">Senha redefinida com sucesso!</p>
                 <p className="text-xs text-muted-foreground mt-1">Redirecionando para o login...</p>
               </div>
             )}
