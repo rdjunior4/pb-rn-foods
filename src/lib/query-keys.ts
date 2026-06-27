@@ -63,5 +63,6 @@ export const queryKeys = {
     stock: () => [...queryKeys.admin.all, "stock"] as const,
     distributors: () => [...queryKeys.admin.all, "distributors"] as const,
     combos: () => [...queryKeys.admin.all, "combos"] as const,
+    customers: () => [...queryKeys.admin.all, "customers"] as const,
   },
 } as const;

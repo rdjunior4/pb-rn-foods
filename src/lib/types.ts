@@ -222,3 +222,38 @@ export interface StockMovement {
   reason: string;
   createdAt: string;
 }
+
+// ============================================================
+// CUSTOMER (CRM)
+// ============================================================
+
+export interface CreditEntry {
+  id: string;
+  type: "release" | "adjust" | "block" | "usage";
+  amount: number;
+  description: string;
+  createdAt: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  document: string;
+  documentType: "cpf" | "cnpj" | "";
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  createdAt: string;
+  // Crédito
+  creditBalance: number;
+  creditLimit: number;
+  creditHistory: CreditEntry[];
+  // Fidelidade
+  loyaltyPoints: number;
+  loyaltyLevel: "bronze" | "prata" | "ouro";
+  // CRM
+  tags: string[];
+  notes: string;
+}

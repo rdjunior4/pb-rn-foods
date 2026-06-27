@@ -16,10 +16,13 @@ import {
   saveCombo,
   deleteCombo,
   generateId,
+  loadCustomers,
+  saveCustomers,
+  addLoyaltyPoints,
 } from "../admin-store";
 import { loadStoreConfig } from "../store-config";
 import type { StoreConfig } from "../store-config";
-import type { Product, Category, Brand, Order, Coupon, ProductReview, StockMovement, Distributor, Combo } from "../types";
+import type { Product, Category, Brand, Order, Coupon, ProductReview, StockMovement, Distributor, Combo, Customer } from "../types";
 import {
   apiSaveProduct,
   apiDeleteProduct,
@@ -474,6 +477,144 @@ export function useDeleteCombo() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.combos() });
+    },
+  });
+}
+
+// ─── Customers (CRM) ───
+export function useAdminCustomers() {
+  return useQuery({
+    queryKey: queryKeys.admin.customers(),
+    queryFn: () => loadCustomers(),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useSaveCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (customer: Customer) => {
+      const customers = loadCustomers();
+      const idx = customers.findIndex((c) => c.id === customer.id);
+      if (idx >= 0) customers[idx] = customer;
+      else customers.push(customer);
+      saveCustomers(customers);
+      return customer;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
+    },
+  });
+}
+
+export function useDeleteCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      saveCustomers(loadCustomers().filter((c) => c.id !== id));
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
+    },
+  });
+}
+
+export function useAddCredit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      customerId,
+      amount,
+      description,
+    }: {
+      customerId: string;
+      amount: number;
+      description: string;
+    }) => {
+      const customers = loadCustomers();
+      const customer = customers.find((c) => c.id === customerId);
+      if (!customer) throw new Error("Cliente não encontrado");
+
+      customer.creditBalance += amount;
+      customer.creditHistory.push({
+        id: `crd_${Date.now()}`,
+        type: "release",
+        amount,
+        description,
+        createdAt: new Date().toISOString(),
+      });
+      saveCustomers(customers);
+      return customer;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
+    },
+  });
+}
+
+export function useAdjustCredit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      customerId,
+      amount,
+      description,
+    }: {
+      customerId: string;
+      amount: number;
+      description: string;
+    }) => {
+      const customers = loadCustomers();
+      const customer = customers.find((c) => c.id === customerId);
+      if (!customer) throw new Error("Cliente não encontrado");
+
+      customer.creditBalance += amount;
+      customer.creditHistory.push({
+        id: `crd_${Date.now()}`,
+        type: "adjust",
+        amount,
+        description,
+        createdAt: new Date().toISOString(),
+      });
+      saveCustomers(customers);
+      return customer;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
+    },
+  });
+}
+
+export function useUpdateCustomerTags() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ customerId, tags }: { customerId: string; tags: string[] }) => {
+      const customers = loadCustomers();
+      const customer = customers.find((c) => c.id === customerId);
+      if (!customer) throw new Error("Cliente não encontrado");
+      customer.tags = tags;
+      saveCustomers(customers);
+      return customer;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
+    },
+  });
+}
+
+export function useUpdateCustomerNotes() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ customerId, notes }: { customerId: string; notes: string }) => {
+      const customers = loadCustomers();
+      const customer = customers.find((c) => c.id === customerId);
+      if (!customer) throw new Error("Cliente não encontrado");
+      customer.notes = notes;
+      saveCustomers(customers);
+      return customer;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
     },
   });
 }

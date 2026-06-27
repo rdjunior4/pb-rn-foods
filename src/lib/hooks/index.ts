@@ -32,4 +32,11 @@ export {
   useAdminCombos,
   useSaveCombo,
   useDeleteCombo,
+  useAdminCustomers,
+  useSaveCustomer,
+  useDeleteCustomer,
+  useAddCredit,
+  useAdjustCredit,
+  useUpdateCustomerTags,
+  useUpdateCustomerNotes,
 } from "./use-admin";

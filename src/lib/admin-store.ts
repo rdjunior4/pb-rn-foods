@@ -1,4 +1,4 @@
-import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed, Combo, Coupon, ProductReview, StockMovement } from "./types";
+import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed, Combo, Coupon, ProductReview, StockMovement, Customer } from "./types";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 
 const STORAGE_KEY = "@pbrn-admin";
@@ -6,6 +6,7 @@ const ORDERS_KEY = "@pbrn-orders";
 const COUPONS_KEY = "@pbrn-coupons";
 const REVIEWS_KEY = "@pbrn-reviews";
 const STOCK_KEY = "@pbrn-stock";
+const CUSTOMERS_KEY = "@pbrn-customers";
 
 export interface AdminStore {
   products: Product[];
@@ -14,6 +15,7 @@ export interface AdminStore {
   brands: Brand[];
   distributors: Distributor[];
   combos: Combo[];
+  customers: Customer[];
 }
 
 const defaultDistributors: Distributor[] = [];
@@ -26,6 +28,7 @@ function getInitialStore(): AdminStore {
     brands: [],
     distributors: defaultDistributors.map((d) => ({ ...d })),
     combos: [],
+    customers: [],
   };
 }
 
@@ -48,6 +51,7 @@ export function loadStore(): AdminStore {
           }));
         }
         if (!parsed.combos) parsed.combos = [];
+        if (!parsed.customers) parsed.customers = [];
         parsed.categories = (parsed.categories || []).map((c: any, i: number) => ({
           ...c,
           sortOrder: c.sortOrder ?? i,
@@ -73,6 +77,7 @@ export function loadStore(): AdminStore {
         parsed.brands = [];
         parsed.distributors = defaultDistributors.map((d) => ({ ...d }));
         if (!parsed.combos) parsed.combos = [];
+        if (!parsed.customers) parsed.customers = [];
         parsed.banners = parsed.banners.map((b: any) => ({
           showTitle: b.showTitle ?? true,
           showSubtitle: b.showSubtitle ?? true,
@@ -280,6 +285,89 @@ export function getStockMovementsByProduct(productId: string): StockMovement[] {
   return loadStockMovements().filter((m) => m.productId === productId);
 }
 
+// ============================================================
+// CUSTOMERS
+// ============================================================
+
+export function loadCustomers(): Customer[] {
+  try {
+    const stored = localStorage.getItem(CUSTOMERS_KEY);
+    if (stored) return JSON.parse(stored) as Customer[];
+  } catch {}
+  return [];
+}
+
+export function saveCustomers(customers: Customer[]): void {
+  localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
+}
+
+export function getCustomerById(id: string): Customer | undefined {
+  return loadCustomers().find((c) => c.id === id);
+}
+
+export function getOrCreateCustomerFromOrder(order: {
+  customerName: string;
+  customerEmail: string;
+  customerDocument?: string;
+  customerPhone?: string;
+  shippingAddress?: string;
+  customerId?: string;
+}): Customer {
+  const customers = loadCustomers();
+  const id = order.customerId || order.customerEmail;
+  const doc = order.customerDocument || "";
+
+  let customer = customers.find(
+    (c) => c.id === id || (doc && c.document === doc),
+  );
+
+  if (!customer) {
+    customer = {
+      id: id || `cust_${Date.now()}`,
+      name: order.customerName,
+      email: order.customerEmail,
+      document: doc,
+      documentType: doc.length === 11 ? "cpf" : doc.length === 14 ? "cnpj" : "",
+      phone: order.customerPhone || "",
+      address: order.shippingAddress || "",
+      city: "",
+      state: "",
+      createdAt: new Date().toISOString(),
+      creditBalance: 0,
+      creditLimit: 0,
+      creditHistory: [],
+      loyaltyPoints: 0,
+      loyaltyLevel: "bronze",
+      tags: [],
+      notes: "",
+    };
+    customers.push(customer);
+    saveCustomers(customers);
+  }
+
+  return customer;
+}
+
+export function addLoyaltyPoints(customerId: string, orderTotal: number): void {
+  const customers = loadCustomers();
+  const customer = customers.find((c) => c.id === customerId);
+  if (!customer) return;
+
+  // R$ 1 = 1 ponto
+  customer.loyaltyPoints += Math.floor(orderTotal);
+
+  // Atualizar nível
+  if (customer.loyaltyPoints >= 5000) {
+    customer.loyaltyLevel = "ouro";
+  } else if (customer.loyaltyPoints >= 2000) {
+    customer.loyaltyLevel = "prata";
+  } else {
+    customer.loyaltyLevel = "bronze";
+  }
+
+  saveCustomers(customers);
+}
+
 export function decrementStockForOrder(
   items: { productId: string; variantId?: string; quantity: number; productName: string }[],
   orderId: string,
@@ -350,7 +438,7 @@ export function syncFromSupabase(): Promise<void> {
     if (!supabase) return;
 
     try {
-      const [cats, brs, prods, dists, combs, bans, cpns, revs, movs, ords] = await Promise.all([
+      const [cats, brs, prods, dists, combs, bans, cpns, revs, movs, ords, custs] = await Promise.all([
         supabase.from("categories").select("*").order("sort_order"),
         supabase.from("brands").select("*").order("name"),
         supabase.from("products").select("*, product_variants(*)").order("created_at", { ascending: false }),
@@ -361,6 +449,7 @@ export function syncFromSupabase(): Promise<void> {
         supabase.from("product_reviews").select("*").order("created_at", { ascending: false }),
         supabase.from("stock_movements").select("*").order("created_at", { ascending: false }).limit(500),
         supabase.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }),
+        supabase.from("customers").select("*").order("created_at"),
       ]);
 
       // Só sobrescrever dados se Supabase retornar dados não-vazios
@@ -388,6 +477,7 @@ export function syncFromSupabase(): Promise<void> {
         })) : existingStore.brands,
         distributors: (dists.data && dists.data.length > 0) ? dists.data.map(mapDbDistributor) : existingStore.distributors,
         combos: (combs.data && combs.data.length > 0) ? combs.data.map(mapDbCombo) : existingStore.combos,
+        customers: (custs.data && custs.data.length > 0) ? custs.data.map(mapDbCustomer) : existingStore.customers,
       };
       saveStore(store);
 
@@ -557,6 +647,28 @@ function mapDbCoupon(db: Record<string, unknown>): Coupon {
     expiresAt: db.expires_at as string | null,
     perUserLimit: Number(db.per_user_limit),
     createdAt: db.created_at as string,
+  };
+}
+
+function mapDbCustomer(db: Record<string, unknown>): Customer {
+  return {
+    id: db.id as string,
+    name: db.name as string,
+    email: db.email as string,
+    document: (db.document as string) || "",
+    documentType: (db.document_type as "cpf" | "cnpj") || "",
+    phone: (db.phone as string) || "",
+    address: (db.address as string) || "",
+    city: (db.city as string) || "",
+    state: (db.state as string) || "",
+    createdAt: db.created_at as string,
+    creditBalance: Number(db.credit_balance) || 0,
+    creditLimit: Number(db.credit_limit) || 0,
+    creditHistory: (db.credit_history as Customer["creditHistory"]) || [],
+    loyaltyPoints: Number(db.loyalty_points) || 0,
+    loyaltyLevel: (db.loyalty_level as Customer["loyaltyLevel"]) || "bronze",
+    tags: (db.tags as string[]) || [],
+    notes: (db.notes as string) || "",
   };
 }
 
