@@ -16,22 +16,24 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export function CategoryNav() {
   const { data: categories = [] } = useCategories();
   return (
-    <nav className="flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar">
-      <div className="flex items-center gap-1.5 shrink-0">
-        {categories.map((c) => {
-          const Icon = iconMap[c.icon] || Wheat;
-          return (
-            <Link
-              key={c.id}
-              to="/categoria/$slug"
-              params={{ slug: c.slug }}
-              className="shrink-0 inline-flex items-center gap-1.5 rounded border border-border/40 bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 whitespace-nowrap transition-all"
-            >
-              <Icon className="h-3.5 w-3.5" />
-              {c.name}
-            </Link>
-          );
-        })}
+    <nav className="flex items-center gap-3">
+      <div className="flex-1 overflow-x-auto no-scrollbar pr-4">
+        <div className="flex items-center gap-1.5 w-max">
+          {categories.map((c) => {
+            const Icon = iconMap[c.icon] || Wheat;
+            return (
+              <Link
+                key={c.id}
+                to="/categoria/$slug"
+                params={{ slug: c.slug }}
+                className="shrink-0 inline-flex items-center gap-1.5 rounded border border-border/40 bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 whitespace-nowrap transition-all"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {c.name}
+              </Link>
+            );
+          })}
+        </div>
       </div>
       <Link
         to="/buscar"

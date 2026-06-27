@@ -120,9 +120,21 @@ function AdminDistribuidoras() {
     setSearchingAddress(true);
     const results = await searchAddresses(query);
     setAddressResults(results);
-    setShowAddressResults(results.length > 0);
+    setShowAddressResults(results.length > 1);
     setSearchingAddress(false);
-  }, []);
+
+    // Auto-fill city + UF when exactly one result
+    if (results.length === 1) {
+      const r = results[0];
+      if (r.city && !city) setCity(r.city);
+      if (r.state && !stateUf) setStateUf(r.state);
+      if (r.cep && !cep) setCep(formatCEP(r.cep));
+      if (r.latitude && r.longitude) {
+        setLatitude(String(r.latitude));
+        setLongitude(String(r.longitude));
+      }
+    }
+  }, [city, stateUf, cep]);
 
   const selectAddress = (result: SearchResult) => {
     setAddress(result.street);
