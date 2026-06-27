@@ -33,14 +33,22 @@ export function pointInDistributorCoverage(
   return false;
 }
 
+function normalizeText(str: string): string {
+  return str
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 export function cityMatchesDistributor(
   cityName: string,
   dist: Distributor,
 ): boolean {
   if (dist.coverageMode !== "city") return false;
-  const normalized = cityName.trim().toLowerCase();
+  const normalized = normalizeText(cityName);
   return dist.coverageCities.some(
-    (c) => c.trim().toLowerCase() === normalized,
+    (c) => normalizeText(c) === normalized,
   );
 }
 

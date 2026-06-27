@@ -28,7 +28,7 @@ import {
   detectLocation,
   type GeoLocation,
 } from "@/lib/location";
-import { findDistributorForPoint } from "@/lib/distributor-utils";
+import { findDistributorForPoint, findDistributorForCity } from "@/lib/distributor-utils";
 import { Store } from "lucide-react";
 import { toast } from "sonner";
 
@@ -102,7 +102,7 @@ function CheckoutPage() {
       );
     }
     if (cityName) {
-      return findDistributorForPoint({ lat: 0, lng: 0 }, distributors, cityName);
+      return findDistributorForCity(cityName, distributors);
     }
     return null;
   }, [location, distributors, city]);
@@ -543,6 +543,13 @@ function CheckoutPage() {
               ))}
             </div>
           </div>
+
+          {!detectedDistributor && city && (
+            <div className="flex items-center gap-2.5 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              Nenhuma distribuidora atende a sua região. O pedido será processado sem distribuidora definida.
+            </div>
+          )}
 
           <button
             onClick={handleFinish}

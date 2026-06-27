@@ -111,7 +111,7 @@ export function TopBar() {
       if (match) {
         setSelected(match);
         setDetected(true);
-        localStorage.setItem(REGION_KEY, JSON.stringify(match));
+        // Don't auto-persist — wait for explicit user selection
       }
     });
     return () => { cancelled = true; };

@@ -39,13 +39,24 @@ function extractQuery(address: string): string | null {
 }
 
 let lastRequestTime = 0;
+let pendingPromise: Promise<void> | null = null;
 
 async function throttledFetch(url: string): Promise<Response> {
+  // Wait for any pending request to complete first
+  if (pendingPromise) {
+    await pendingPromise;
+  }
+
   const now = Date.now();
   const elapsed = now - lastRequestTime;
   if (elapsed < 1100) {
-    await new Promise((r) => setTimeout(r, 1100 - elapsed));
+    const waitMs = 1100 - elapsed;
+    const waitPromise = new Promise<void>((r) => setTimeout(r, waitMs));
+    pendingPromise = waitPromise;
+    await waitPromise;
+    pendingPromise = null;
   }
+
   lastRequestTime = Date.now();
   return fetch(url);
 }

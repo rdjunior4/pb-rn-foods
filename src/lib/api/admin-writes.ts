@@ -140,9 +140,34 @@ export async function apiSaveDistributor(distributor: Distributor): Promise<void
   if (!isSupabaseConfigured()) return;
   const supabase = getSupabase();
   if (!supabase) return;
+
+  // Validate fields
+  if (!distributor.name || distributor.name.trim().length < 2) {
+    throw new Error("Nome da distribuidora é obrigatório");
+  }
+  if (typeof distributor.latitude !== "number" || typeof distributor.longitude !== "number" ||
+      isNaN(distributor.latitude) || isNaN(distributor.longitude)) {
+    throw new Error("Coordenadas inválidas");
+  }
+  if (distributor.coverageMode === "radius") {
+    if (typeof distributor.coverageRadiusKm !== "number" ||
+        distributor.coverageRadiusKm <= 0 || distributor.coverageRadiusKm > 500) {
+      throw new Error("Raio de cobertura deve ser entre 1 e 500 km");
+    }
+  }
+  if (distributor.coverageMode === "city" && (!distributor.coverageCities || distributor.coverageCities.length === 0)) {
+    throw new Error("Adicione pelo menos uma cidade de cobertura");
+  }
+  if (distributor.coverageCities && distributor.coverageCities.length > 50) {
+    throw new Error("Máximo de 50 cidades por distribuidora");
+  }
+
+  // Sanitize color — only allow hex colors
+  const safeColor = /^#[0-9a-fA-F]{6}$/.test(distributor.color) ? distributor.color : "#3b82f6";
+
   const { error } = await supabase.from("distributors").upsert({
     id: distributor.id,
-    name: distributor.name,
+    name: distributor.name.trim(),
     city: distributor.city,
     state: distributor.state,
     address: distributor.address,
@@ -150,9 +175,9 @@ export async function apiSaveDistributor(distributor: Distributor): Promise<void
     latitude: distributor.latitude,
     longitude: distributor.longitude,
     coverage_mode: distributor.coverageMode,
-    coverage_radius_km: distributor.coverageRadiusKm,
-    coverage_cities: distributor.coverageCities,
-    color: distributor.color,
+    coverage_radius_km: Math.min(distributor.coverageRadiusKm, 500),
+    coverage_cities: distributor.coverageCities?.slice(0, 50) || [],
+    color: safeColor,
     active: distributor.active,
   }, { onConflict: "id" });
   if (error) throw error;

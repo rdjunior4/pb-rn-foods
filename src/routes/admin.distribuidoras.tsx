@@ -279,9 +279,24 @@ function AdminDistribuidoras() {
         toast.error("Informe um raio de cobertura válido");
         return;
       }
+      if (radius > 500) {
+        toast.error("Raio máximo permitido é 500 km");
+        return;
+      }
     }
     if (coverageMode === "city" && coverageCities.length === 0) {
       toast.error("Adicione pelo menos uma cidade de cobertura");
+      return;
+    }
+    if (coverageMode === "city" && coverageCities.length > 50) {
+      toast.error("Máximo de 50 cidades por distribuidora");
+      return;
+    }
+
+    const validUFs = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+    const uf = stateUf.trim().toUpperCase();
+    if (uf && !validUFs.includes(uf)) {
+      toast.error("UF inválida. Use uma sigla de estado brasileiro");
       return;
     }
 
@@ -306,11 +321,19 @@ function AdminDistribuidoras() {
         },
       });
     } else {
+      if (!city.trim()) {
+        toast.error("Informe a cidade da distribuidora");
+        return;
+      }
+      if (!stateUf.trim()) {
+        toast.error("Informe o estado (UF)");
+        return;
+      }
       saveDistributorMutation.mutate({
         id: generateId(),
         name: name.trim(),
-        city: city.trim() || "Não informado",
-        state: stateUf.trim().toUpperCase() || "XX",
+        city: city.trim(),
+        state: stateUf.trim().toUpperCase(),
         address: address.trim(),
         cep: cep.replace(/\D/g, ""),
         latitude: lat,
