@@ -48,6 +48,10 @@ export function loadStore(): AdminStore {
           }));
         }
         if (!parsed.combos) parsed.combos = [];
+        parsed.categories = (parsed.categories || []).map((c: any, i: number) => ({
+          ...c,
+          sortOrder: c.sortOrder ?? i,
+        })).sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
         parsed.banners = parsed.banners.map((b: any) => ({
           showTitle: b.showTitle ?? true,
           showSubtitle: b.showSubtitle ?? true,
@@ -372,6 +376,7 @@ export function syncFromSupabase(): Promise<void> {
           name: c.name as string,
           icon: c.icon as string,
           productCount: 0,
+          sortOrder: Number(c.sort_order) || 0,
         })) : existingStore.categories,
         brands: (brs.data && brs.data.length > 0) ? brs.data.map((b: Record<string, unknown>) => ({
           id: b.id as string,

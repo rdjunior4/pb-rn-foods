@@ -81,7 +81,7 @@ export async function apiSaveCategory(category: Category): Promise<void> {
     slug: category.slug,
     name: category.name,
     icon: category.icon,
-    sort_order: category.productCount ?? 0,
+    sort_order: category.sortOrder ?? 0,
   }, { onConflict: "id" });
   if (error) throw error;
 }
@@ -92,6 +92,18 @@ export async function apiDeleteCategory(id: string): Promise<void> {
   if (!supabase) return;
   const { error } = await supabase.from("categories").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function apiReorderCategories(categories: { id: string; sortOrder: number }[]): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+  const updates = categories.map((c) =>
+    supabase.from("categories").update({ sort_order: c.sortOrder }).eq("id", c.id)
+  );
+  const results = await Promise.all(updates);
+  const firstError = results.find((r) => r.error);
+  if (firstError) throw firstError.error;
 }
 
 // ============================================================

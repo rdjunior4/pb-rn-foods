@@ -147,7 +147,9 @@ export function useSaveCategory() {
       if (isSupabaseConfigured()) await apiSaveCategory(category);
       return category;
     },
-onSuccess: () => {
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.admin.categories() });
+      qc.invalidateQueries({ queryKey: queryKeys.categories.all });
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
@@ -168,6 +170,7 @@ export function useDeleteCategory() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.categories() });
+      qc.invalidateQueries({ queryKey: queryKeys.categories.all });
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },

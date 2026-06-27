@@ -52,6 +52,7 @@ export interface Category {
   name: string;
   icon: string;
   productCount: number;
+  sortOrder: number;
 }
 
 export interface CartItem {

@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAdminCategories, useAdminProducts, useSaveCategory, useDeleteCategory } from "@/lib/hooks";
-import { generateId, slugify } from "@/lib/admin-store";
+import { generateId, slugify, loadStore, saveStore } from "@/lib/admin-store";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { apiReorderCategories } from "@/lib/api/admin-writes";
+import { queryKeys } from "@/lib/query-keys";
 import {
-  Tags, Plus, Pencil, Trash2, AlertTriangle, X, Search, LayoutGrid, List,
-  Package, ShoppingCart, Beef, Wine, Milk, Egg, Soup, Droplets, Shirt, Home,
-  Pizza, Coffee, Baby, Dog, Flower2, Heart, Sparkles, Gem, Watch, Gift,
+  Tags, Plus, Pencil, Trash2, AlertTriangle, X, Search, GripVertical,
+  ChevronUp, ChevronDown, Package, ShoppingCart, Beef, Wine, Milk, Egg, Soup, Droplets,
+  Shirt, Home, Pizza, Coffee, Baby, Dog, Flower2, Heart, Sparkles, Gem, Watch, Gift,
   Star, Zap, Shield, Clock, MapPin, Phone, Mail, Globe, Camera, Music,
   BookOpen, GraduationCap, Dumbbell, Wrench, Hammer, Scissors, Lightbulb,
   Wifi, Monitor, Smartphone, Headphones, Printer, Database, Server, Cloud,
@@ -16,6 +20,10 @@ import {
   Play, Pause, Volume2, Disc3, Folder, FileText, Clipboard, Award, Trophy,
   Tent, TreePine, Mountain, Waves, Anchor, Compass, Map, Navigation, Fish,
   Umbrella, Snowflake, Sun, Moon, Sunrise, CloudRain, Bird, Loader2,
+  Croissant, CakeSlice, Cookie, Utensils, UtensilsCrossed, Cherry, Apple,
+  Salad, Sandwich, IceCreamBowl, CookingPot, Drumstick, Popcorn, Wheat,
+  Citrus, EggFried, Beer, GlassWater, CupSoda,
+  IceCream2, Cake, Ham, Bean, Leaf, Carrot, FishOff, Bone, HeartPulse,
 } from "lucide-react";
 import type { Category } from "@/lib/types";
 import { toast } from "sonner";
@@ -41,15 +49,19 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Play, Pause, Volume2, Disc3, Folder, FileText, Clipboard, Award, Trophy,
   Tent, TreePine, Mountain, Waves, Anchor, Compass, Map, Navigation, Umbrella,
   Snowflake, Sun, Moon, Sunrise, CloudRain,
+  Croissant, CakeSlice, Cookie, Utensils, UtensilsCrossed, Cherry, Apple,
+  Salad, Sandwich, IceCreamBowl, CookingPot, Drumstick, Popcorn, Wheat,
+  Citrus, EggFried, Beer, GlassWater, CupSoda, IceCream2, Cake,
+  Ham, Bean, Leaf, Carrot, Bone, HeartPulse,
 };
 
 const iconGroups = [
   { label: "Todos", icons: Object.keys(iconMap) },
-  { label: "Alimentos", icons: ["Package", "Beef", "Egg", "Milk", "Pizza", "Soup", "Coffee"] },
-  { label: "Bebidas", icons: ["Wine", "Droplets", "Coffee", "Milk"] },
+  { label: "Alimentos", icons: ["Package", "Beef", "Egg", "EggFried", "Milk", "Pizza", "Soup", "Coffee", "Croissant", "CakeSlice", "Cake", "Cookie", "Utensils", "UtensilsCrossed", "Cherry", "Apple", "Grape", "Nut", "Salad", "Sandwich", "IceCreamBowl", "IceCream2", "CookingPot", "Drumstick", "Popcorn", "Wheat", "Citrus", "Ham", "Bean", "Leaf", "Carrot", "Bone", "Fish", "Bird"] },
+  { label: "Bebidas", icons: ["Wine", "WineOff", "Beer", "Droplets", "Coffee", "Milk", "GlassWater", "CupSoda"] },
   { label: "Casa", icons: ["Home", "Flower2", "Lightbulb"] },
-  { label: "Moda", icons: ["Shirt", "Gem", "Watch", "Heart", "Crown", "Briefcase"] },
-  { label: "Beleza", icons: ["Sparkles", "Heart", "Shield", "Baby"] },
+  { label: "Moda", icons: ["Shirt", "Gem", "Watch", "Heart", "Briefcase"] },
+  { label: "Beleza", icons: ["Sparkles", "Heart", "Shield", "Baby", "HeartPulse"] },
   { label: "Tecnologia", icons: ["Monitor", "Smartphone", "Headphones", "Printer", "Wifi", "Database"] },
   { label: "Esportes", icons: ["Dumbbell", "Tent", "Mountain", "Map", "Compass", "Anchor"] },
   { label: "Ferramentas", icons: ["Wrench", "Hammer", "Scissors", "Settings"] },
@@ -65,20 +77,25 @@ const iconGroups = [
 const iconOptions = Object.keys(iconMap);
 
 function AdminCategories() {
+  const qc = useQueryClient();
   const { data: categories = [], isLoading } = useAdminCategories();
   const { data: products = [] } = useAdminProducts();
   const saveMutation = useSaveCategory();
   const deleteMutation = useDeleteCategory();
+
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [name, setName] = useState("");
+  const [icon, setIcon] = useState("Package");
   const [iconSearch, setIconSearch] = useState("");
   const [selectedGroup, setSelectedGroup] = useState("Todos");
 
-  const [name, setName] = useState("");
-  const [icon, setIcon] = useState("Package");
+  // Drag state
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const dragCounterRef = useRef(0);
 
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -138,6 +155,7 @@ function AdminCategories() {
         slug,
         icon,
         productCount: 0,
+        sortOrder: categories.length,
       }, {
         onSuccess: () => {
           resetForm();
@@ -164,6 +182,79 @@ function AdminCategories() {
     });
   };
 
+  // ─── Reorder logic ───
+  const persistOrder = useCallback(async (reordered: Category[]) => {
+    // Update localStorage
+    const store = loadStore();
+    store.categories = reordered;
+    saveStore(store);
+
+    // Update React Query cache immediately (no refetch needed)
+    qc.setQueryData(queryKeys.admin.categories(), reordered);
+
+    // Sync to Supabase
+    if (isSupabaseConfigured()) {
+      try {
+        await apiReorderCategories(reordered.map((c, i) => ({ id: c.id, sortOrder: i })));
+      } catch (err) {
+        console.error("[categorias] reorder sync failed:", err);
+      }
+    }
+  }, [qc]);
+
+  const moveCategory = useCallback((fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= categories.length) return;
+    const reordered = [...categories];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    persistOrder(reordered);
+  }, [categories, persistOrder]);
+
+  // ─── Drag handlers ───
+  const handleDragStart = useCallback((e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", id);
+    requestAnimationFrame(() => {
+      const el = e.currentTarget as HTMLElement;
+      el.style.opacity = "0.4";
+    });
+  }, []);
+
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    (e.currentTarget as HTMLElement).style.opacity = "1";
+    setDraggedId(null);
+    setDragOverId(null);
+    dragCounterRef.current = 0;
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    dragCounterRef.current++;
+    if (id !== draggedId) setDragOverId(id);
+  }, [draggedId]);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) setDragOverId(null);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    dragCounterRef.current = 0;
+    setDragOverId(null);
+    if (!draggedId || draggedId === targetId) return;
+
+    const fromIndex = categories.findIndex((c) => c.id === draggedId);
+    const toIndex = categories.findIndex((c) => c.id === targetId);
+    if (fromIndex !== -1 && toIndex !== -1) moveCategory(fromIndex, toIndex);
+  }, [draggedId, categories, moveCategory]);
+
   const filteredCategories = categories.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.slug.toLowerCase().includes(searchQuery.toLowerCase())
@@ -177,89 +268,71 @@ function AdminCategories() {
   const IconComponent = iconMap[icon] || Package;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Categorias</h1>
           <p className="text-sm text-zinc-500 mt-1">
-            {categories.length} {categories.length === 1 ? "categoria" : "categorias"} cadastrada{categories.length !== 1 ? "s" : ""}
+            {categories.length} {categories.length === 1 ? "categoria" : "categorias"}
+            <span className="text-zinc-400 ml-1">· arraste para reordenar</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center border border-zinc-200 rounded-lg overflow-hidden">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`h-9 w-9 flex items-center justify-center transition-colors ${
-                viewMode === "grid" ? "bg-zinc-900 text-white" : "bg-white text-zinc-500 hover:bg-zinc-50"
-              }`}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`h-9 w-9 flex items-center justify-center transition-colors ${
-                viewMode === "list" ? "bg-zinc-900 text-white" : "bg-white text-zinc-500 hover:bg-zinc-50"
-              }`}
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
-          {!showForm && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2 bg-zinc-900 text-white hover:bg-zinc-800 text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors shadow-sm"
-            >
-              <Plus className="h-4 w-4" />
-              Nova categoria
-            </button>
-          )}
-        </div>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center gap-2 bg-zinc-900 text-white hover:bg-zinc-800 text-sm font-semibold rounded-lg px-4 py-2.5 transition-colors shadow-sm"
+          >
+            <Plus className="h-4 w-4" />
+            Nova categoria
+          </button>
+        )}
       </div>
 
-      {/* Form */}
+      {/* Inline Form */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-zinc-200 p-6 space-y-5">
+        <div className="bg-white rounded-xl border border-zinc-200 p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-zinc-900">
+            <h2 className="text-sm font-semibold text-zinc-900">
               {editingId ? "Editar categoria" : "Nova categoria"}
             </h2>
             <button
               onClick={resetForm}
-              className="h-9 w-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+              className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+          <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
             {/* Left: Name + Preview */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-zinc-700 mb-1.5">Nome</label>
+                <label className="block text-xs font-medium text-zinc-600 mb-1">Nome</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all"
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all"
                   placeholder="Ex: Bebidas"
+                  autoFocus
                 />
                 {name.trim() && (
-                  <p className="text-xs text-zinc-400 mt-1.5">
+                  <p className="text-[11px] text-zinc-400 mt-1">
                     Slug: <span className="text-zinc-600 font-mono">{slugify(name)}</span>
                   </p>
                 )}
               </div>
 
               {/* Preview */}
-              <div className="border border-zinc-200 rounded-xl p-4 bg-zinc-50">
-                <p className="text-[11px] text-zinc-400 font-medium uppercase tracking-wider mb-3">Prévia</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-14 w-14 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shadow-sm">
-                    <IconComponent className="h-7 w-7 text-zinc-700" />
+              <div className="border border-zinc-100 rounded-lg p-3 bg-zinc-50">
+                <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider mb-2">Prévia</p>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-lg bg-white border border-zinc-200 flex items-center justify-center">
+                    <IconComponent className="h-5 w-5 text-zinc-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-zinc-900">{name || "Nome da categoria"}</p>
-                    <p className="text-xs text-zinc-400 font-mono">{name ? slugify(name) : "slug"}</p>
+                    <p className="text-sm font-semibold text-zinc-900">{name || "Nome"}</p>
+                    <p className="text-[11px] text-zinc-400 font-mono">{name ? slugify(name) : "slug"}</p>
                   </div>
                 </div>
               </div>
@@ -267,27 +340,23 @@ function AdminCategories() {
 
             {/* Right: Icon Picker */}
             <div>
-              <label className="block text-sm font-medium text-zinc-700 mb-1.5">Ícone</label>
-
-              {/* Search */}
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <label className="block text-xs font-medium text-zinc-600 mb-1">Ícone</label>
+              <div className="relative mb-2">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
                 <input
                   value={iconSearch}
                   onChange={(e) => setIconSearch(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 pl-9 pr-4 py-2 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all"
-                  placeholder="Buscar ícone..."
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 pl-8 pr-3 py-1.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all"
+                  placeholder="Buscar..."
                 />
               </div>
-
-              {/* Groups */}
-              <div className="flex flex-wrap gap-1.5 mb-3">
+              <div className="flex flex-wrap gap-1 mb-2">
                 {iconGroups.map((g) => (
                   <button
                     key={g.label}
                     type="button"
                     onClick={() => { setSelectedGroup(g.label); setIconSearch(""); }}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                    className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
                       selectedGroup === g.label
                         ? "bg-zinc-900 text-white"
                         : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
@@ -297,26 +366,23 @@ function AdminCategories() {
                   </button>
                 ))}
               </div>
-
-              {/* Icon Grid */}
-              <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5 max-h-[240px] overflow-y-auto rounded-lg border border-zinc-200 p-2 bg-zinc-50">
+              <div className="grid grid-cols-8 gap-1 max-h-[180px] overflow-y-auto rounded-lg border border-zinc-200 p-1.5 bg-zinc-50">
                 {filteredIconOptions.map((opt) => {
                   const Ic = iconMap[opt];
                   if (!Ic) return null;
-                  const isSelected = icon === opt;
                   return (
                     <button
                       key={opt}
                       type="button"
                       onClick={() => setIcon(opt)}
-                      className={`h-10 w-full flex items-center justify-center rounded-lg border-2 transition-all ${
-                        isSelected
-                          ? "border-zinc-900 bg-zinc-900 text-white shadow-sm"
-                          : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700 bg-white"
+                      className={`h-8 w-full flex items-center justify-center rounded border-2 transition-all ${
+                        icon === opt
+                          ? "border-zinc-900 bg-zinc-900 text-white"
+                          : "border-transparent text-zinc-500 hover:border-zinc-300 bg-white"
                       }`}
                       title={opt}
                     >
-                      <Ic className="h-4 w-4" />
+                      <Ic className="h-3.5 w-3.5" />
                     </button>
                   );
                 })}
@@ -324,16 +390,16 @@ function AdminCategories() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center gap-3 pt-1">
             <button
               onClick={handleSave}
-              className="bg-zinc-900 text-white hover:bg-zinc-800 text-sm font-semibold rounded-lg px-5 py-2.5 transition-colors shadow-sm"
+              className="bg-zinc-900 text-white hover:bg-zinc-800 text-sm font-semibold rounded-lg px-4 py-2 transition-colors shadow-sm"
             >
-              {editingId ? "Salvar alterações" : "Criar categoria"}
+              {editingId ? "Salvar" : "Criar"}
             </button>
             <button
               onClick={resetForm}
-              className="text-sm text-zinc-500 hover:text-zinc-700 font-medium transition-colors px-4 py-2 rounded-lg hover:bg-zinc-100"
+              className="text-sm text-zinc-500 hover:text-zinc-700 font-medium transition-colors px-3 py-2 rounded-lg hover:bg-zinc-100"
             >
               Cancelar
             </button>
@@ -354,96 +420,105 @@ function AdminCategories() {
         </div>
       )}
 
-      {/* Categories */}
+      {/* Category List */}
       {filteredCategories.length === 0 && !showForm ? (
-        <div className="bg-white rounded-2xl border border-zinc-200 p-12 text-center">
-          <div className="h-16 w-16 rounded-2xl bg-zinc-100 flex items-center justify-center mx-auto mb-4">
-            <Tags className="h-8 w-8 text-zinc-300" />
+        <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
+          <div className="h-14 w-14 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-3">
+            <Tags className="h-7 w-7 text-zinc-300" />
           </div>
           <p className="text-sm font-medium text-zinc-900">
             {searchQuery ? "Nenhuma categoria encontrada" : "Nenhuma categoria cadastrada"}
           </p>
           <p className="text-xs text-zinc-400 mt-1">
-            {searchQuery ? "Tente outro termo de busca" : "Crie categorias para organizar seus produtos"}
+            {searchQuery ? "Tente outro termo" : "Clique em 'Nova categoria' para começar"}
           </p>
         </div>
-      ) : viewMode === "grid" ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredCategories.map((c) => {
-            const CatIcon = iconMap[c.icon] || Tags;
-            const count = productCounts[c.id] || 0;
-            return (
-              <div
-                key={c.id}
-                className="group bg-white rounded-2xl border border-zinc-200 p-5 hover:shadow-lg hover:border-zinc-300 transition-all duration-300"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="h-14 w-14 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center group-hover:bg-zinc-100 transition-colors">
-                    <CatIcon className="h-7 w-7 text-zinc-600" />
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleEdit(c)}
-                      className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteId(c.id)}
-                      className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-zinc-900 truncate">{c.name}</h3>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-xs text-zinc-400 font-mono">{c.slug}</span>
-                    <span className="text-zinc-300">·</span>
-                    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${count > 0 ? "text-zinc-700" : "text-zinc-400"}`}>
-                      <Package className="h-3 w-3" />
-                      {count}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-zinc-200 divide-y divide-zinc-100 overflow-hidden">
-          {filteredCategories.map((c) => {
+        <div className="bg-white rounded-xl border border-zinc-200 divide-y divide-zinc-100 overflow-hidden">
+          {filteredCategories.map((c, index) => {
             const CatIcon = iconMap[c.icon] || Tags;
             const count = productCounts[c.id] || 0;
+            const isDraggedOver = dragOverId === c.id;
+            const isDragging = draggedId === c.id;
+            const realIndex = categories.findIndex((cat) => cat.id === c.id);
+
             return (
               <div
                 key={c.id}
-                className="group flex items-center gap-4 px-5 py-4 hover:bg-zinc-50 transition-colors"
+                draggable
+                onDragStart={(e) => handleDragStart(e, c.id)}
+                onDragEnd={handleDragEnd}
+                onDragEnter={(e) => handleDragEnter(e, c.id)}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, c.id)}
+                className={`group flex items-center gap-3 px-4 py-3 transition-all duration-150 ${
+                  isDragging
+                    ? "opacity-40 bg-zinc-50"
+                    : isDraggedOver
+                      ? "bg-blue-50 border-t-2 border-t-blue-500"
+                      : "hover:bg-zinc-50"
+                }`}
               >
-                <div className="h-10 w-10 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0">
-                  <CatIcon className="h-5 w-5 text-zinc-600" />
+                {/* Drag Handle */}
+                <div className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 shrink-0 transition-colors">
+                  <GripVertical className="h-4 w-4" />
                 </div>
+
+                {/* Position number */}
+                <span className="text-[11px] font-mono text-zinc-400 w-5 text-center shrink-0 tabular-nums">
+                  {realIndex + 1}
+                </span>
+
+                {/* Icon */}
+                <div className="h-9 w-9 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0">
+                  <CatIcon className="h-4.5 w-4.5 text-zinc-600" />
+                </div>
+
+                {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-zinc-900 truncate">{c.name}</div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-zinc-400 font-mono">{c.slug}</span>
+                  <div className="text-sm font-semibold text-zinc-900 truncate">{c.name}</div>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[11px] text-zinc-400 font-mono">{c.slug}</span>
                     <span className="text-zinc-300">·</span>
-                    <span className={`text-xs font-semibold ${count > 0 ? "text-zinc-700" : "text-zinc-400"}`}>
+                    <span className={`text-[11px] font-medium ${count > 0 ? "text-zinc-600" : "text-zinc-400"}`}>
                       {count} {count === 1 ? "produto" : "produtos"}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                {/* Actions */}
+                <div className="flex items-center gap-0.5 shrink-0">
+                  {/* Up/Down arrows */}
+                  <div className="flex flex-col -space-y-0.5 mr-1">
+                    <button
+                      onClick={() => moveCategory(realIndex, realIndex - 1)}
+                      disabled={realIndex === 0}
+                      className="h-6 w-6 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+                      title="Mover para cima"
+                    >
+                      <ChevronUp className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => moveCategory(realIndex, realIndex + 1)}
+                      disabled={realIndex === categories.length - 1}
+                      className="h-6 w-6 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+                      title="Mover para baixo"
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Edit/Delete */}
                   <button
                     onClick={() => handleEdit(c)}
-                    className="h-9 w-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setDeleteId(c.id)}
-                    className="h-9 w-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -468,7 +543,7 @@ function AdminCategories() {
                   Tem certeza que deseja excluir <strong>{deleteCategory.name}</strong>?
                   {deleteProductCount > 0 && (
                     <span className="block mt-1 text-amber-600 font-medium">
-                      {deleteProductCount} produto(s) associado(s) ficarão sem categoria.
+                      {deleteProductCount} produto(s) ficarão sem categoria.
                     </span>
                   )}
                 </>

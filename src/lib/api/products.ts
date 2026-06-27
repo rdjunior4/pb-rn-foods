@@ -105,6 +105,7 @@ export async function apiGetCategories(): Promise<Category[]> {
     name: c.name as string,
     icon: c.icon as string,
     productCount: 0,
+    sortOrder: Number(c.sort_order) || 0,
   }));
 }
 

@@ -244,7 +244,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                        className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder="Seu nome completo"
                       />
                     </div>
@@ -258,7 +258,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                         type="text"
                         value={document}
                         onChange={(e) => handleDocChange(e.target.value)}
-                        className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                        className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder={docLabels[documentType].placeholder}
                       />
                     </div>
@@ -289,7 +289,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="seu@email.com"
                   />
                 </div>
@@ -303,7 +303,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="********"
                   />
                   <button
@@ -325,7 +325,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full h-12 rounded-xl border border-border/60 bg-background pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                      className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                       placeholder="********"
                     />
                     <button
@@ -433,7 +433,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     placeholder="seu@email.com"
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                   />
                 </div>
                 <div className="flex gap-3">
@@ -463,7 +463,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     onChange={(e) => setResetCode(e.target.value)}
                     placeholder="000000"
                     maxLength={6}
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40 text-center text-lg tracking-[0.3em] font-mono"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40 text-center text-lg tracking-[0.3em] font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -473,7 +473,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     value={resetNewPassword}
                     onChange={(e) => setResetNewPassword(e.target.value)}
                     placeholder="********"
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                   />
                 </div>
                 <div className="flex gap-3">
