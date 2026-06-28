@@ -29,6 +29,7 @@ import {
   type GeoLocation,
 } from "@/lib/location";
 import { findDistributorForPoint, findDistributorForCity } from "@/lib/distributor-utils";
+import { carriers, ZERO_FEE_CARRIERS } from "@/lib/constants";
 import { Store } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,6 +64,7 @@ function CheckoutPage() {
   const [couponError, setCouponError] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCarrier, setSelectedCarrier] = useState("");
 
   const cartProducts = items
     .map((item) => {
@@ -82,7 +84,8 @@ function CheckoutPage() {
   const total = cartProducts.reduce((sum, p) => sum + p!.unitPrice * p!.quantity, 0);
   const deliveryState = state || location?.state || "";
   const freeShipping = isNordeste(deliveryState) || appliedCoupon?.type === "freeship";
-  const shippingCost = freeShipping ? 0 : 15.9;
+  const carrierZeroFee = ZERO_FEE_CARRIERS.includes(selectedCarrier);
+  const shippingCost = freeShipping || carrierZeroFee ? 0 : 15.9;
   const couponDiscount = useMemo(() => {
     if (!appliedCoupon) return 0;
     if (appliedCoupon.type === "percent") return (total * appliedCoupon.value) / 100;
@@ -213,7 +216,7 @@ function CheckoutPage() {
     setIsSubmitting(true);
     const phoneDigits = phone.replace(/\D/g, "");
     const docDigits = docNumber.replace(/\D/g, "");
-    if (phoneDigits.length < 10) {
+    if (selectedCarrier !== "retirada" && phoneDigits.length < 10) {
       toast.error("Informe um telefone válido com DDD.");
       return;
     }
@@ -221,17 +224,23 @@ function CheckoutPage() {
       toast.error("Informe um CPF ou CNPJ válido.");
       return;
     }
-    if (!cep.replace(/\D/g, "")) {
-      toast.error("Informe o CEP.");
+    if (!selectedCarrier) {
+      toast.error("Selecione uma forma de recebimento.");
       return;
     }
-    if (!address.trim() || !number.trim()) {
-      toast.error("Informe o endereço e o número.");
-      return;
-    }
-    if (!city.trim() || !state.trim()) {
-      toast.error("Informe a cidade e o estado.");
-      return;
+    if (selectedCarrier === "propria") {
+      if (!cep.replace(/\D/g, "")) {
+        toast.error("Informe o CEP.");
+        return;
+      }
+      if (!address.trim() || !number.trim()) {
+        toast.error("Informe o endereço e o número.");
+        return;
+      }
+      if (!city.trim() || !state.trim()) {
+        toast.error("Informe a cidade e o estado.");
+        return;
+      }
     }
 
     const orderId = generateOrderId();
@@ -261,10 +270,13 @@ function CheckoutPage() {
           : payment === "boleto"
             ? "Boleto bancário"
             : "Pix",
-      shippingAddress: `${address}, ${number}${neighborhood ? ` - ${neighborhood}` : ""}${city ? `, ${city}` : ""}${state ? ` - ${state}` : ""}${cep ? ` | CEP: ${cep}` : ""}`,
+      shippingAddress: selectedCarrier === "retirada"
+        ? "Retirada no local — Rua Example, 123 — Centro, Campina Grande — PB"
+        : `${address}, ${number}${neighborhood ? ` - ${neighborhood}` : ""}${city ? `, ${city}` : ""}${state ? ` - ${state}` : ""}${cep ? ` | CEP: ${cep}` : ""}`,
       latitude: location?.latitude,
       longitude: location?.longitude,
       distributorId: detectedDistributor?.id,
+      shippingCarrier: selectedCarrier || undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -320,171 +332,277 @@ function CheckoutPage() {
 
       <div className="grid lg:grid-cols-[1fr_400px] gap-8">
         <div className="space-y-6">
+          {/* ═══════ STEP 1: Como deseja receber? ═══════ */}
           <div className="rounded-2xl border border-border/40 bg-card p-6">
             <div className="flex items-center gap-3 mb-5">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
                 1
               </span>
-              <h2 className="font-semibold text-lg">Endereço de entrega</h2>
-              {locationDetected && location && (
-                <span className="inline-flex items-center gap-1.5 text-xs text-primary ml-auto bg-primary/5 px-2.5 py-1 rounded-full">
-                  <Navigation className="h-3 w-3" />
-                  {location.city || "Local detectado"}
+              <h2 className="font-semibold text-lg">Como deseja receber?</h2>
+              {selectedCarrier && (
+                <span className="ml-auto text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
+                  Frete grátis
                 </span>
               )}
             </div>
-
-            {deliveryState && (
-              <div
-                className={`mb-5 flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium ${
-                  freeShipping
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "bg-amber-50 text-amber-700 border border-amber-200"
+            <div className="grid sm:grid-cols-2 gap-3">
+              <label
+                className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 p-6 cursor-pointer transition-all text-center ${
+                  selectedCarrier === "propria"
+                    ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
+                    : "border-border/40 hover:border-border hover:bg-zinc-50/50"
                 }`}
               >
-                {freeShipping ? (
-                  <>
-                    <CheckCircle className="h-4 w-4 shrink-0" />
-                    <span>Frete grátis para a região Nordeste!</span>
-                  </>
-                ) : (
-                  <>
-                    <AlertTriangle className="h-4 w-4 shrink-0" />
-                    <span>
-                      Frete de {formatCurrency(shippingCost)} para fora da região Nordeste
-                    </span>
-                  </>
-                )}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                    CEP
-                  </label>
-                  <div className="relative">
-                    <input
-                      value={cep}
-                      onChange={(e) => handleCepChange(e.target.value)}
-                      placeholder="00000-000"
-                      className="w-full h-11 rounded-xl border border-border/40 bg-background pl-3 pr-10 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    />
-                    {loadingCep && (
-                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary animate-spin" />
-                    )}
-                  </div>
-                  {cepError && <p className="text-xs text-destructive mt-1.5">{cepError}</p>}
-                  <p className="text-[11px] text-muted-foreground/50 mt-1.5">
-                    Digite o CEP para preencher automaticamente
-                  </p>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                    Número
-                  </label>
-                  <input
-                    value={number}
-                    onChange={(e) => setNumber(e.target.value)}
-                    placeholder="123"
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                  Endereço
-                </label>
                 <input
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Rua, avenida..."
-                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  type="radio"
+                  name="carrier"
+                  value="propria"
+                  checked={selectedCarrier === "propria"}
+                  onChange={(e) => setSelectedCarrier(e.target.value)}
+                  className="sr-only"
                 />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-1">
-                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                    Bairro
-                  </label>
-                  <input
-                    value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
-                    placeholder="Bairro"
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  />
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center ${
+                  selectedCarrier === "propria" ? "bg-primary/10" : "bg-zinc-100"
+                }`}>
+                  <Truck className={`h-7 w-7 ${selectedCarrier === "propria" ? "text-primary" : "text-zinc-400"}`} />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                    Cidade
-                  </label>
-                  <input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  />
+                  <div className="text-sm font-semibold text-foreground">Entrega própria</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Receba no seu endereço</div>
+                </div>
+                {selectedCarrier === "propria" && (
+                  <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                    <CheckCircle className="h-3 w-3 text-primary-foreground" />
+                  </div>
+                )}
+              </label>
+
+              <label
+                className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 p-6 cursor-pointer transition-all text-center ${
+                  selectedCarrier === "retirada"
+                    ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
+                    : "border-border/40 hover:border-border hover:bg-zinc-50/50"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="carrier"
+                  value="retirada"
+                  checked={selectedCarrier === "retirada"}
+                  onChange={(e) => setSelectedCarrier(e.target.value)}
+                  className="sr-only"
+                />
+                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center ${
+                  selectedCarrier === "retirada" ? "bg-primary/10" : "bg-zinc-100"
+                }`}>
+                  <Store className={`h-7 w-7 ${selectedCarrier === "retirada" ? "text-primary" : "text-zinc-400"}`} />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                    Estado
-                  </label>
-                  <input
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  />
+                  <div className="text-sm font-semibold text-foreground">Retirada no local</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Retire na nossa loja</div>
                 </div>
-              </div>
+                {selectedCarrier === "retirada" && (
+                  <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                    <CheckCircle className="h-3 w-3 text-primary-foreground" />
+                  </div>
+                )}
+              </label>
             </div>
+            {!selectedCarrier && (
+              <p className="text-xs text-muted-foreground mt-3 text-center">Escolha uma opção para continuar</p>
+            )}
           </div>
 
-          {detectedDistributor && (
+          {/* ═══════ STEP 2: Endereço (só para entrega) ═══════ */}
+          {selectedCarrier === "propria" && (
             <div className="rounded-2xl border border-border/40 bg-card p-6">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
+                  2
+                </span>
+                <h2 className="font-semibold text-lg">Endereço de entrega</h2>
+                {locationDetected && location && (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-primary ml-auto bg-primary/5 px-2.5 py-1 rounded-full">
+                    <Navigation className="h-3 w-3" />
+                    {location.city || "Local detectado"}
+                  </span>
+                )}
+              </div>
+
+              {deliveryState && (
                 <div
-                  className="h-10 w-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: detectedDistributor.color + "15" }}
+                  className={`mb-5 flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium ${
+                    freeShipping
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      : "bg-amber-50 text-amber-700 border border-amber-200"
+                  }`}
                 >
-                  <Store className="h-5 w-5" style={{ color: detectedDistributor.color }} />
+                  {freeShipping ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 shrink-0" />
+                      <span>Frete grátis para a região Nordeste!</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                      <span>Frete de {formatCurrency(shippingCost)} para fora da região Nordeste</span>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">CEP</label>
+                    <div className="relative">
+                      <input
+                        value={cep}
+                        onChange={(e) => handleCepChange(e.target.value)}
+                        placeholder="00000-000"
+                        className="w-full h-11 rounded-xl border border-border/40 bg-background pl-3 pr-10 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                      />
+                      {loadingCep && (
+                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary animate-spin" />
+                      )}
+                    </div>
+                    {cepError && <p className="text-xs text-destructive mt-1.5">{cepError}</p>}
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Número</label>
+                    <input
+                      value={number}
+                      onChange={(e) => setNumber(e.target.value)}
+                      placeholder="123"
+                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Entrega pela</p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {detectedDistributor.name}
-                    <span className="text-xs font-normal text-muted-foreground ml-1.5">
-                      ({detectedDistributor.city} — {detectedDistributor.state})
-                    </span>
-                  </p>
+                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Endereço</label>
+                  <input
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Rua, avenida..."
+                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
                 </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-1">
+                    <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Bairro</label>
+                    <input
+                      value={neighborhood}
+                      onChange={(e) => setNeighborhood(e.target.value)}
+                      placeholder="Bairro"
+                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Cidade</label>
+                    <input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Estado</label>
+                    <input
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {detectedDistributor && (
+                <div className="mt-4 rounded-xl bg-primary/5 border border-primary/10 p-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-9 w-9 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: detectedDistributor.color + "15" }}
+                    >
+                      <Store className="h-4 w-4" style={{ color: detectedDistributor.color }} />
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">Entrega pela</p>
+                      <p className="text-xs font-semibold text-foreground">
+                        {detectedDistributor.name}
+                        <span className="text-[11px] font-normal text-muted-foreground ml-1.5">
+                          ({detectedDistributor.city} — {detectedDistributor.state})
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ═══════ STEP 2: Informações de retirada ═══════ */}
+          {selectedCarrier === "retirada" && (
+            <div className="rounded-2xl border border-border/40 bg-card p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
+                  2
+                </span>
+                <h2 className="font-semibold text-lg">Retirada no local</h2>
+              </div>
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-5">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-emerald-800">Retire seu pedido na loja</p>
+                    <div className="text-xs text-emerald-700 space-y-1">
+                      <p><strong>Endereço:</strong> Rua Example, 123 — Centro, Campina Grande — PB</p>
+                      <p><strong>Horário:</strong> Segunda a Sexta, das 8h às 18h | Sábado das 8h às 12h</p>
+                      <p><strong>Prazo:</strong> Seu pedido ficará pronto em até 24h após a confirmação</p>
+                    </div>
+                    <p className="text-[11px] text-emerald-600 mt-2">
+                      Você receberá uma notificação por e-mail quando seu pedido estiver disponível para retirada.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Nome de quem vai retirar</label>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(formatPhone(e.target.value))}
+                  placeholder="Nome completo"
+                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                />
               </div>
             </div>
           )}
 
+          {/* ═══════ STEP 3: Dados pessoais ═══════ */}
+          {selectedCarrier && (
           <div className="rounded-2xl border border-border/40 bg-card p-6">
             <div className="flex items-center gap-3 mb-5">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
-                2
+                {selectedCarrier === "retirada" ? "3" : "3"}
               </span>
               <h2 className="font-semibold text-lg">Dados pessoais</h2>
             </div>
             <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                  Telefone
-                </label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(formatPhone(e.target.value))}
-                  placeholder="(83) 99999-9999"
-                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-              </div>
+              {selectedCarrier === "propria" && (
+                <div>
+                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Telefone</label>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(formatPhone(e.target.value))}
+                    placeholder="(83) 99999-9999"
+                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-[auto_1fr] gap-4">
                 <div className="w-24">
-                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">
-                    Tipo
-                  </label>
+                  <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Tipo</label>
                   <select
                     value={docType}
                     onChange={(e) => {
@@ -511,11 +629,14 @@ function CheckoutPage() {
               </div>
             </div>
           </div>
+          )}
 
+          {/* ═══════ STEP 4: Pagamento ═══════ */}
+          {selectedCarrier && (
           <div className="rounded-2xl border border-border/40 bg-card p-6">
             <div className="flex items-center gap-3 mb-5">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
-                3
+                {selectedCarrier === "retirada" ? "4" : "4"}
               </span>
               <h2 className="font-semibold text-lg">Pagamento</h2>
             </div>
@@ -543,8 +664,9 @@ function CheckoutPage() {
               ))}
             </div>
           </div>
+          )}
 
-          {!detectedDistributor && city && (
+          {!detectedDistributor && selectedCarrier === "propria" && city && (
             <div className="flex items-center gap-2.5 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               Nenhuma distribuidora atende a sua região. O pedido será processado sem distribuidora definida.
@@ -553,7 +675,7 @@ function CheckoutPage() {
 
           <button
             onClick={handleFinish}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !selectedCarrier}
             className="w-full rounded-xl bg-primary text-primary-foreground font-semibold py-4 hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:pointer-events-none"
           >
             {isSubmitting ? (
@@ -563,7 +685,7 @@ function CheckoutPage() {
               </>
             ) : (
               <>
-                Finalizar compra — {formatCurrency(orderTotal)}
+                {selectedCarrier === "retirada" ? "Confirmar pedido" : "Finalizar compra"} — {formatCurrency(orderTotal)}
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

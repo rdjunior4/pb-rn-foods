@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../query-keys";
+import { useAuth } from "../auth-context";
 import {
   loadStore,
   saveStore,
@@ -44,6 +45,14 @@ import {
 import { apiUpdateOrderStatus } from "../api/orders";
 import { isSupabaseConfigured } from "../supabase";
 
+function useRequireAdmin() {
+  const { isAdmin } = useAuth();
+  if (!isAdmin) {
+    throw new Error("Acesso negado: apenas administradores podem executar esta ação.");
+  }
+  return { isAdmin };
+}
+
 // ─── Dashboard ───
 export function useAdminStore() {
   return useQuery({
@@ -82,6 +91,7 @@ export function useSaveProduct() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (product: Product) => {
+      useRequireAdmin();
       const store = loadStore();
       const idx = store.products.findIndex((p) => p.id === product.id);
       if (idx >= 0) store.products[idx] = product;
@@ -101,6 +111,7 @@ export function useDeleteProduct() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      useRequireAdmin();
       const store = loadStore();
       store.products = store.products.filter((p) => p.id !== id);
       saveStore(store);
@@ -142,6 +153,7 @@ export function useSaveCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (category: Category) => {
+      useRequireAdmin();
       const store = loadStore();
       const idx = store.categories.findIndex((c) => c.id === category.id);
       if (idx >= 0) store.categories[idx] = category;
@@ -163,6 +175,7 @@ export function useDeleteCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      useRequireAdmin();
       const store = loadStore();
       store.products.forEach((p) => {
         if (p.categoryId === id) p.categoryId = "";
@@ -193,6 +206,7 @@ export function useSaveBrand() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (brand: Brand) => {
+      useRequireAdmin();
       const store = loadStore();
       const idx = store.brands.findIndex((b) => b.id === brand.id);
       if (idx >= 0) store.brands[idx] = brand;
@@ -212,6 +226,7 @@ export function useDeleteBrand() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      useRequireAdmin();
       const store = loadStore();
       store.brands = store.brands.filter((b) => b.id !== id);
       saveStore(store);
@@ -229,6 +244,7 @@ export function useAdminAdvanceOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: string) => {
+      useRequireAdmin();
       const orders = loadOrders();
       const order = orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Pedido não encontrado");
@@ -256,6 +272,7 @@ export function useAdminCancelOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: string) => {
+      useRequireAdmin();
       const orders = loadOrders();
       const order = orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Pedido não encontrado");
@@ -284,6 +301,7 @@ export function useSaveCoupon() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (coupon: Coupon) => {
+      useRequireAdmin();
       saveCoupon(coupon);
       if (isSupabaseConfigured()) await apiSaveCoupon(coupon);
       return coupon;
@@ -298,6 +316,7 @@ export function useDeleteCoupon() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      useRequireAdmin();
       deleteCoupon(id);
       if (isSupabaseConfigured()) await apiDeleteCoupon(id);
     },
@@ -349,6 +368,7 @@ export function useAdjustStock() {
       newStock: number;
       reason: string;
     }) => {
+      useRequireAdmin();
       const store = loadStore();
       const product = store.products.find((p) => p.id === productId);
       if (!product) throw new Error("Produto não encontrado");
@@ -394,6 +414,7 @@ export function useSaveDistributor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (distributor: Distributor) => {
+      useRequireAdmin();
       const store = loadStore();
       const idx = store.distributors.findIndex((d) => d.id === distributor.id);
       if (idx >= 0) store.distributors[idx] = distributor;
@@ -413,6 +434,7 @@ export function useDeleteDistributor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      useRequireAdmin();
       const store = loadStore();
       store.distributors = store.distributors.filter((d) => d.id !== id);
       saveStore(store);
@@ -458,6 +480,7 @@ export function useSaveCombo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (combo: Combo) => {
+      useRequireAdmin();
       saveCombo(combo);
       if (isSupabaseConfigured()) await apiSaveCombo(combo);
       return combo;
@@ -472,6 +495,7 @@ export function useDeleteCombo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      useRequireAdmin();
       deleteCombo(id);
       if (isSupabaseConfigured()) await apiDeleteCombo(id);
     },
@@ -531,6 +555,7 @@ export function useAddCredit() {
       amount: number;
       description: string;
     }) => {
+      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");
@@ -564,6 +589,7 @@ export function useAdjustCredit() {
       amount: number;
       description: string;
     }) => {
+      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");
@@ -589,6 +615,7 @@ export function useUpdateCustomerTags() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ customerId, tags }: { customerId: string; tags: string[] }) => {
+      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");
@@ -606,6 +633,7 @@ export function useUpdateCustomerNotes() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ customerId, notes }: { customerId: string; notes: string }) => {
+      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");

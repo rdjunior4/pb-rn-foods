@@ -3,6 +3,7 @@ import { formatCPF, formatCNPJ, type DocumentType } from "./format";
 import { setUserContext } from "./sentry";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 import { checkRateLimit, recordAttempt, resetRateLimit, formatRemainingTime } from "./rate-limit";
+import { hashPassword, comparePassword } from "./crypto";
 
 export type { DocumentType };
 
@@ -228,12 +229,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Fallback localStorage
     const allUsers = loadAllUsersLocal();
     const match = allUsers[cleanEmail];
-    if (match && match.password === cleanPass) {
-      resetRateLimit("login", cleanEmail);
-      const authUser = storedToAuth(match);
-      setUser(authUser);
-      claimGuestOrdersLocal(cleanEmail, authUser.id, authUser.name);
-      return true;
+    if (match) {
+      // Suporte a senhas hasheadas (bcrypt) e legadas (plaintext)
+      const isMatch = match.password.startsWith("$2")
+        ? await comparePassword(cleanPass, match.password)
+        : match.password === cleanPass;
+      if (isMatch) {
+        // Migrar senha legada para bcrypt se necessário
+        if (!match.password.startsWith("$2")) {
+          match.password = await hashPassword(cleanPass);
+          allUsers[cleanEmail] = match;
+          saveRegisteredUsersLocal(allUsers);
+        }
+        resetRateLimit("login", cleanEmail);
+        const authUser = storedToAuth(match);
+        setUser(authUser);
+        claimGuestOrdersLocal(cleanEmail, authUser.id, authUser.name);
+        return true;
+      }
     }
     recordAttempt("login", cleanEmail);
     return false;
@@ -285,11 +298,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (allUsers[cleanEmail]) {
       return { ok: false, error: "Este e-mail já está cadastrado." };
     }
+    const hashedPassword = await hashPassword(cleanPass);
     const newUser: StoredUser = {
-      id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      id: crypto.randomUUID(),
       name: cleanName,
       email: cleanEmail,
-      password: cleanPass,
+      password: hashedPassword,
       document: cleanDoc,
       documentType,
       role: "customer",
@@ -382,8 +396,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(RESET_KEY, JSON.stringify({ [cleanEmail]: code }));
     }
     recordAttempt("reset", cleanEmail);
-    // Em produção, enviar code por email. Para demo, não retornar ao cliente.
-    console.warn("Código de reset (demo):", code);
+    // Em produção, enviar code por email (Edge Function já cuida disso)
     return { ok: true };
   }, [useSupabase]);
 
@@ -425,7 +438,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const allUsers = loadAllUsersLocal();
       const u = allUsers[cleanEmail];
       if (!u) return { ok: false, error: "Usuário não encontrado." };
-      u.password = newPassword.trim();
+      u.password = await hashPassword(newPassword.trim());
       allUsers[cleanEmail] = u;
       saveRegisteredUsersLocal(allUsers);
       delete resets[cleanEmail];

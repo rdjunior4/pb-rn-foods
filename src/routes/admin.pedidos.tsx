@@ -447,21 +447,10 @@ function AdminOrders() {
       {/* ═══════════════ PIPELINE VIEW ═══════════════ */}
       {view === "pipeline" && (
         <>
-          {filtered.length === 0 ? (
-            <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
-              <div className="h-16 w-16 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-4">
-                <Truck className="h-8 w-8 text-zinc-300" />
-              </div>
-              <p className="text-sm font-medium text-zinc-900">Nenhum pedido encontrado</p>
-              <p className="text-xs text-zinc-400 mt-1">
-                Arraste pedidos entre colunas para alterar status
-              </p>
-            </div>
-          ) : (
-            <div className="flex gap-6 min-h-[500px]">
-              {/* Kanban */}
-              <div className="flex-1 overflow-x-auto">
-                <div className="grid grid-cols-5 gap-3 min-w-[800px]">
+          <div className="flex gap-6 min-h-[500px]">
+            {/* Kanban */}
+            <div className="flex-1 overflow-x-auto">
+              <div className="grid grid-cols-5 gap-3 min-w-[800px]">
                   {pipelineStatuses.map((status) => {
                     const cfg = statusConfig[status];
                     const items = pipelineGroups[status];
@@ -756,7 +745,6 @@ function AdminOrders() {
                 </div>
               )}
             </div>
-          )}
         </>
       )}
 

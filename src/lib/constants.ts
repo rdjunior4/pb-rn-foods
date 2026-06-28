@@ -47,13 +47,11 @@ export const nextStatus: Record<OrderStatus, OrderStatus | null> = {
 
 /* ─── Transportadoras ─── */
 export const carriers = [
-  { id: "correios-sedex", name: "Correios - SEDEX", days: "1-3 dias úteis" },
-  { id: "correios-pac", name: "Correios - PAC", days: "3-7 dias úteis" },
-  { id: "jadlog", name: "Jadlog", days: "2-5 dias úteis" },
-  { id: "total", name: "Total Express", days: "2-5 dias úteis" },
-  { id: "sequoia", name: "Sequoia", days: "3-6 dias úteis" },
+  { id: "propria", name: "Entrega própria", days: "Conforme região" },
   { id: "retirada", name: "Retirada no local", days: "Imediata" },
 ];
+
+export const ZERO_FEE_CARRIERS = ["propria", "retirada"];
 
 /* ─── Unidades de produto ─── */
 export const unitLabels: Record<string, string> = {
