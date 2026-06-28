@@ -103,9 +103,13 @@ function AdminMarcas() {
             );
             saveStore(s);
           }
+          toast.success("Marca atualizada");
+          resetForm();
+        },
+        onError: () => {
+          toast.error("Erro ao atualizar marca");
         },
       });
-      toast.success("Marca atualizada");
     } else {
       if (brands.some((b) => b.name.toLowerCase() === formName.trim().toLowerCase())) {
         toast.error("Já existe uma marca com esse nome");
@@ -118,11 +122,16 @@ function AdminMarcas() {
         logo: finalLogo,
         active: true,
         createdAt: new Date().toISOString(),
+      }, {
+        onSuccess: () => {
+          toast.success("Marca criada");
+          resetForm();
+        },
+        onError: () => {
+          toast.error("Erro ao criar marca");
+        },
       });
-      toast.success("Marca criada");
     }
-
-    resetForm();
   };
 
   const resetForm = () => {
@@ -150,8 +159,14 @@ function AdminMarcas() {
       toast.error(`Não é possível excluir. ${count} produto(s) usam esta marca.`);
       return;
     }
-    deleteBrandMutation.mutate(brand.id);
-    toast.success("Marca excluída");
+    deleteBrandMutation.mutate(brand.id, {
+      onSuccess: () => {
+        toast.success("Marca excluída");
+      },
+      onError: () => {
+        toast.error("Erro ao excluir marca");
+      },
+    });
   };
 
   const toggleActive = (brand: Brand) => {

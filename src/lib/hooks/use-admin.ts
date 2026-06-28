@@ -45,12 +45,20 @@ import {
 import { apiUpdateOrderStatus } from "../api/orders";
 import { isSupabaseConfigured } from "../supabase";
 
-function useRequireAdmin() {
+export function useRequireAdmin() {
   const { isAdmin } = useAuth();
   if (!isAdmin) {
     throw new Error("Acesso negado: apenas administradores podem executar esta ação.");
   }
   return { isAdmin };
+}
+
+async function safeSupabaseWrite(fn: () => Promise<void>) {
+  try {
+    await fn();
+  } catch (err) {
+    console.warn("[Supabase] write failed (localStorage preserved):", err);
+  }
 }
 
 // ─── Dashboard ───
@@ -91,13 +99,12 @@ export function useSaveProduct() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (product: Product) => {
-      useRequireAdmin();
       const store = loadStore();
       const idx = store.products.findIndex((p) => p.id === product.id);
       if (idx >= 0) store.products[idx] = product;
       else store.products.push(product);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiSaveProduct(product);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveProduct(product));
       return product;
     },
     onSuccess: () => {
@@ -111,11 +118,10 @@ export function useDeleteProduct() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      useRequireAdmin();
       const store = loadStore();
       store.products = store.products.filter((p) => p.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiDeleteProduct(id);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteProduct(id));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
@@ -131,7 +137,7 @@ export function useBulkDeleteProducts() {
       const store = loadStore();
       store.products = store.products.filter((p) => !ids.includes(p.id));
       saveStore(store);
-      if (isSupabaseConfigured()) await apiBulkDeleteProducts(ids);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiBulkDeleteProducts(ids));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
@@ -153,13 +159,12 @@ export function useSaveCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (category: Category) => {
-      useRequireAdmin();
       const store = loadStore();
       const idx = store.categories.findIndex((c) => c.id === category.id);
       if (idx >= 0) store.categories[idx] = category;
       else store.categories.push(category);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiSaveCategory(category);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveCategory(category));
       return category;
     },
     onSuccess: () => {
@@ -175,14 +180,13 @@ export function useDeleteCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      useRequireAdmin();
       const store = loadStore();
       store.products.forEach((p) => {
         if (p.categoryId === id) p.categoryId = "";
       });
       store.categories = store.categories.filter((c) => c.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiDeleteCategory(id);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteCategory(id));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.categories() });
@@ -206,13 +210,12 @@ export function useSaveBrand() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (brand: Brand) => {
-      useRequireAdmin();
       const store = loadStore();
       const idx = store.brands.findIndex((b) => b.id === brand.id);
       if (idx >= 0) store.brands[idx] = brand;
       else store.brands.push(brand);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiSaveBrand(brand);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveBrand(brand));
       return brand;
     },
     onSuccess: () => {
@@ -226,11 +229,10 @@ export function useDeleteBrand() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      useRequireAdmin();
       const store = loadStore();
       store.brands = store.brands.filter((b) => b.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiDeleteBrand(id);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteBrand(id));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.brands() });
@@ -244,7 +246,6 @@ export function useAdminAdvanceOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: string) => {
-      useRequireAdmin();
       const orders = loadOrders();
       const order = orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Pedido não encontrado");
@@ -259,7 +260,7 @@ export function useAdminAdvanceOrder() {
       order.status = next as Order["status"];
       order.updatedAt = new Date().toISOString();
       saveOrders(orders);
-      if (isSupabaseConfigured()) await apiUpdateOrderStatus(orderId, order.status);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiUpdateOrderStatus(orderId, order.status));
       return order;
     },
     onSuccess: () => {
@@ -272,14 +273,13 @@ export function useAdminCancelOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (orderId: string) => {
-      useRequireAdmin();
       const orders = loadOrders();
       const order = orders.find((o) => o.id === orderId);
       if (!order) throw new Error("Pedido não encontrado");
       order.status = "cancelled";
       order.updatedAt = new Date().toISOString();
       saveOrders(orders);
-      if (isSupabaseConfigured()) await apiUpdateOrderStatus(orderId, "cancelled");
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiUpdateOrderStatus(orderId, "cancelled"));
       return order;
     },
     onSuccess: () => {
@@ -301,9 +301,8 @@ export function useSaveCoupon() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (coupon: Coupon) => {
-      useRequireAdmin();
       saveCoupon(coupon);
-      if (isSupabaseConfigured()) await apiSaveCoupon(coupon);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveCoupon(coupon));
       return coupon;
     },
     onSuccess: () => {
@@ -316,9 +315,8 @@ export function useDeleteCoupon() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      useRequireAdmin();
       deleteCoupon(id);
-      if (isSupabaseConfigured()) await apiDeleteCoupon(id);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteCoupon(id));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.coupons() });
@@ -368,7 +366,6 @@ export function useAdjustStock() {
       newStock: number;
       reason: string;
     }) => {
-      useRequireAdmin();
       const store = loadStore();
       const product = store.products.find((p) => p.id === productId);
       if (!product) throw new Error("Produto não encontrado");
@@ -376,7 +373,7 @@ export function useAdjustStock() {
       product.stock = Math.max(0, newStock);
       saveStore(store);
 
-      if (isSupabaseConfigured()) await apiSaveProduct(product);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveProduct(product));
 
       const movement: StockMovement = {
         id: `smv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -390,7 +387,7 @@ export function useAdjustStock() {
         createdAt: new Date().toISOString(),
       };
       addStockMovement(movement);
-      if (isSupabaseConfigured()) await apiAddStockMovement(movement);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiAddStockMovement(movement));
       return movement;
     },
     onSuccess: () => {
@@ -414,13 +411,12 @@ export function useSaveDistributor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (distributor: Distributor) => {
-      useRequireAdmin();
       const store = loadStore();
       const idx = store.distributors.findIndex((d) => d.id === distributor.id);
       if (idx >= 0) store.distributors[idx] = distributor;
       else store.distributors.push(distributor);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiSaveDistributor(distributor);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveDistributor(distributor));
       return distributor;
     },
     onSuccess: () => {
@@ -434,11 +430,10 @@ export function useDeleteDistributor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      useRequireAdmin();
       const store = loadStore();
       store.distributors = store.distributors.filter((d) => d.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await apiDeleteDistributor(id);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteDistributor(id));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.distributors() });
@@ -456,7 +451,7 @@ export function useToggleDistributor() {
       if (dist) {
         dist.active = !dist.active;
         saveStore(store);
-        if (isSupabaseConfigured()) await apiSaveDistributor(dist);
+        if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveDistributor(dist));
       }
       return dist;
     },
@@ -480,9 +475,8 @@ export function useSaveCombo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (combo: Combo) => {
-      useRequireAdmin();
       saveCombo(combo);
-      if (isSupabaseConfigured()) await apiSaveCombo(combo);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveCombo(combo));
       return combo;
     },
     onSuccess: () => {
@@ -495,9 +489,8 @@ export function useDeleteCombo() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      useRequireAdmin();
       deleteCombo(id);
-      if (isSupabaseConfigured()) await apiDeleteCombo(id);
+      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteCombo(id));
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.combos() });
@@ -555,7 +548,6 @@ export function useAddCredit() {
       amount: number;
       description: string;
     }) => {
-      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");
@@ -589,7 +581,6 @@ export function useAdjustCredit() {
       amount: number;
       description: string;
     }) => {
-      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");
@@ -615,7 +606,6 @@ export function useUpdateCustomerTags() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ customerId, tags }: { customerId: string; tags: string[] }) => {
-      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");
@@ -633,7 +623,6 @@ export function useUpdateCustomerNotes() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ customerId, notes }: { customerId: string; notes: string }) => {
-      useRequireAdmin();
       const customers = loadCustomers();
       const customer = customers.find((c) => c.id === customerId);
       if (!customer) throw new Error("Cliente não encontrado");

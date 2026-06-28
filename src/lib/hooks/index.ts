@@ -39,4 +39,5 @@ export {
   useAdjustCredit,
   useUpdateCustomerTags,
   useUpdateCustomerNotes,
+  useRequireAdmin,
 } from "./use-admin";
