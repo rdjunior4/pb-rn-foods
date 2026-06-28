@@ -35,7 +35,7 @@ export function BrandHighlights() {
               key={`${b.name}-${i}`}
               to="/buscar"
               search={{ q: b.name }}
-              className="flex h-20 w-40 shrink-0 items-center justify-center rounded border border-border/40 bg-card hover:border-primary/30 hover:shadow-md transition-all p-4"
+              className="flex h-24 w-48 shrink-0 items-center justify-center rounded border border-border/40 bg-card hover:border-primary/30 hover:shadow-md transition-all px-3 py-2"
             >
               <img
                 src={b.logo}
