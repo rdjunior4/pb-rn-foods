@@ -109,13 +109,14 @@ function SearchPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-2 mt-6">
             {categories.map((cat) => (
-              <a
+              <Link
                 key={cat.id}
-                href={`/categoria/${cat.slug}`}
+                to="/categoria/$slug"
+                params={{ slug: cat.slug }}
                 className="inline-flex items-center rounded border border-border/40 px-4 py-1.5 text-sm hover:border-primary hover:text-primary transition-colors"
               >
                 {cat.name}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { CategoryNav } from "@/components/CategoryNav";
 import { HeroBanner } from "@/components/HeroBanner";
 import { BrandHighlights } from "@/components/BrandHighlights";
@@ -109,7 +110,7 @@ function renderSection(
             section.style === "gradient" ? "rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-primary/10 p-6" :
             ""
           }`}
-          dangerouslySetInnerHTML={{ __html: section.html }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(section.html) }}
         />
       );
 

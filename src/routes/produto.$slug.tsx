@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
   ShoppingCart, Heart, Truck, ShieldCheck,
@@ -22,6 +22,7 @@ function ProductPage() {
   const { slug } = Route.useParams();
   const { data: product, isLoading } = useProductBySlug(slug);
   const { data: categories = [] } = useCategories();
+  const navigate = useNavigate();
   const { addItem, getItemQuantity } = useCart();
   const { isFavorite, toggleFavorite } = useWishlist();
   const [qty, setQty] = useState(1);
@@ -78,7 +79,7 @@ function ProductPage() {
     const variantLabel = selectedVariant ? ` (${selectedVariant.label})` : "";
     toast.success(`${product.name}${variantLabel} adicionado ao carrinho`, {
       description: `${qty}x — ${formatCurrency(currentPrice * qty)}`,
-      action: { label: "Ver carrinho", onClick: () => window.location.href = "/carrinho" },
+      action: { label: "Ver carrinho", onClick: () => navigate({ to: "/carrinho" }) },
     });
     setQty(1);
   };
