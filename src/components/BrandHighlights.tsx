@@ -45,6 +45,13 @@ export function BrandHighlights() {
               />
             </Link>
           ))}
+          <Link
+            to="/buscar"
+            search={{ q: "" }}
+            className="flex h-24 w-48 shrink-0 items-center justify-center rounded border border-dashed border-border/60 bg-card/50 hover:border-primary/30 hover:bg-card transition-all px-3 py-2"
+          >
+            <span className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">Ver todas →</span>
+          </Link>
         </div>
       </div>
     </section>

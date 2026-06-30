@@ -1,4 +1,4 @@
-import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed, Combo, Coupon, ProductReview, StockMovement, Customer } from "./types";
+import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed, Combo, Coupon, ProductReview, StockMovement, Customer, CreditEntry } from "./types";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 
 const STORAGE_KEY = "@pbrn-admin";
@@ -438,7 +438,7 @@ export function syncFromSupabase(): Promise<void> {
     if (!supabase) return;
 
     try {
-      const [cats, brs, prods, dists, combs, bans, cpns, revs, movs, ords, custs] = await Promise.all([
+      const [cats, brs, prods, dists, combs, bans, cpns, revs, movs, ords, custs, credHist] = await Promise.all([
         supabase.from("categories").select("*").order("sort_order"),
         supabase.from("brands").select("*").order("name"),
         supabase.from("products").select("*, product_variants(*)").order("created_at", { ascending: false }),
@@ -450,6 +450,7 @@ export function syncFromSupabase(): Promise<void> {
         supabase.from("stock_movements").select("*").order("created_at", { ascending: false }).limit(500),
         supabase.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }),
         supabase.from("customers").select("*").order("created_at"),
+        supabase.from("credit_history").select("*").order("created_at", { ascending: false }),
       ]);
 
       // Só sobrescrever dados se Supabase retornar dados não-vazios
@@ -477,7 +478,24 @@ export function syncFromSupabase(): Promise<void> {
         })) : existingStore.brands,
         distributors: (dists.data && dists.data.length > 0) ? dists.data.map(mapDbDistributor) : existingStore.distributors,
         combos: (combs.data && combs.data.length > 0) ? combs.data.map(mapDbCombo) : existingStore.combos,
-        customers: (custs.data && custs.data.length > 0) ? custs.data.map(mapDbCustomer) : existingStore.customers,
+        customers: (custs.data && custs.data.length > 0)
+          ? custs.data.map((c: Record<string, unknown>) => {
+              const customer = mapDbCustomer(c);
+              // Join credit_history from separate table
+              if (credHist.data && credHist.data.length > 0) {
+                customer.creditHistory = credHist.data
+                  .filter((h: Record<string, unknown>) => h.customer_id === c.id)
+                  .map((h: Record<string, unknown>) => ({
+                    id: h.id as string,
+                    type: h.type as CreditEntry["type"],
+                    amount: Number(h.amount) || 0,
+                    description: (h.description as string) || "",
+                    createdAt: h.created_at as string,
+                  }));
+              }
+              return customer;
+            })
+          : existingStore.customers,
       };
       saveStore(store);
 
@@ -664,10 +682,10 @@ function mapDbCustomer(db: Record<string, unknown>): Customer {
     createdAt: db.created_at as string,
     creditBalance: Number(db.credit_balance) || 0,
     creditLimit: Number(db.credit_limit) || 0,
-    creditHistory: (db.credit_history as Customer["creditHistory"]) || [],
+    creditHistory: [],
     loyaltyPoints: Number(db.loyalty_points) || 0,
     loyaltyLevel: (db.loyalty_level as Customer["loyaltyLevel"]) || "bronze",
-    tags: (db.tags as string[]) || [],
+    tags: Array.isArray(db.tags) ? db.tags as string[] : [],
     notes: (db.notes as string) || "",
   };
 }

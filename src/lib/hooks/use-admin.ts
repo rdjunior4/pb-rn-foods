@@ -41,6 +41,10 @@ import {
   apiSaveCoupon,
   apiDeleteCoupon,
   apiAddStockMovement,
+  apiSaveCustomer,
+  apiDeleteCustomer,
+  apiAddCredit,
+  apiAdjustCredit,
 } from "../api/admin-writes";
 import { apiUpdateOrderStatus } from "../api/orders";
 import { isSupabaseConfigured } from "../supabase";
@@ -516,6 +520,9 @@ export function useSaveCustomer() {
       if (idx >= 0) customers[idx] = customer;
       else customers.push(customer);
       saveCustomers(customers);
+      if (isSupabaseConfigured()) {
+        try { await apiSaveCustomer(customer); } catch { /* localStorage fallback */ }
+      }
       return customer;
     },
     onSuccess: () => {
@@ -529,6 +536,9 @@ export function useDeleteCustomer() {
   return useMutation({
     mutationFn: async (id: string) => {
       saveCustomers(loadCustomers().filter((c) => c.id !== id));
+      if (isSupabaseConfigured()) {
+        try { await apiDeleteCustomer(id); } catch { /* localStorage fallback */ }
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
@@ -553,14 +563,18 @@ export function useAddCredit() {
       if (!customer) throw new Error("Cliente não encontrado");
 
       customer.creditBalance += amount;
-      customer.creditHistory.push({
+      const entry = {
         id: `crd_${Date.now()}`,
-        type: "release",
+        type: "release" as const,
         amount,
         description,
         createdAt: new Date().toISOString(),
-      });
+      };
+      customer.creditHistory.push(entry);
       saveCustomers(customers);
+      if (isSupabaseConfigured()) {
+        try { await apiAddCredit(customerId, amount, description); } catch { /* localStorage fallback */ }
+      }
       return customer;
     },
     onSuccess: () => {
@@ -594,6 +608,11 @@ export function useAdjustCredit() {
         createdAt: new Date().toISOString(),
       });
       saveCustomers(customers);
+      if (isSupabaseConfigured()) {
+        try {
+          await apiAdjustCredit(customerId, customer.creditBalance, description);
+        } catch { /* localStorage fallback */ }
+      }
       return customer;
     },
     onSuccess: () => {
@@ -611,6 +630,12 @@ export function useUpdateCustomerTags() {
       if (!customer) throw new Error("Cliente não encontrado");
       customer.tags = tags;
       saveCustomers(customers);
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = (await import("../supabase")).getSupabase();
+          if (supabase) await supabase.from("customers").update({ tags }).eq("id", customerId);
+        } catch { /* localStorage fallback */ }
+      }
       return customer;
     },
     onSuccess: () => {
@@ -628,6 +653,12 @@ export function useUpdateCustomerNotes() {
       if (!customer) throw new Error("Cliente não encontrado");
       customer.notes = notes;
       saveCustomers(customers);
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = (await import("../supabase")).getSupabase();
+          if (supabase) await supabase.from("customers").update({ notes }).eq("id", customerId);
+        } catch { /* localStorage fallback */ }
+      }
       return customer;
     },
     onSuccess: () => {

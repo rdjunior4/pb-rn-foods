@@ -1,5 +1,5 @@
 import { getSupabase, isSupabaseConfigured } from "../supabase";
-import type { Product, Category, Brand, Distributor, Combo, Banner, Coupon, StockMovement } from "../types";
+import type { Product, Category, Brand, Distributor, Combo, Banner, Coupon, StockMovement, Customer, CreditEntry } from "../types";
 
 // ============================================================
 // PRODUCTS
@@ -333,4 +333,101 @@ export async function apiAddStockMovement(movement: StockMovement): Promise<void
     reason: movement.reason,
   });
   if (error) throw error;
+}
+
+// ============================================================
+// CUSTOMERS
+// ============================================================
+
+export async function apiSaveCustomer(customer: Customer): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  const { error } = await supabase.from("customers").upsert({
+    id: customer.id,
+    name: customer.name,
+    email: customer.email,
+    document: customer.document,
+    document_type: customer.documentType || "cpf",
+    phone: customer.phone,
+    address: customer.address,
+    city: customer.city,
+    state: customer.state,
+    credit_balance: customer.creditBalance,
+    credit_limit: customer.creditLimit,
+    loyalty_points: customer.loyaltyPoints,
+    loyalty_level: customer.loyaltyLevel,
+    tags: customer.tags,
+    notes: customer.notes,
+    active: true,
+  }, { onConflict: "id" });
+  if (error) throw error;
+}
+
+export async function apiDeleteCustomer(id: string): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+  const { error } = await supabase.from("customers").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function apiAddCredit(
+  customerId: string,
+  amount: number,
+  description: string,
+  orderId?: string,
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  const entry: Record<string, unknown> = {
+    id: crypto.randomUUID(),
+    customer_id: customerId,
+    type: "release",
+    amount,
+    description,
+  };
+  if (orderId) entry.order_id = orderId;
+
+  const { error: histErr } = await supabase.from("credit_history").insert(entry);
+  if (histErr) throw histErr;
+
+  const { error: balErr } = await supabase.rpc("increment_customer_credit", {
+    p_customer_id: customerId,
+    p_amount: amount,
+  });
+  if (balErr) {
+    const { data: cust } = await supabase.from("customers").select("credit_balance").eq("id", customerId).single();
+    if (cust) {
+      await supabase.from("customers").update({ credit_balance: cust.credit_balance + amount }).eq("id", customerId);
+    }
+  }
+}
+
+export async function apiAdjustCredit(
+  customerId: string,
+  newBalance: number,
+  description: string,
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  const { data: cust } = await supabase.from("customers").select("credit_balance").eq("id", customerId).single();
+  const diff = newBalance - (cust?.credit_balance ?? 0);
+
+  const { error: histErr } = await supabase.from("credit_history").insert({
+    id: crypto.randomUUID(),
+    customer_id: customerId,
+    type: "adjust",
+    amount: diff,
+    description,
+  });
+  if (histErr) throw histErr;
+
+  const { error: balErr } = await supabase.from("customers").update({ credit_balance: newBalance }).eq("id", customerId);
+  if (balErr) throw balErr;
 }
