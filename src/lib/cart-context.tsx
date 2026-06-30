@@ -1,13 +1,17 @@
-import { createContext, useContext, useReducer, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useCallback, useMemo, useEffect, type ReactNode } from "react";
 import type { CartItem } from "./types";
 import { useProducts } from "./hooks";
+import { useAuth } from "./auth-context";
+import { getSupabase, isSupabaseConfigured } from "./supabase";
 import { toast } from "sonner";
 
 interface CartState {
   items: CartItem[];
+  loaded: boolean;
 }
 
 type CartAction =
+  | { type: "SET_ITEMS"; items: CartItem[] }
   | { type: "ADD_ITEM"; productId: string; variantId?: string; quantity?: number; unitPrice: number }
   | { type: "REMOVE_ITEM"; productId: string; variantId?: string }
   | { type: "UPDATE_QUANTITY"; productId: string; variantId?: string; quantity: number }
@@ -19,36 +23,40 @@ function cartKey(productId: string, variantId?: string) {
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
+    case "SET_ITEMS":
+      return { items: action.items, loaded: true };
     case "ADD_ITEM": {
       const q = action.quantity ?? 1;
       const key = cartKey(action.productId, action.variantId);
       const existing = state.items.find((i) => cartKey(i.productId, i.variantId) === key);
       if (existing) {
         return {
+          ...state,
           items: state.items.map((i) =>
             cartKey(i.productId, i.variantId) === key ? { ...i, quantity: i.quantity + q, unitPrice: action.unitPrice } : i
           ),
         };
       }
-      return { items: [...state.items, { productId: action.productId, variantId: action.variantId, quantity: q, unitPrice: action.unitPrice }] };
+      return { ...state, items: [...state.items, { productId: action.productId, variantId: action.variantId, quantity: q, unitPrice: action.unitPrice }] };
     }
     case "REMOVE_ITEM": {
       const key = cartKey(action.productId, action.variantId);
-      return { items: state.items.filter((i) => cartKey(i.productId, i.variantId) !== key) };
+      return { ...state, items: state.items.filter((i) => cartKey(i.productId, i.variantId) !== key) };
     }
     case "UPDATE_QUANTITY": {
       const key = cartKey(action.productId, action.variantId);
       if (action.quantity <= 0) {
-        return { items: state.items.filter((i) => cartKey(i.productId, i.variantId) !== key) };
+        return { ...state, items: state.items.filter((i) => cartKey(i.productId, i.variantId) !== key) };
       }
       return {
+        ...state,
         items: state.items.map((i) =>
           cartKey(i.productId, i.variantId) === key ? { ...i, quantity: action.quantity } : i
         ),
       };
     }
     case "CLEAR":
-      return { items: [] };
+      return { items: [], loaded: true };
     default:
       return state;
   }
@@ -57,6 +65,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 interface CartContextType {
   items: CartItem[];
   totalItems: number;
+  loaded: boolean;
   addItem: (productId: string, quantity?: number, variantId?: string, unitPrice?: number) => void;
   removeItem: (productId: string, variantId?: string) => void;
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
@@ -66,10 +75,62 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
+async function loadCartFromSupabase(userId: string): Promise<CartItem[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("cart_items")
+    .select("product_id, variant_id, quantity, unit_price")
+    .eq("user_id", userId);
+  if (error || !data) return [];
+  return data.map((row: Record<string, unknown>) => ({
+    productId: row.product_id as string,
+    variantId: (row.variant_id as string) || undefined,
+    quantity: Number(row.quantity) || 1,
+    unitPrice: Number(row.unit_price) || 0,
+  }));
+}
+
+async function saveCartToSupabase(userId: string, items: CartItem[]): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase) return;
+  await supabase.from("cart_items").delete().eq("user_id", userId);
+  if (items.length === 0) return;
+  const rows = items.map((item) => ({
+    user_id: userId,
+    product_id: item.productId,
+    variant_id: item.variantId || null,
+    quantity: item.quantity,
+    unit_price: item.unitPrice,
+  }));
+  await supabase.from("cart_items").insert(rows);
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  const [state, dispatch] = useReducer(cartReducer, { items: [], loaded: false });
+  const { user } = useAuth();
   const { data: products = [] } = useProducts();
   const productMap = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+
+  // Load cart from Supabase when user logs in
+  useEffect(() => {
+    if (!user || !isSupabaseConfigured()) {
+      dispatch({ type: "SET_ITEMS", items: [] });
+      return;
+    }
+    loadCartFromSupabase(user.id).then((items) => {
+      dispatch({ type: "SET_ITEMS", items });
+    });
+  }, [user]);
+
+  // Save to Supabase whenever cart changes (debounced)
+  useEffect(() => {
+    if (!user || !isSupabaseConfigured() || !state.loaded) return;
+    const timeout = setTimeout(() => {
+      saveCartToSupabase(user.id, state.items);
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [user, state.items, state.loaded]);
 
   const addItem = useCallback((productId: string, quantity?: number, variantId?: string, unitPrice?: number) => {
     const q = quantity ?? 1;
@@ -141,7 +202,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = state.items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items: state.items, totalItems, addItem, removeItem, updateQuantity, clearCart, getItemQuantity }}>
+    <CartContext.Provider value={{ items: state.items, totalItems, loaded: state.loaded, addItem, removeItem, updateQuantity, clearCart, getItemQuantity }}>
       {children}
     </CartContext.Provider>
   );
