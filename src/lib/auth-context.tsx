@@ -23,7 +23,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, document: string, documentType: DocumentType) => Promise<{ ok: boolean; error?: string }>;
+  register: (name: string, email: string, password: string, document: string, documentType: DocumentType) => Promise<{ ok: boolean; error?: string; needsEmailConfirmation?: boolean }>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<AuthUser>) => Promise<void>;
   validateDocument: (doc: string, type: DocumentType) => boolean;
@@ -218,6 +218,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (error || !data.user) {
         recordAttempt("login", cleanEmail);
+        if (error && (error.message.toLowerCase().includes("email not confirmed") || error.message.toLowerCase().includes("not confirmed"))) {
+          throw new Error("EMAIL_NOT_CONFIRMED");
+        }
         return false;
       }
       resetRateLimit("login", cleanEmail);
@@ -258,7 +261,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     document: string,
     documentType: DocumentType,
-  ): Promise<{ ok: boolean; error?: string }> => {
+): Promise<{ ok: boolean; error?: string; needsEmailConfirmation?: boolean }> => {
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
     const cleanPass = password.trim();
@@ -287,8 +290,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
       if (error) return { ok: false, error: error.message };
-      if (data.user) {
-        await fetchProfile(data.user.id);
+      if (data.session) {
+        if (data.user) {
+          await fetchProfile(data.user.id);
+        }
+        return { ok: true };
+      }
+      if (data.user && !data.session) {
+        return { ok: true, needsEmailConfirmation: true };
       }
       return { ok: true };
     }

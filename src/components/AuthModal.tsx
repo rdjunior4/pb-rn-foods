@@ -47,6 +47,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const [document, setDocument] = useState("");
   const [documentType, setDocumentType] = useState<DocumentType>("cnpj");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -110,6 +111,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setLoading(true);
 
     try {
@@ -127,12 +129,26 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         }
         const result = await register(name, email, password, raw, documentType);
         if (!result.ok) { setError(result.error || "Erro ao criar conta."); return; }
+        if (result.needsEmailConfirmation) {
+          setSuccessMessage("Conta criada! Verifique seu e-mail (incluindo o spam) e clique no link de confirmação para ativar sua conta.");
+          setTab("login");
+          return;
+        }
         reset();
         onClose();
       } else {
         if (!email.trim()) { setError("Informe seu e-mail"); return; }
         if (!password) { setError("Informe sua senha"); return; }
-        if (!(await login(email, password))) {
+        try {
+          if (!(await login(email, password))) {
+            setError("E-mail ou senha inválidos. Se o problema persistir, aguarde 15 minutos.");
+            return;
+          }
+        } catch (err: any) {
+          if (err?.message === "EMAIL_NOT_CONFIRMED") {
+            setSuccessMessage("Sua conta ainda não foi confirmada. Verifique seu e-mail (incluindo o spam) e clique no link de confirmação.");
+            return;
+          }
           setError("E-mail ou senha inválidos. Se o problema persistir, aguarde 15 minutos.");
           return;
         }
@@ -343,6 +359,13 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 <div className="flex items-center gap-2.5 text-sm text-destructive bg-destructive/5 border border-destructive/15 rounded-xl px-4 py-3">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />
                   {error}
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="flex items-start gap-2.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                  <CheckCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>{successMessage}</span>
                 </div>
               )}
 
