@@ -162,7 +162,7 @@ export function TopBar() {
           </button>
 
           {open && (
-            <div className="absolute top-full left-0 sm:left-1/2 sm:-translate-x-1/2 mt-1.5 w-72 max-w-[calc(100vw-2rem)] rounded border border-border/40 bg-popover shadow-xl z-[100] py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 w-72 max-w-[calc(100vw-2rem)] rounded border border-border/40 bg-popover shadow-xl z-[100] py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
               <p className="px-3.5 py-1.5 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
                 Escolha sua região
               </p>
