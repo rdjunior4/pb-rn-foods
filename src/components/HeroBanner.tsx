@@ -70,7 +70,7 @@ export function HeroBanner() {
         <img
           src={(isMobile && displayBanner?.mobileImage) ? displayBanner.mobileImage : (displayBanner?.image || defaultHeroImg)}
           alt={displayBanner?.title || ""}
-          className={`absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-700 ${
+          className={`absolute inset-0 h-full w-full object-cover ${
             hasAnyText ? "opacity-40" : "opacity-100"
           }`}
           onError={(e) => {
