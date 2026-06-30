@@ -53,8 +53,6 @@ export interface StoreConfig {
   sections: StoreSection[];
 }
 
-const CONFIG_KEY = "@pbrn-store-config";
-
 const iconNames = [
   "ShieldCheck", "Truck", "Headset", "BadgePercent", "Star", "Clock",
   "MapPin", "CreditCard", "Gift", "Zap", "Heart", "RefreshCw",
@@ -134,48 +132,48 @@ export const defaultConfig: StoreConfig = {
   sections: defaultSections,
 };
 
-export function loadStoreConfig(): StoreConfig {
-  try {
-    const stored = localStorage.getItem(CONFIG_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      const config = {
-        ...defaultConfig,
-        ...parsed,
-        heroEnabled: parsed.heroEnabled ?? true,
-        heroCtaEnabled: parsed.heroCtaEnabled ?? true,
-        heroCtaLink: parsed.heroCtaLink ?? defaultConfig.heroCtaLink,
-        heroSecondaryCtaEnabled: parsed.heroSecondaryCtaEnabled ?? true,
-        carouselEnabled: parsed.carouselEnabled ?? true,
-        carouselInterval: parsed.carouselInterval ?? defaultConfig.carouselInterval,
-        benefits: parsed.benefits || defaultConfig.benefits,
-        featuredBrandIds: parsed.featuredBrandIds || [],
-        sections: parsed.sections || defaultSections,
-      };
-      return config;
-    }
-  } catch {}
-  syncConfigFromSupabase();
-  return { ...defaultConfig };
-}
+// ============================================================
+// IN-MEMORY CACHE (populated by syncStoreConfigFromSupabase)
+// ============================================================
 
-async function syncConfigFromSupabase() {
-  if (!isSupabaseConfigured()) return;
-  const supabase = getSupabase();
-  if (!supabase) return;
-  try {
-    const { data } = await supabase.from("store_config").select("config").eq("id", 1).single();
-    if (data?.config) {
-      const config = { ...defaultConfig, ...(data.config as object) };
-      localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-    }
-  } catch {}
+let _config: StoreConfig = { ...defaultConfig };
+
+export function loadStoreConfig(): StoreConfig {
+  return _config;
 }
 
 export function saveStoreConfig(config: StoreConfig): void {
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+  _config = config;
 }
 
 export function generateSectionId(): string {
   return "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+// ============================================================
+// SUPABASE SYNC
+// ============================================================
+
+let syncPromise: Promise<void> | null = null;
+
+export async function syncStoreConfigFromSupabase(): Promise<void> {
+  if (syncPromise) return syncPromise;
+  if (!isSupabaseConfigured()) return;
+
+  syncPromise = (async () => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    try {
+      const { data } = await supabase.from("store_config").select("config").eq("id", 1).single();
+      if (data?.config) {
+        _config = { ...defaultConfig, ...(data.config as object) };
+      }
+    } catch (err) {
+      console.error("[syncStoreConfigFromSupabase] erro:", err);
+    } finally {
+      syncPromise = null;
+    }
+  })();
+
+  return syncPromise;
 }

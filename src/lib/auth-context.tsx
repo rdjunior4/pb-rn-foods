@@ -1,9 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { formatCPF, formatCNPJ, type DocumentType } from "./format";
 import { setUserContext } from "./sentry";
-import { getSupabase, isSupabaseConfigured } from "./supabase";
+import { getSupabase } from "./supabase";
 import { checkRateLimit, recordAttempt, resetRateLimit, formatRemainingTime } from "./rate-limit";
-import { hashPassword, comparePassword } from "./crypto";
 
 export type { DocumentType };
 
@@ -57,10 +56,6 @@ export function validateCNPJ(cnpj: string): boolean {
   return (r2 < 2 ? 0 : 11 - r2) === parseInt(digits[13]);
 }
 
-const AUTH_KEY = "@pbrn-auth";
-const USERS_KEY = "@pbrn-users";
-const RESET_KEY = "@pbrn-pwreset";
-
 function mapProfileToAuth(p: Record<string, unknown>): AuthUser {
   return {
     id: p.id as string,
@@ -74,66 +69,7 @@ function mapProfileToAuth(p: Record<string, unknown>): AuthUser {
   };
 }
 
-// ---- localStorage fallback (quando Supabase não configurado) ----
-
-interface StoredUser {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  document: string;
-  documentType: DocumentType;
-  phone?: string;
-  role?: "admin" | "customer";
-  createdAt: string;
-}
-
-function loadAllUsersLocal(): Record<string, StoredUser> {
-  try {
-    const stored = localStorage.getItem(USERS_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveRegisteredUsersLocal(registered: Record<string, StoredUser>) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(registered));
-}
-
-function storedToAuth(stored: StoredUser): AuthUser {
-  const { password: _, ...user } = stored;
-  return user;
-}
-
-function loadCurrentUserLocal(): AuthUser | null {
-  try {
-    const stored = localStorage.getItem(AUTH_KEY);
-    return stored ? JSON.parse(stored) : null;
-  } catch {
-    return null;
-  }
-}
-
-function claimGuestOrdersLocal(email: string, userId: string, userName: string) {
-  try {
-    const ordersRaw = localStorage.getItem("@pbrn-orders");
-    if (!ordersRaw) return;
-    const orders = JSON.parse(ordersRaw);
-    if (!Array.isArray(orders)) return;
-    let changed = false;
-    for (const order of orders) {
-      if (order.customerId === "guest" && order.customerEmail === email) {
-        order.customerId = userId;
-        order.customerName = userName;
-        changed = true;
-      }
-    }
-    if (changed) localStorage.setItem("@pbrn-orders", JSON.stringify(orders));
-  } catch {}
-}
-
-async function claimGuestOrdersSupabase(email: string, userId: string) {
+async function claimGuestOrders(email: string, userId: string) {
   const supabase = getSupabase();
   if (!supabase) return;
   try {
@@ -148,22 +84,18 @@ async function claimGuestOrdersSupabase(email: string, userId: string) {
 // ---- Provider ----
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(loadCurrentUserLocal);
-  const useSupabase = isSupabaseConfigured();
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem(AUTH_KEY, JSON.stringify(user));
       setUserContext({ id: user.id, email: user.email, name: user.name });
     } else {
-      localStorage.removeItem(AUTH_KEY);
       setUserContext(null);
     }
   }, [user]);
 
   // Supabase: escutar mudanças de sessão
   useEffect(() => {
-    if (!useSupabase) return;
     const supabase = getSupabase();
     if (!supabase) return;
 
@@ -182,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => listener.subscription.unsubscribe();
-  }, [useSupabase]);
+  }, []);
 
   async function fetchProfile(userId: string) {
     const supabase = getSupabase();
@@ -202,58 +134,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cleanPass = password.trim();
     if (!cleanEmail || !cleanPass) return false;
 
-    // Rate limiting
     const { allowed, remainingMs } = checkRateLimit("login", cleanEmail);
     if (!allowed) {
       console.warn(`Login bloqueado por rate limit. Tente novamente em ${formatRemainingTime(remainingMs)}`);
       return false;
     }
 
-    if (useSupabase) {
-      const supabase = getSupabase();
-      if (!supabase) return false;
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password: cleanPass,
-      });
-      if (error || !data.user) {
-        recordAttempt("login", cleanEmail);
-        if (error && (error.message.toLowerCase().includes("email not confirmed") || error.message.toLowerCase().includes("not confirmed"))) {
-          throw new Error("EMAIL_NOT_CONFIRMED");
-        }
-        return false;
+    const supabase = getSupabase();
+    if (!supabase) return false;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: cleanEmail,
+      password: cleanPass,
+    });
+
+    if (error || !data.user) {
+      recordAttempt("login", cleanEmail);
+      if (error && (error.message.toLowerCase().includes("email not confirmed") || error.message.toLowerCase().includes("not confirmed"))) {
+        throw new Error("EMAIL_NOT_CONFIRMED");
       }
-      resetRateLimit("login", cleanEmail);
-      await fetchProfile(data.user.id);
-      await claimGuestOrdersSupabase(cleanEmail, data.user.id);
-      return true;
+      return false;
     }
 
-    // Fallback localStorage
-    const allUsers = loadAllUsersLocal();
-    const match = allUsers[cleanEmail];
-    if (match) {
-      // Suporte a senhas hasheadas (bcrypt) e legadas (plaintext)
-      const isMatch = match.password.startsWith("$2")
-        ? await comparePassword(cleanPass, match.password)
-        : match.password === cleanPass;
-      if (isMatch) {
-        // Migrar senha legada para bcrypt se necessário
-        if (!match.password.startsWith("$2")) {
-          match.password = await hashPassword(cleanPass);
-          allUsers[cleanEmail] = match;
-          saveRegisteredUsersLocal(allUsers);
-        }
-        resetRateLimit("login", cleanEmail);
-        const authUser = storedToAuth(match);
-        setUser(authUser);
-        claimGuestOrdersLocal(cleanEmail, authUser.id, authUser.name);
-        return true;
-      }
-    }
-    recordAttempt("login", cleanEmail);
-    return false;
-  }, [useSupabase]);
+    resetRateLimit("login", cleanEmail);
+    await fetchProfile(data.user.id);
+    await claimGuestOrders(cleanEmail, data.user.id);
+    return true;
+  }, []);
 
   const register = useCallback(async (
     name: string,
@@ -261,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     document: string,
     documentType: DocumentType,
-): Promise<{ ok: boolean; error?: string; needsEmailConfirmation?: boolean }> => {
+  ): Promise<{ ok: boolean; error?: string; needsEmailConfirmation?: boolean }> => {
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
     const cleanPass = password.trim();
@@ -274,93 +181,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, error: "A senha deve ter pelo menos 4 caracteres." };
     }
 
-    if (useSupabase) {
-      const supabase = getSupabase();
-      if (!supabase) return { ok: false, error: "Erro de conexão." };
-      const { data, error } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password: cleanPass,
-        options: {
-          data: {
-            name: cleanName,
-            document: cleanDoc,
-            document_type: documentType,
-            role: "customer",
-          },
+    const supabase = getSupabase();
+    if (!supabase) return { ok: false, error: "Erro de conexão." };
+
+    const { data, error } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password: cleanPass,
+      options: {
+        data: {
+          name: cleanName,
+          document: cleanDoc,
+          document_type: documentType,
+          role: "customer",
         },
-      });
-      if (error) return { ok: false, error: error.message };
-      if (data.session) {
-        if (data.user) {
-          await fetchProfile(data.user.id);
-        }
-        return { ok: true };
-      }
-      if (data.user && !data.session) {
-        return { ok: true, needsEmailConfirmation: true };
+      },
+    });
+
+    if (error) return { ok: false, error: error.message };
+    if (data.session) {
+      if (data.user) {
+        await fetchProfile(data.user.id);
       }
       return { ok: true };
     }
-
-    // Fallback localStorage
-    const allUsers = loadAllUsersLocal();
-    if (allUsers[cleanEmail]) {
-      return { ok: false, error: "Este e-mail já está cadastrado." };
+    if (data.user && !data.session) {
+      return { ok: true, needsEmailConfirmation: true };
     }
-    const hashedPassword = await hashPassword(cleanPass);
-    const newUser: StoredUser = {
-      id: crypto.randomUUID(),
-      name: cleanName,
-      email: cleanEmail,
-      password: hashedPassword,
-      document: cleanDoc,
-      documentType,
-      role: "customer",
-      createdAt: new Date().toISOString(),
-    };
-    allUsers[cleanEmail] = newUser;
-    saveRegisteredUsersLocal(allUsers);
-    setUser(storedToAuth(newUser));
     return { ok: true };
-  }, [useSupabase]);
+  }, []);
 
   const logout = useCallback(async (): Promise<void> => {
     setUser(null);
-    if (useSupabase) {
-      const supabase = getSupabase();
-      if (supabase) await supabase.auth.signOut();
-    }
-  }, [useSupabase]);
+    const supabase = getSupabase();
+    if (supabase) await supabase.auth.signOut();
+  }, []);
 
   const updateUser = useCallback(async (data: Partial<AuthUser>): Promise<void> => {
-    if (useSupabase && user) {
-      const supabase = getSupabase();
-      if (supabase) {
-        const updates: Record<string, unknown> = {};
-        if (data.name !== undefined) updates.name = data.name;
-        if (data.phone !== undefined) updates.phone = data.phone;
-        if (data.document !== undefined) updates.document = data.document;
-        if (data.documentType !== undefined) updates.document_type = data.documentType;
+    if (!user) return;
 
-        await supabase.from("profiles").update(updates).eq("id", user.id);
-        setUser((prev) => (prev ? { ...prev, ...data } : prev));
-        return;
-      }
-    }
+    const supabase = getSupabase();
+    if (!supabase) return;
 
-    // Fallback localStorage
-    setUser((prev) => {
-      if (!prev) return prev;
-      const updated = { ...prev, ...data };
-      const allUsers = loadAllUsersLocal();
-      const key = prev.email.toLowerCase();
-      if (allUsers[key]) {
-        allUsers[key] = { ...allUsers[key], ...data };
-        saveRegisteredUsersLocal(allUsers);
-      }
-      return updated;
-    });
-  }, [useSupabase, user]);
+    const updates: Record<string, unknown> = {};
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.phone !== undefined) updates.phone = data.phone;
+    if (data.document !== undefined) updates.document = data.document;
+    if (data.documentType !== undefined) updates.document_type = data.documentType;
+
+    await supabase.from("profiles").update(updates).eq("id", user.id);
+    setUser((prev) => (prev ? { ...prev, ...data } : prev));
+  }, [user]);
 
   const validateDocument = useCallback((doc: string, type: DocumentType) => {
     return type === "cpf" ? validateCPF(doc) : validateCNPJ(doc);
@@ -374,40 +244,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail) return { ok: false, error: "Informe seu e-mail." };
 
-    // Rate limiting
     const { allowed, remainingMs } = checkRateLimit("reset", cleanEmail);
     if (!allowed) {
       return { ok: false, error: `Muitas tentativas. Aguarde ${formatRemainingTime(remainingMs)}.` };
     }
 
-    if (useSupabase) {
-      const supabase = getSupabase();
-      if (!supabase) return { ok: false, error: "Erro de conexão." };
-      const { error } = await supabase.rpc("request_password_reset", { p_email: cleanEmail });
-      if (error) return { ok: false, error: error.message };
-      recordAttempt("reset", cleanEmail);
-      return { ok: true };
-    }
+    const supabase = getSupabase();
+    if (!supabase) return { ok: false, error: "Erro de conexão." };
 
-    // Fallback localStorage
-    const allUsers = loadAllUsersLocal();
-    if (!allUsers[cleanEmail]) {
-      // Por segurança, não informar se o email existe ou não
-      recordAttempt("reset", cleanEmail);
-      return { ok: true };
-    }
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    try {
-      const resets: Record<string, string> = JSON.parse(localStorage.getItem(RESET_KEY) || "{}");
-      resets[cleanEmail] = code;
-      localStorage.setItem(RESET_KEY, JSON.stringify(resets));
-    } catch {
-      localStorage.setItem(RESET_KEY, JSON.stringify({ [cleanEmail]: code }));
-    }
+    const { error } = await supabase.rpc("request_password_reset", { p_email: cleanEmail });
+    if (error) return { ok: false, error: error.message };
     recordAttempt("reset", cleanEmail);
-    // Em produção, enviar code por email (Edge Function já cuida disso)
     return { ok: true };
-  }, [useSupabase]);
+  }, []);
 
   const resetPassword = useCallback(async (email: string, code: string, newPassword: string): Promise<{ ok: boolean; error?: string }> => {
     const cleanEmail = email.trim().toLowerCase();
@@ -415,86 +264,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, error: "A senha deve ter pelo menos 4 caracteres." };
     }
 
-    if (useSupabase) {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-password`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({ email: cleanEmail, code: code.trim(), newPassword }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          return { ok: false, error: data.error || "Erro ao redefinir senha." };
-        }
-
-        resetRateLimit("reset", cleanEmail);
-        return { ok: true };
-      } catch {
-        return { ok: false, error: "Erro de conexão ao redefinir senha." };
-      }
-    }
-
-    // Fallback localStorage
     try {
-      const resets: Record<string, string> = JSON.parse(localStorage.getItem(RESET_KEY) || "{}");
-      if (resets[cleanEmail] !== code.trim()) {
-        return { ok: false, error: "Código de verificação inválido." };
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ email: cleanEmail, code: code.trim(), newPassword }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, error: data.error || "Erro ao redefinir senha." };
       }
-      const allUsers = loadAllUsersLocal();
-      const u = allUsers[cleanEmail];
-      if (!u) return { ok: false, error: "Usuário não encontrado." };
-      u.password = await hashPassword(newPassword.trim());
-      allUsers[cleanEmail] = u;
-      saveRegisteredUsersLocal(allUsers);
-      delete resets[cleanEmail];
-      localStorage.setItem(RESET_KEY, JSON.stringify(resets));
+
       resetRateLimit("reset", cleanEmail);
       return { ok: true };
     } catch {
-      return { ok: false, error: "Erro ao redefinir senha." };
+      return { ok: false, error: "Erro de conexão ao redefinir senha." };
     }
-  }, [useSupabase]);
+  }, []);
 
   const deleteAccount = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
     if (!user) return { ok: false, error: "Nenhum usuário logado." };
 
-    if (useSupabase) {
-      const supabase = getSupabase();
-      if (!supabase) return { ok: false, error: "Erro de conexão." };
+    const supabase = getSupabase();
+    if (!supabase) return { ok: false, error: "Erro de conexão." };
 
-      // Excluir dados do usuário (orders, reviews, etc.)
-      try {
-        // Excluir reviews
-        await supabase.from("product_reviews").delete().eq("user_id", user.id);
-        // Excluir pedidos (mantém para histórico, mas remove referência)
-        await supabase.from("orders").update({ customer_id: null }).eq("customer_id", user.id);
-        // Excluir profile (cascade delete do auth user)
-        await supabase.from("profiles").delete().eq("id", user.id);
-      } catch {
-        // Continuar mesmo com erro — o importante é deslogar
-      }
-
-      await supabase.auth.signOut();
-      setUser(null);
-      return { ok: true };
-    }
-
-    // Fallback localStorage
     try {
-      const allUsers = loadAllUsersLocal();
-      delete allUsers[user.email.toLowerCase()];
-      saveRegisteredUsersLocal(allUsers);
-      localStorage.removeItem(AUTH_KEY);
-      setUser(null);
-      return { ok: true };
+      await supabase.from("product_reviews").delete().eq("user_id", user.id);
+      await supabase.from("orders").update({ customer_id: null }).eq("customer_id", user.id);
+      await supabase.from("profiles").delete().eq("id", user.id);
     } catch {
-      return { ok: false, error: "Erro ao excluir conta." };
+      // Continuar mesmo com erro — o importante é deslogar
     }
-  }, [useSupabase, user]);
+
+    await supabase.auth.signOut();
+    setUser(null);
+    return { ok: true };
+  }, [user]);
 
   return (
     <AuthContext.Provider

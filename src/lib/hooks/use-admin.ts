@@ -47,7 +47,6 @@ import {
   apiAdjustCredit,
 } from "../api/admin-writes";
 import { apiUpdateOrderStatus } from "../api/orders";
-import { isSupabaseConfigured } from "../supabase";
 
 export function useRequireAdmin() {
   const { isAdmin } = useAuth();
@@ -55,14 +54,6 @@ export function useRequireAdmin() {
     throw new Error("Acesso negado: apenas administradores podem executar esta ação.");
   }
   return { isAdmin };
-}
-
-async function safeSupabaseWrite(fn: () => Promise<void>) {
-  try {
-    await fn();
-  } catch (err) {
-    console.warn("[Supabase] write failed (localStorage preserved):", err);
-  }
 }
 
 // ─── Dashboard ───
@@ -108,7 +99,7 @@ export function useSaveProduct() {
       if (idx >= 0) store.products[idx] = product;
       else store.products.push(product);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveProduct(product));
+      await apiSaveProduct(product);
       return product;
     },
     onSuccess: () => {
@@ -125,7 +116,7 @@ export function useDeleteProduct() {
       const store = loadStore();
       store.products = store.products.filter((p) => p.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteProduct(id));
+      await apiDeleteProduct(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
@@ -141,7 +132,7 @@ export function useBulkDeleteProducts() {
       const store = loadStore();
       store.products = store.products.filter((p) => !ids.includes(p.id));
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiBulkDeleteProducts(ids));
+      await apiBulkDeleteProducts(ids);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
@@ -168,7 +159,7 @@ export function useSaveCategory() {
       if (idx >= 0) store.categories[idx] = category;
       else store.categories.push(category);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveCategory(category));
+      await apiSaveCategory(category);
       return category;
     },
     onSuccess: () => {
@@ -190,7 +181,7 @@ export function useDeleteCategory() {
       });
       store.categories = store.categories.filter((c) => c.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteCategory(id));
+      await apiDeleteCategory(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.categories() });
@@ -219,7 +210,7 @@ export function useSaveBrand() {
       if (idx >= 0) store.brands[idx] = brand;
       else store.brands.push(brand);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveBrand(brand));
+      await apiSaveBrand(brand);
       return brand;
     },
     onSuccess: () => {
@@ -236,7 +227,7 @@ export function useDeleteBrand() {
       const store = loadStore();
       store.brands = store.brands.filter((b) => b.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteBrand(id));
+      await apiDeleteBrand(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.brands() });
@@ -264,7 +255,7 @@ export function useAdminAdvanceOrder() {
       order.status = next as Order["status"];
       order.updatedAt = new Date().toISOString();
       saveOrders(orders);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiUpdateOrderStatus(orderId, order.status));
+      await apiUpdateOrderStatus(orderId, order.status);
       return order;
     },
     onSuccess: () => {
@@ -283,7 +274,7 @@ export function useAdminCancelOrder() {
       order.status = "cancelled";
       order.updatedAt = new Date().toISOString();
       saveOrders(orders);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiUpdateOrderStatus(orderId, "cancelled"));
+      await apiUpdateOrderStatus(orderId, "cancelled");
       return order;
     },
     onSuccess: () => {
@@ -306,7 +297,7 @@ export function useSaveCoupon() {
   return useMutation({
     mutationFn: async (coupon: Coupon) => {
       saveCoupon(coupon);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveCoupon(coupon));
+      await apiSaveCoupon(coupon);
       return coupon;
     },
     onSuccess: () => {
@@ -320,7 +311,7 @@ export function useDeleteCoupon() {
   return useMutation({
     mutationFn: async (id: string) => {
       deleteCoupon(id);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteCoupon(id));
+      await apiDeleteCoupon(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.coupons() });
@@ -377,7 +368,7 @@ export function useAdjustStock() {
       product.stock = Math.max(0, newStock);
       saveStore(store);
 
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveProduct(product));
+      await apiSaveProduct(product);
 
       const movement: StockMovement = {
         id: `smv_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -391,7 +382,7 @@ export function useAdjustStock() {
         createdAt: new Date().toISOString(),
       };
       addStockMovement(movement);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiAddStockMovement(movement));
+      await apiAddStockMovement(movement);
       return movement;
     },
     onSuccess: () => {
@@ -420,7 +411,7 @@ export function useSaveDistributor() {
       if (idx >= 0) store.distributors[idx] = distributor;
       else store.distributors.push(distributor);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveDistributor(distributor));
+      await apiSaveDistributor(distributor);
       return distributor;
     },
     onSuccess: () => {
@@ -437,7 +428,7 @@ export function useDeleteDistributor() {
       const store = loadStore();
       store.distributors = store.distributors.filter((d) => d.id !== id);
       saveStore(store);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteDistributor(id));
+      await apiDeleteDistributor(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.distributors() });
@@ -455,7 +446,7 @@ export function useToggleDistributor() {
       if (dist) {
         dist.active = !dist.active;
         saveStore(store);
-        if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveDistributor(dist));
+        await apiSaveDistributor(dist);
       }
       return dist;
     },
@@ -480,7 +471,7 @@ export function useSaveCombo() {
   return useMutation({
     mutationFn: async (combo: Combo) => {
       saveCombo(combo);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiSaveCombo(combo));
+      await apiSaveCombo(combo);
       return combo;
     },
     onSuccess: () => {
@@ -494,7 +485,7 @@ export function useDeleteCombo() {
   return useMutation({
     mutationFn: async (id: string) => {
       deleteCombo(id);
-      if (isSupabaseConfigured()) await safeSupabaseWrite(() => apiDeleteCombo(id));
+      await apiDeleteCombo(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.combos() });
@@ -520,9 +511,7 @@ export function useSaveCustomer() {
       if (idx >= 0) customers[idx] = customer;
       else customers.push(customer);
       saveCustomers(customers);
-      if (isSupabaseConfigured()) {
-        try { await apiSaveCustomer(customer); } catch { /* localStorage fallback */ }
-      }
+      await apiSaveCustomer(customer);
       return customer;
     },
     onSuccess: () => {
@@ -536,9 +525,7 @@ export function useDeleteCustomer() {
   return useMutation({
     mutationFn: async (id: string) => {
       saveCustomers(loadCustomers().filter((c) => c.id !== id));
-      if (isSupabaseConfigured()) {
-        try { await apiDeleteCustomer(id); } catch { /* localStorage fallback */ }
-      }
+      await apiDeleteCustomer(id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.customers() });
@@ -563,18 +550,15 @@ export function useAddCredit() {
       if (!customer) throw new Error("Cliente não encontrado");
 
       customer.creditBalance += amount;
-      const entry = {
+      customer.creditHistory.push({
         id: `crd_${Date.now()}`,
-        type: "release" as const,
+        type: "release",
         amount,
         description,
         createdAt: new Date().toISOString(),
-      };
-      customer.creditHistory.push(entry);
+      });
       saveCustomers(customers);
-      if (isSupabaseConfigured()) {
-        try { await apiAddCredit(customerId, amount, description); } catch { /* localStorage fallback */ }
-      }
+      await apiAddCredit(customerId, amount, description);
       return customer;
     },
     onSuccess: () => {
@@ -608,11 +592,7 @@ export function useAdjustCredit() {
         createdAt: new Date().toISOString(),
       });
       saveCustomers(customers);
-      if (isSupabaseConfigured()) {
-        try {
-          await apiAdjustCredit(customerId, customer.creditBalance, description);
-        } catch { /* localStorage fallback */ }
-      }
+      await apiAdjustCredit(customerId, customer.creditBalance, description);
       return customer;
     },
     onSuccess: () => {
@@ -630,12 +610,8 @@ export function useUpdateCustomerTags() {
       if (!customer) throw new Error("Cliente não encontrado");
       customer.tags = tags;
       saveCustomers(customers);
-      if (isSupabaseConfigured()) {
-        try {
-          const supabase = (await import("../supabase")).getSupabase();
-          if (supabase) await supabase.from("customers").update({ tags }).eq("id", customerId);
-        } catch { /* localStorage fallback */ }
-      }
+      const supabase = (await import("../supabase")).getSupabase();
+      if (supabase) await supabase.from("customers").update({ tags }).eq("id", customerId);
       return customer;
     },
     onSuccess: () => {
@@ -653,12 +629,8 @@ export function useUpdateCustomerNotes() {
       if (!customer) throw new Error("Cliente não encontrado");
       customer.notes = notes;
       saveCustomers(customers);
-      if (isSupabaseConfigured()) {
-        try {
-          const supabase = (await import("../supabase")).getSupabase();
-          if (supabase) await supabase.from("customers").update({ notes }).eq("id", customerId);
-        } catch { /* localStorage fallback */ }
-      }
+      const supabase = (await import("../supabase")).getSupabase();
+      if (supabase) await supabase.from("customers").update({ notes }).eq("id", customerId);
       return customer;
     },
     onSuccess: () => {

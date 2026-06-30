@@ -1,25 +1,39 @@
 import { useState } from "react";
 import { Send, Mail, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { getSupabase } from "@/lib/supabase";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
+    setLoading(true);
     try {
-      const stored: string[] = JSON.parse(localStorage.getItem("@pbrn-newsletter") || "[]");
-      if (stored.includes(email.trim().toLowerCase())) {
-        toast.error("Este e-mail já está cadastrado!");
+      const supabase = getSupabase();
+      if (!supabase) {
+        toast.error("Serviço indisponível. Tente novamente.");
         return;
       }
-      stored.push(email.trim().toLowerCase());
-      localStorage.setItem("@pbrn-newsletter", JSON.stringify(stored));
+      const { error } = await supabase
+        .from("newsletter_subscribers")
+        .insert({ email: email.trim().toLowerCase() });
+      if (error) {
+        if (error.code === "23505") {
+          toast.error("Este e-mail já está cadastrado!");
+        } else {
+          toast.error("Erro ao salvar e-mail. Tente novamente.");
+        }
+        return;
+      }
       toast.success("E-mail cadastrado com sucesso!");
       setEmail("");
     } catch {
       toast.error("Erro ao salvar e-mail. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,7 +81,8 @@ export function Newsletter() {
             </div>
             <button
               type="submit"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded bg-white text-primary font-semibold px-8 text-sm hover:bg-white/90 hover:shadow-xl hover:shadow-white/10 transition-all active:scale-[0.98] shadow-lg shadow-black/5"
+              disabled={loading}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded bg-white text-primary font-semibold px-8 text-sm hover:bg-white/90 hover:shadow-xl hover:shadow-white/10 transition-all active:scale-[0.98] shadow-lg shadow-black/5 disabled:opacity-50 disabled:pointer-events-none"
             >
               Cadastrar
               <Send className="h-4 w-4" />

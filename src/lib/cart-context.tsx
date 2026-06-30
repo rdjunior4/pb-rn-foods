@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useCallback, useMemo, type ReactNode } from "react";
 import type { CartItem } from "./types";
 import { useProducts } from "./hooks";
 import { toast } from "sonner";
@@ -66,23 +66,10 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-function loadCart(): CartItem[] {
-  try {
-    const stored = localStorage.getItem("@pbrn-cart");
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: loadCart() });
+  const [state, dispatch] = useReducer(cartReducer, { items: [] });
   const { data: products = [] } = useProducts();
   const productMap = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
-
-  useEffect(() => {
-    localStorage.setItem("@pbrn-cart", JSON.stringify(state.items));
-  }, [state.items]);
 
   const addItem = useCallback((productId: string, quantity?: number, variantId?: string, unitPrice?: number) => {
     const q = quantity ?? 1;

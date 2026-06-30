@@ -7,9 +7,7 @@ export interface StaticPage {
   updatedAt: string;
 }
 
-const PAGES_KEY = "@pbrn-pages";
-
-const defaultPages: StaticPage[] = [
+let _pages: StaticPage[] = [
   {
     slug: "sobre",
     title: "Sobre nós",
@@ -135,38 +133,11 @@ Você pode solicitar a exclusão dos seus dados a qualquer momento entrando em c
 ];
 
 export function loadPages(): StaticPage[] {
-  try {
-    const stored = localStorage.getItem(PAGES_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored) as StaticPage[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {}
-  localStorage.setItem(PAGES_KEY, JSON.stringify(defaultPages));
-  syncPagesFromSupabase();
-  return defaultPages;
-}
-
-async function syncPagesFromSupabase() {
-  if (!isSupabaseConfigured()) return;
-  const supabase = getSupabase();
-  if (!supabase) return;
-  try {
-    const { data } = await supabase.from("pages").select("*");
-    if (data && data.length > 0) {
-      const pages: StaticPage[] = data.map((p: Record<string, unknown>) => ({
-        slug: p.slug as string,
-        title: p.title as string,
-        content: p.content as string,
-        updatedAt: p.updated_at as string,
-      }));
-      localStorage.setItem(PAGES_KEY, JSON.stringify(pages));
-    }
-  } catch {}
+  return _pages;
 }
 
 export function savePages(pages: StaticPage[]): void {
-  localStorage.setItem(PAGES_KEY, JSON.stringify(pages));
+  _pages = pages;
 }
 
 export function getPage(slug: string): StaticPage | null {
@@ -183,4 +154,38 @@ export function savePage(page: StaticPage): void {
 
 export function deletePage(slug: string): void {
   savePages(loadPages().filter((p) => p.slug !== slug));
+}
+
+// ============================================================
+// SUPABASE SYNC
+// ============================================================
+
+let syncPromise: Promise<void> | null = null;
+
+export async function syncPagesFromSupabase(): Promise<void> {
+  if (syncPromise) return syncPromise;
+  if (!isSupabaseConfigured()) return;
+
+  syncPromise = (async () => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    try {
+      const { data } = await supabase.from("pages").select("*");
+      if (data && data.length > 0) {
+        const pages: StaticPage[] = data.map((p: Record<string, unknown>) => ({
+          slug: p.slug as string,
+          title: p.title as string,
+          content: p.content as string,
+          updatedAt: p.updated_at as string,
+        }));
+        _pages = pages;
+      }
+    } catch (err) {
+      console.error("[syncPagesFromSupabase] erro:", err);
+    } finally {
+      syncPromise = null;
+    }
+  })();
+
+  return syncPromise;
 }

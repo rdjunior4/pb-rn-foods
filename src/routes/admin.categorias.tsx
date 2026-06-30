@@ -184,7 +184,7 @@ function AdminCategories() {
 
   // ─── Reorder logic ───
   const persistOrder = useCallback(async (reordered: Category[]) => {
-    // Update localStorage
+    // Update in-memory cache
     const store = loadStore();
     store.categories = reordered;
     saveStore(store);

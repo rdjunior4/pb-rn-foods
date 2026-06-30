@@ -1,12 +1,10 @@
 import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed, Combo, Coupon, ProductReview, StockMovement, Customer, CreditEntry } from "./types";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 
-const STORAGE_KEY = "@pbrn-admin";
-const ORDERS_KEY = "@pbrn-orders";
-const COUPONS_KEY = "@pbrn-coupons";
-const REVIEWS_KEY = "@pbrn-reviews";
-const STOCK_KEY = "@pbrn-stock";
-const CUSTOMERS_KEY = "@pbrn-customers";
+// ============================================================
+// IN-MEMORY CACHE (populated by syncFromSupabase)
+// No localStorage — Supabase is the only source of truth.
+// ============================================================
 
 export interface AdminStore {
   products: Product[];
@@ -18,110 +16,47 @@ export interface AdminStore {
   customers: Customer[];
 }
 
-const defaultDistributors: Distributor[] = [];
+let _store: AdminStore = {
+  products: [],
+  banners: [],
+  categories: [],
+  brands: [],
+  distributors: [],
+  combos: [],
+  customers: [],
+};
 
-function getInitialStore(): AdminStore {
-  return {
+let _orders: Order[] = [];
+let _coupons: Coupon[] = [];
+let _reviews: ProductReview[] = [];
+let _stockMovements: StockMovement[] = [];
+
+export function loadStore(): AdminStore {
+  return _store;
+}
+
+export function saveStore(store: AdminStore): void {
+  _store = store;
+}
+
+export function resetStore(): void {
+  _store = {
     products: [],
     banners: [],
     categories: [],
     brands: [],
-    distributors: defaultDistributors.map((d) => ({ ...d })),
+    distributors: [],
     combos: [],
     customers: [],
   };
 }
 
-export function loadStore(): AdminStore {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored) as AdminStore;
-      if (parsed.products && parsed.banners !== undefined && parsed.categories !== undefined) {
-        if (!parsed.brands) parsed.brands = [];
-        if (!parsed.distributors) parsed.distributors = defaultDistributors.map((d) => ({ ...d }));
-        else {
-          parsed.distributors = parsed.distributors.map((d: any) => ({
-            ...d,
-            address: d.address || "",
-            cep: d.cep || "",
-            coverageMode: d.coverageMode || "radius",
-            coverageRadiusKm: d.coverageRadiusKm || 100,
-            coverageCities: d.coverageCities || [],
-          }));
-        }
-        if (!parsed.combos) parsed.combos = [];
-        if (!parsed.customers) parsed.customers = [];
-        parsed.categories = (parsed.categories || []).map((c: any, i: number) => ({
-          ...c,
-          sortOrder: c.sortOrder ?? i,
-        })).sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-        parsed.banners = parsed.banners.map((b: any) => ({
-          showTitle: b.showTitle ?? true,
-          showSubtitle: b.showSubtitle ?? true,
-          showCta: b.showCta ?? true,
-          ctaText: b.ctaText ?? "",
-          ...b,
-        }));
-        parsed.products = parsed.products.map((p: any) => ({
-          description: p.description || "",
-          images: p.images || (p.image ? [p.image] : []),
-          variants: p.variants || [],
-          pricingTiers: p.pricingTiers || [],
-          ...p,
-        }));
-        return parsed;
-      }
-      if (parsed.products && parsed.banners !== undefined) {
-        parsed.categories = [];
-        parsed.brands = [];
-        parsed.distributors = defaultDistributors.map((d) => ({ ...d }));
-        if (!parsed.combos) parsed.combos = [];
-        if (!parsed.customers) parsed.customers = [];
-        parsed.banners = parsed.banners.map((b: any) => ({
-          showTitle: b.showTitle ?? true,
-          showSubtitle: b.showSubtitle ?? true,
-          showCta: b.showCta ?? true,
-          ctaText: b.ctaText ?? "",
-          ...b,
-        }));
-        parsed.products = parsed.products.map((p: any) => ({
-          description: p.description || "",
-          images: p.images || (p.image ? [p.image] : []),
-          variants: p.variants || [],
-          pricingTiers: p.pricingTiers || [],
-          ...p,
-        }));
-        return parsed;
-      }
-    }
-  } catch {}
-  const initial = getInitialStore();
-  saveStore(initial);
-  return initial;
-}
-
-export function saveStore(store: AdminStore): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-}
-
-export function resetStore(): void {
-  localStorage.removeItem(STORAGE_KEY);
-}
-
 export function loadOrders(): Order[] {
-  try {
-    const stored = localStorage.getItem(ORDERS_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored) as Order[];
-      if (Array.isArray(parsed)) return parsed;
-    }
-  } catch {}
-  return [];
+  return _orders;
 }
 
 export function saveOrders(orders: Order[]): void {
-  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  _orders = orders;
 }
 
 export function generateId(): string {
@@ -156,46 +91,44 @@ export function slugify(text: string): string {
     .trim();
 }
 
+// ============================================================
+// COMBOS
+// ============================================================
+
 export function getCombos(): Combo[] {
-  return loadStore().combos || [];
+  return _store.combos || [];
 }
 
 export function saveCombo(combo: Combo): void {
-  const store = loadStore();
-  const idx = store.combos.findIndex((c) => c.id === combo.id);
-  if (idx >= 0) store.combos[idx] = combo;
-  else store.combos.push(combo);
-  saveStore(store);
+  const idx = _store.combos.findIndex((c) => c.id === combo.id);
+  if (idx >= 0) _store.combos[idx] = combo;
+  else _store.combos.push(combo);
 }
 
 export function deleteCombo(id: string): void {
-  const store = loadStore();
-  store.combos = store.combos.filter((c) => c.id !== id);
-  saveStore(store);
+  _store.combos = _store.combos.filter((c) => c.id !== id);
 }
 
+// ============================================================
+// COUPONS
+// ============================================================
+
 export function loadCoupons(): Coupon[] {
-  try {
-    const stored = localStorage.getItem(COUPONS_KEY);
-    if (stored) return JSON.parse(stored) as Coupon[];
-  } catch {}
-  return [];
+  return _coupons;
 }
 
 export function saveCoupons(coupons: Coupon[]): void {
-  localStorage.setItem(COUPONS_KEY, JSON.stringify(coupons));
+  _coupons = coupons;
 }
 
 export function saveCoupon(coupon: Coupon): void {
-  const coupons = loadCoupons();
-  const idx = coupons.findIndex((c) => c.id === coupon.id);
-  if (idx >= 0) coupons[idx] = coupon;
-  else coupons.push(coupon);
-  saveCoupons(coupons);
+  const idx = _coupons.findIndex((c) => c.id === coupon.id);
+  if (idx >= 0) _coupons[idx] = coupon;
+  else _coupons.push(coupon);
 }
 
 export function deleteCoupon(id: string): void {
-  saveCoupons(loadCoupons().filter((c) => c.id !== id));
+  _coupons = _coupons.filter((c) => c.id !== id);
 }
 
 export function validateCoupon(
@@ -203,8 +136,7 @@ export function validateCoupon(
   orderValue: number,
   userId?: string,
 ): { ok: boolean; coupon?: Coupon; error?: string } {
-  const coupons = loadCoupons();
-  const coupon = coupons.find((c) => c.code.toLowerCase() === code.trim().toLowerCase());
+  const coupon = _coupons.find((c) => c.code.toLowerCase() === code.trim().toLowerCase());
   if (!coupon) return { ok: false, error: "Cupom não encontrado." };
   if (!coupon.active) return { ok: false, error: "Cupom inativo." };
   if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
@@ -217,8 +149,7 @@ export function validateCoupon(
     return { ok: false, error: `Pedido mínimo de R$ ${coupon.minOrderValue.toFixed(2).replace(".", ",")}.` };
   }
   if (userId && coupon.perUserLimit > 0) {
-    const orders = loadOrders();
-    const userUses = orders.filter(
+    const userUses = _orders.filter(
       (o) => o.customerId === userId && o.couponCode === coupon.code,
     ).length;
     if (userUses >= coupon.perUserLimit) {
@@ -229,60 +160,53 @@ export function validateCoupon(
 }
 
 export function incrementCouponUsage(id: string): void {
-  const coupons = loadCoupons();
-  const c = coupons.find((c) => c.id === id);
-  if (c) {
-    c.usedCount++;
-    saveCoupons(coupons);
-  }
+  const c = _coupons.find((c) => c.id === id);
+  if (c) c.usedCount++;
 }
 
+// ============================================================
+// REVIEWS
+// ============================================================
+
 export function loadReviews(): ProductReview[] {
-  try {
-    const stored = localStorage.getItem(REVIEWS_KEY);
-    if (stored) return JSON.parse(stored) as ProductReview[];
-  } catch {}
-  return [];
+  return _reviews;
 }
 
 export function saveReviews(reviews: ProductReview[]): void {
-  localStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+  _reviews = reviews;
 }
 
 export function getReviewsByProduct(productId: string): ProductReview[] {
-  return loadReviews().filter((r) => r.productId === productId);
+  return _reviews.filter((r) => r.productId === productId);
 }
 
 export function addReview(review: ProductReview): void {
-  const reviews = loadReviews();
-  reviews.push(review);
-  saveReviews(reviews);
+  _reviews.push(review);
 }
 
 export function deleteReview(id: string): void {
-  saveReviews(loadReviews().filter((r) => r.id !== id));
+  _reviews = _reviews.filter((r) => r.id !== id);
 }
 
+// ============================================================
+// STOCK MOVEMENTS
+// ============================================================
+
 export function loadStockMovements(): StockMovement[] {
-  try {
-    const stored = localStorage.getItem(STOCK_KEY);
-    if (stored) return JSON.parse(stored) as StockMovement[];
-  } catch {}
-  return [];
+  return _stockMovements;
 }
 
 export function saveStockMovements(movements: StockMovement[]): void {
-  localStorage.setItem(STOCK_KEY, JSON.stringify(movements));
+  _stockMovements = movements;
 }
 
 export function addStockMovement(movement: StockMovement): void {
-  const movements = loadStockMovements();
-  movements.unshift(movement);
-  saveStockMovements(movements.slice(0, 500));
+  _stockMovements.unshift(movement);
+  if (_stockMovements.length > 500) _stockMovements = _stockMovements.slice(0, 500);
 }
 
 export function getStockMovementsByProduct(productId: string): StockMovement[] {
-  return loadStockMovements().filter((m) => m.productId === productId);
+  return _stockMovements.filter((m) => m.productId === productId);
 }
 
 // ============================================================
@@ -290,19 +214,15 @@ export function getStockMovementsByProduct(productId: string): StockMovement[] {
 // ============================================================
 
 export function loadCustomers(): Customer[] {
-  try {
-    const stored = localStorage.getItem(CUSTOMERS_KEY);
-    if (stored) return JSON.parse(stored) as Customer[];
-  } catch {}
-  return [];
+  return _store.customers;
 }
 
 export function saveCustomers(customers: Customer[]): void {
-  localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
+  _store.customers = customers;
 }
 
 export function getCustomerById(id: string): Customer | undefined {
-  return loadCustomers().find((c) => c.id === id);
+  return _store.customers.find((c) => c.id === id);
 }
 
 export function getOrCreateCustomerFromOrder(order: {
@@ -313,11 +233,10 @@ export function getOrCreateCustomerFromOrder(order: {
   shippingAddress?: string;
   customerId?: string;
 }): Customer {
-  const customers = loadCustomers();
   const id = order.customerId || order.customerEmail;
   const doc = order.customerDocument || "";
 
-  let customer = customers.find(
+  let customer = _store.customers.find(
     (c) => c.id === id || (doc && c.document === doc),
   );
 
@@ -341,22 +260,18 @@ export function getOrCreateCustomerFromOrder(order: {
       tags: [],
       notes: "",
     };
-    customers.push(customer);
-    saveCustomers(customers);
+    _store.customers.push(customer);
   }
 
   return customer;
 }
 
 export function addLoyaltyPoints(customerId: string, orderTotal: number): void {
-  const customers = loadCustomers();
-  const customer = customers.find((c) => c.id === customerId);
+  const customer = _store.customers.find((c) => c.id === customerId);
   if (!customer) return;
 
-  // R$ 1 = 1 ponto
   customer.loyaltyPoints += Math.floor(orderTotal);
 
-  // Atualizar nível
   if (customer.loyaltyPoints >= 5000) {
     customer.loyaltyLevel = "ouro";
   } else if (customer.loyaltyPoints >= 2000) {
@@ -364,20 +279,17 @@ export function addLoyaltyPoints(customerId: string, orderTotal: number): void {
   } else {
     customer.loyaltyLevel = "bronze";
   }
-
-  saveCustomers(customers);
 }
 
 export function decrementStockForOrder(
   items: { productId: string; variantId?: string; quantity: number; productName: string }[],
   orderId: string,
 ): void {
-  const store = loadStore();
   const now = new Date().toISOString();
   const movements: StockMovement[] = [];
 
   for (const item of items) {
-    const product = store.products.find((p) => p.id === item.productId);
+    const product = _store.products.find((p) => p.id === item.productId);
     if (!product) continue;
 
     if (item.variantId) {
@@ -414,17 +326,12 @@ export function decrementStockForOrder(
     });
   }
 
-  saveStore(store);
-
-  const allMovements = loadStockMovements();
-  allMovements.unshift(...movements);
-  saveStockMovements(allMovements.slice(0, 500));
+  _stockMovements.unshift(...movements);
+  if (_stockMovements.length > 500) _stockMovements = _stockMovements.slice(0, 500);
 }
 
 // ============================================================
-// SUPABASE SYNC
-// Sincroniza dados do Supabase para o cache local (localStorage)
-// Mantém leituras síncronas, escritas vão para Supabase + cache
+// SUPABASE SYNC — single source of truth
 // ============================================================
 
 let syncPromise: Promise<void> | null = null;
@@ -453,13 +360,9 @@ export function syncFromSupabase(): Promise<void> {
         supabase.from("credit_history").select("*").order("created_at", { ascending: false }),
       ]);
 
-      // Só sobrescrever dados se Supabase retornar dados não-vazios
-      // Isso preserva dados existentes (seed) quando admin não cadastrou nada ainda
-      const existingStore = loadStore();
-      
-      const store: AdminStore = {
-        products: (prods.data && prods.data.length > 0) ? prods.data.map(mapDbProduct) : existingStore.products,
-        banners: (bans.data && bans.data.length > 0) ? bans.data.map(mapDbBanner) : existingStore.banners,
+      _store = {
+        products: (prods.data && prods.data.length > 0) ? prods.data.map(mapDbProduct) : _store.products,
+        banners: (bans.data && bans.data.length > 0) ? bans.data.map(mapDbBanner) : _store.banners,
         categories: (cats.data && cats.data.length > 0) ? cats.data.map((c: Record<string, unknown>) => ({
           id: c.id as string,
           slug: c.slug as string,
@@ -467,7 +370,7 @@ export function syncFromSupabase(): Promise<void> {
           icon: c.icon as string,
           productCount: 0,
           sortOrder: Number(c.sort_order) || 0,
-        })) : existingStore.categories,
+        })) : _store.categories,
         brands: (brs.data && brs.data.length > 0) ? brs.data.map((b: Record<string, unknown>) => ({
           id: b.id as string,
           name: b.name as string,
@@ -475,13 +378,12 @@ export function syncFromSupabase(): Promise<void> {
           logo: b.logo as string,
           active: b.active as boolean,
           createdAt: b.created_at as string,
-        })) : existingStore.brands,
-        distributors: (dists.data && dists.data.length > 0) ? dists.data.map(mapDbDistributor) : existingStore.distributors,
-        combos: (combs.data && combs.data.length > 0) ? combs.data.map(mapDbCombo) : existingStore.combos,
+        })) : _store.brands,
+        distributors: (dists.data && dists.data.length > 0) ? dists.data.map(mapDbDistributor) : _store.distributors,
+        combos: (combs.data && combs.data.length > 0) ? combs.data.map(mapDbCombo) : _store.combos,
         customers: (custs.data && custs.data.length > 0)
           ? custs.data.map((c: Record<string, unknown>) => {
               const customer = mapDbCustomer(c);
-              // Join credit_history from separate table
               if (credHist.data && credHist.data.length > 0) {
                 customer.creditHistory = credHist.data
                   .filter((h: Record<string, unknown>) => h.customer_id === c.id)
@@ -495,22 +397,20 @@ export function syncFromSupabase(): Promise<void> {
               }
               return customer;
             })
-          : existingStore.customers,
+          : _store.customers,
       };
-      saveStore(store);
 
-      // Pedidos, cupons, avaliações e estoque: só sobrescrever se houver dados
       if (ords.data && ords.data.length > 0) {
-        localStorage.setItem(ORDERS_KEY, JSON.stringify(ords.data.map(mapDbOrder)));
+        _orders = ords.data.map(mapDbOrder);
       }
       if (cpns.data && cpns.data.length > 0) {
-        localStorage.setItem(COUPONS_KEY, JSON.stringify(cpns.data.map(mapDbCoupon)));
+        _coupons = cpns.data.map(mapDbCoupon);
       }
       if (revs.data && revs.data.length > 0) {
-        localStorage.setItem(REVIEWS_KEY, JSON.stringify(revs.data.map(mapDbReview)));
+        _reviews = revs.data.map(mapDbReview);
       }
       if (movs.data && movs.data.length > 0) {
-        localStorage.setItem(STOCK_KEY, JSON.stringify(movs.data.map(mapDbMovement)));
+        _stockMovements = movs.data.map(mapDbMovement);
       }
     } catch (err) {
       console.error("[syncFromSupabase] erro:", err);
@@ -522,7 +422,9 @@ export function syncFromSupabase(): Promise<void> {
   return syncPromise;
 }
 
-// ---- Mappers (DB row → app type) ----
+// ============================================================
+// MAPPERS (DB row → app type)
+// ============================================================
 
 function mapDbProduct(db: Record<string, unknown>): Product {
   return {
