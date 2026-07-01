@@ -144,6 +144,20 @@ export function loadStoreConfig(): StoreConfig {
 
 export function saveStoreConfig(config: StoreConfig): void {
   _config = config;
+  persistStoreConfig(config).catch(() => {});
+}
+
+async function persistStoreConfig(config: StoreConfig): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabase();
+  if (!supabase) return;
+  try {
+    await supabase
+      .from("store_config")
+      .upsert({ id: 1, config: config as unknown as Record<string, unknown> }, { onConflict: "id" });
+  } catch (err) {
+    console.error("[persistStoreConfig] erro:", err);
+  }
 }
 
 export function generateSectionId(): string {

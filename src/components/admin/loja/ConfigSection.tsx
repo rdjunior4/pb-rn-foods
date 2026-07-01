@@ -1,19 +1,25 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { loadStoreConfig, saveStoreConfig, defaultConfig } from "@/lib/store-config";
 import type { StoreConfig } from "@/lib/store-config";
+import { queryKeys } from "@/lib/query-keys";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
 
 export function ConfigSection() {
+  const queryClient = useQueryClient();
   const [config, setConfig] = useState<StoreConfig>(() => loadStoreConfig());
 
   const handleSave = () => {
     saveStoreConfig(config);
+    queryClient.invalidateQueries({ queryKey: queryKeys.storeConfig.all });
     toast.success("Configurações salvas");
   };
   const handleReset = () => {
-    setConfig({ ...defaultConfig });
-    saveStoreConfig({ ...defaultConfig });
+    const reset = { ...defaultConfig };
+    setConfig(reset);
+    saveStoreConfig(reset);
+    queryClient.invalidateQueries({ queryKey: queryKeys.storeConfig.all });
     toast.success("Configurações restauradas");
   };
 

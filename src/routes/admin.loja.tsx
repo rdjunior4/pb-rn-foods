@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Image, ShieldCheck, Sparkles, Store, LayoutGrid } from "lucide-react";
+import { Image, ShieldCheck, Store, LayoutGrid } from "lucide-react";
 import { BannersSection } from "@/components/admin/loja/BannersSection";
 import { BenefitsSection } from "@/components/admin/loja/BenefitsSection";
-import { BrandsSection } from "@/components/admin/loja/BrandsSection";
 import { ConfigSection } from "@/components/admin/loja/ConfigSection";
 import { LayoutBuilder } from "@/components/admin/LayoutBuilder";
 import { loadStoreConfig, saveStoreConfig } from "@/lib/store-config";
@@ -13,7 +12,7 @@ export const Route = createFileRoute("/admin/loja")({
   component: AdminLoja,
 });
 
-type Tab = "banners" | "layout" | "benefits" | "brands" | "config";
+type Tab = "banners" | "layout" | "benefits" | "config";
 
 function AdminLoja() {
   const [tab, setTab] = useState<Tab>("banners");
@@ -32,7 +31,6 @@ function AdminLoja() {
     { id: "banners", label: "Banners", icon: Image },
     { id: "layout", label: "Layout", icon: LayoutGrid },
     { id: "benefits", label: "Benefícios", icon: ShieldCheck },
-    { id: "brands", label: "Marcas", icon: Sparkles },
     { id: "config", label: "Configurações", icon: Store },
   ];
 
@@ -67,7 +65,6 @@ function AdminLoja() {
       )}
       {tab === "banners" && <BannersSection />}
       {tab === "benefits" && <BenefitsSection />}
-      {tab === "brands" && <BrandsSection />}
       {tab === "config" && <ConfigSection />}
     </div>
   );
