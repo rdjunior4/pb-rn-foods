@@ -206,7 +206,7 @@ function AdminProducts() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-zinc-200 p-4">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="relative flex-1 w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
@@ -252,8 +252,8 @@ function AdminProducts() {
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-zinc-200 p-12 text-center">
-          <div className="h-16 w-16 rounded-2xl bg-zinc-100 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
+          <div className="h-16 w-16 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-4">
             <Package className="h-8 w-8 text-zinc-300" />
           </div>
           <p className="text-sm font-medium text-zinc-900">Nenhum produto encontrado</p>
@@ -261,11 +261,11 @@ function AdminProducts() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
+          <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-100 bg-zinc-50/50">
+                  <tr className="border-b border-zinc-200 bg-zinc-50">
                     <th className="px-4 py-3 w-10">
                       <input
                         type="checkbox"

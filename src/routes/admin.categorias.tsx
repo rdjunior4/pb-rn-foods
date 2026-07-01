@@ -434,98 +434,109 @@ function AdminCategories() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-zinc-200 divide-y divide-zinc-100 overflow-hidden">
-          {filteredCategories.map((c, index) => {
-            const CatIcon = iconMap[c.icon] || Tags;
-            const count = productCounts[c.id] || 0;
-            const isDraggedOver = dragOverId === c.id;
-            const isDragging = draggedId === c.id;
-            const realIndex = categories.findIndex((cat) => cat.id === c.id);
+        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+          {/* Table Header */}
+          <div className="hidden sm:grid grid-cols-[36px_32px_40px_1fr_1fr_100px_90px] items-center gap-3 px-4 py-2.5 bg-zinc-50 border-b border-zinc-200 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider select-none">
+            <span></span>
+            <span className="text-center">#</span>
+            <span className="text-center">Ícone</span>
+            <span>Nome</span>
+            <span>Slug</span>
+            <span className="text-center">Produtos</span>
+            <span className="text-center">Ações</span>
+          </div>
 
-            return (
-              <div
-                key={c.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, c.id)}
-                onDragEnd={handleDragEnd}
-                onDragEnter={(e) => handleDragEnter(e, c.id)}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, c.id)}
-                className={`group flex items-center gap-3 px-4 py-3 transition-all duration-150 ${
-                  isDragging
-                    ? "opacity-40 bg-zinc-50"
-                    : isDraggedOver
-                      ? "bg-blue-50 border-t-2 border-t-blue-500"
-                      : "hover:bg-zinc-50"
-                }`}
-              >
-                {/* Drag Handle */}
-                <div className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 shrink-0 transition-colors">
-                  <GripVertical className="h-4 w-4" />
-                </div>
+          {/* Table Rows */}
+          <div className="divide-y divide-zinc-100">
+            {filteredCategories.map((c, index) => {
+              const CatIcon = iconMap[c.icon] || Tags;
+              const count = productCounts[c.id] || 0;
+              const isDraggedOver = dragOverId === c.id;
+              const isDragging = draggedId === c.id;
+              const realIndex = categories.findIndex((cat) => cat.id === c.id);
 
-                {/* Position number */}
-                <span className="text-[11px] font-mono text-zinc-400 w-5 text-center shrink-0 tabular-nums">
-                  {realIndex + 1}
-                </span>
-
-                {/* Icon */}
-                <div className="h-9 w-9 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0">
-                  <CatIcon className="h-4.5 w-4.5 text-zinc-600" />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-zinc-900 truncate">{c.name}</div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[11px] text-zinc-400 font-mono">{c.slug}</span>
-                    <span className="text-zinc-300">·</span>
-                    <span className={`text-[11px] font-medium ${count > 0 ? "text-zinc-600" : "text-zinc-400"}`}>
-                      {count} {count === 1 ? "produto" : "produtos"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-0.5 shrink-0">
-                  {/* Up/Down arrows */}
-                  <div className="flex flex-col -space-y-0.5 mr-1">
-                    <button
-                      onClick={() => moveCategory(realIndex, realIndex - 1)}
-                      disabled={realIndex === 0}
-                      className="h-6 w-6 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors disabled:opacity-20 disabled:pointer-events-none"
-                      title="Mover para cima"
-                    >
-                      <ChevronUp className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => moveCategory(realIndex, realIndex + 1)}
-                      disabled={realIndex === categories.length - 1}
-                      className="h-6 w-6 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors disabled:opacity-20 disabled:pointer-events-none"
-                      title="Mover para baixo"
-                    >
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </button>
+              return (
+                <div
+                  key={c.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, c.id)}
+                  onDragEnd={handleDragEnd}
+                  onDragEnter={(e) => handleDragEnter(e, c.id)}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, c.id)}
+                  className={`group grid grid-cols-[36px_32px_40px_1fr_1fr_100px_90px] items-center gap-3 px-4 py-3 transition-all duration-150 ${
+                    isDragging
+                      ? "opacity-40 bg-zinc-50"
+                      : isDraggedOver
+                        ? "bg-blue-50 border-t-2 border-t-blue-500"
+                        : "hover:bg-zinc-50"
+                  }`}
+                >
+                  {/* Drag Handle */}
+                  <div className="cursor-grab active:cursor-grabbing text-zinc-300 hover:text-zinc-500 flex items-center justify-center shrink-0 transition-colors">
+                    <GripVertical className="h-4 w-4" />
                   </div>
 
-                  {/* Edit/Delete */}
-                  <button
-                    onClick={() => handleEdit(c)}
-                    className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors opacity-0 group-hover:opacity-100"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(c.id)}
-                    className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  {/* Position number */}
+                  <span className="text-[11px] font-mono text-zinc-400 text-center shrink-0 tabular-nums">
+                    {realIndex + 1}
+                  </span>
+
+                  {/* Icon */}
+                  <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 mx-auto">
+                    <CatIcon className="h-4 w-4 text-zinc-600" />
+                  </div>
+
+                  {/* Nome */}
+                  <span className="text-sm font-semibold text-zinc-900 truncate">{c.name}</span>
+
+                  {/* Slug */}
+                  <span className="text-xs text-zinc-400 font-mono truncate">{c.slug}</span>
+
+                  {/* Produtos */}
+                  <span className={`text-xs font-medium text-center ${count > 0 ? "text-zinc-700 bg-zinc-100 rounded-full px-2 py-0.5" : "text-zinc-400"}`}>
+                    {count}
+                  </span>
+
+                  {/* Ações */}
+                  <div className="flex items-center justify-center gap-0.5 shrink-0">
+                    <div className="flex flex-col -space-y-0.5 mr-0.5">
+                      <button
+                        onClick={() => moveCategory(realIndex, realIndex - 1)}
+                        disabled={realIndex === 0}
+                        className="h-6 w-6 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+                        title="Mover para cima"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => moveCategory(realIndex, realIndex + 1)}
+                        disabled={realIndex === categories.length - 1}
+                        className="h-6 w-6 flex items-center justify-center rounded text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+                        title="Mover para baixo"
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => handleEdit(c)}
+                      className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteId(c.id)}
+                      className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 

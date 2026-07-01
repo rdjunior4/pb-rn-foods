@@ -1,25 +1,55 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, Package, Image, LogOut, Menu, X, ShoppingBag, Tags, ChevronLeft, ChevronRight, Award, Users, BarChart3, Truck, Store, MapPin, PackagePlus, Ticket, Star, Boxes, FileText } from "lucide-react";
+import { LayoutDashboard, Package, LogOut, Menu, X, ShoppingBag, Tags, ChevronLeft, ChevronRight, Award, Users, BarChart3, Truck, Store, MapPin, PackagePlus, Ticket, Star, Boxes, FileText } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
-const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Produtos", href: "/admin/produtos", icon: Package },
-  { label: "Categorias", href: "/admin/categorias", icon: Tags },
-  { label: "Marcas", href: "/admin/marcas", icon: Award },
-  { label: "Combos", href: "/admin/combos", icon: PackagePlus },
-  { label: "Cupons", href: "/admin/cupons", icon: Ticket },
-  { label: "Estoque", href: "/admin/estoque", icon: Boxes },
-  { label: "Avaliações", href: "/admin/avaliacoes", icon: Star },
-  { label: "Distribuidoras", href: "/admin/distribuidoras", icon: MapPin },
-  { label: "Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
-  { label: "Clientes", href: "/admin/clientes", icon: Users },
-  { label: "Logística", href: "/admin/logistica", icon: Truck },
-  { label: "Relatórios", href: "/admin/relatorios", icon: BarChart3 },
-  { label: "Páginas", href: "/admin/paginas", icon: FileText },
-  { label: "Minha Loja", href: "/admin/loja", icon: Store },
+const navGroups = [
+  {
+    label: "Visão Geral",
+    items: [
+      { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "Catálogo",
+    items: [
+      { label: "Produtos", href: "/admin/produtos", icon: Package },
+      { label: "Categorias", href: "/admin/categorias", icon: Tags },
+      { label: "Marcas", href: "/admin/marcas", icon: Award },
+      { label: "Combos", href: "/admin/combos", icon: PackagePlus },
+    ],
+  },
+  {
+    label: "Operações",
+    items: [
+      { label: "Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
+      { label: "Estoque", href: "/admin/estoque", icon: Boxes },
+      { label: "Clientes", href: "/admin/clientes", icon: Users },
+    ],
+  },
+  {
+    label: "Logística",
+    items: [
+      { label: "Distribuidoras", href: "/admin/distribuidoras", icon: MapPin },
+      { label: "Logística", href: "/admin/logistica", icon: Truck },
+    ],
+  },
+  {
+    label: "Marketing",
+    items: [
+      { label: "Cupons", href: "/admin/cupons", icon: Ticket },
+      { label: "Avaliações", href: "/admin/avaliacoes", icon: Star },
+    ],
+  },
+  {
+    label: "Loja & Conteúdo",
+    items: [
+      { label: "Relatórios", href: "/admin/relatorios", icon: BarChart3 },
+      { label: "Páginas", href: "/admin/paginas", icon: FileText },
+      { label: "Minha Loja", href: "/admin/loja", icon: Store },
+    ],
+  },
 ];
 
 export const Route = createFileRoute("/admin")({
@@ -92,38 +122,52 @@ function AdminLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-3 space-y-0.5 px-2 overflow-y-auto overflow-x-hidden scrollbar-none [&::-webkit-scrollbar]:hidden">
-          {navItems.map((item) => {
-            const isActive = item.href === "/admin"
-              ? location.pathname === "/admin"
-              : location.pathname.startsWith(item.href);
-            return (
-              <div key={item.href} className={`group relative ${collapsed ? "flex justify-center" : ""}`}>
-                <Link
-                  to={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center rounded-lg transition-colors ${
-                    collapsed
-                      ? "h-9 w-9 justify-center mx-auto"
-                      : "gap-2.5 px-3 py-2"
-                  } ${
-                    isActive
-                      ? "bg-white/10 text-white"
-                      : "text-white/50 hover:text-white hover:bg-white/5"
-                  }`}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <item.icon className={`${collapsed ? "h-4 w-4" : "h-4 w-4"} shrink-0`} />
-                  {!collapsed && <span className="text-sm truncate">{item.label}</span>}
-                </Link>
-                {collapsed && (
-                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md bg-zinc-800 text-white text-xs shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
-                    {item.label}
-                  </div>
-                )}
+        <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden scrollbar-none [&::-webkit-scrollbar]:hidden">
+          {navGroups.map((group, gi) => (
+            <div key={group.label} className={gi > 0 ? "mt-4" : ""}>
+              {!collapsed && (
+                <div className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-widest text-white/25 select-none">
+                  {group.label}
+                </div>
+              )}
+              {collapsed && gi > 0 && (
+                <div className="mx-2 my-2 border-t border-white/5" />
+              )}
+              <div className="space-y-0.5 px-2">
+                {group.items.map((item) => {
+                  const isActive = item.href === "/admin"
+                    ? location.pathname === "/admin"
+                    : location.pathname.startsWith(item.href);
+                  return (
+                    <div key={item.href} className={`group relative ${collapsed ? "flex justify-center" : ""}`}>
+                      <Link
+                        to={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center rounded-lg transition-colors ${
+                          collapsed
+                            ? "h-9 w-9 justify-center mx-auto"
+                            : "gap-2.5 px-3 py-2"
+                        } ${
+                          isActive
+                            ? "bg-white/10 text-white"
+                            : "text-white/50 hover:text-white hover:bg-white/5"
+                        }`}
+                        title={collapsed ? item.label : undefined}
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span className="text-sm truncate">{item.label}</span>}
+                      </Link>
+                      {collapsed && (
+                        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md bg-zinc-800 text-white text-xs shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                          {item.label}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </nav>
 
         {/* Collapse toggle */}
