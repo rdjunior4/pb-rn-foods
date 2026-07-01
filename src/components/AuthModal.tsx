@@ -149,6 +149,10 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
             setSuccessMessage("Sua conta ainda não foi confirmada. Verifique seu e-mail (incluindo o spam) e clique no link de confirmação.");
             return;
           }
+          if (err?.message === "RATE_LIMIT") {
+            setError("Muitas tentativas de login. Aguarde alguns minutos e tente novamente.");
+            return;
+          }
           setError("E-mail ou senha inválidos. Se o problema persistir, aguarde 15 minutos.");
           return;
         }

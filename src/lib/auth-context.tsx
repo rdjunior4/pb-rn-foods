@@ -150,7 +150,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error || !data.user) {
       recordAttempt("login", cleanEmail);
-      if (error && (error.message.toLowerCase().includes("email not confirmed") || error.message.toLowerCase().includes("not confirmed"))) {
+      const msg = error?.message?.toLowerCase() ?? "";
+      if (msg.includes("rate limit") || msg.includes("too many")) {
+        throw new Error("RATE_LIMIT");
+      }
+      if (error && (msg.includes("email not confirmed") || msg.includes("not confirmed"))) {
         throw new Error("EMAIL_NOT_CONFIRMED");
       }
       return false;
@@ -197,7 +201,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("rate limit") || msg.includes("too many")) {
+        return { ok: false, error: "Muitas tentativas. Aguarde alguns minutos e tente novamente." };
+      }
+      return { ok: false, error: error.message };
+    }
     if (data.session) {
       if (data.user) {
         await fetchProfile(data.user.id);
