@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, Package, LogOut, Menu, X, ShoppingBag, Tags, ChevronLeft, ChevronRight, Award, Users, BarChart3, Truck, Store, MapPin, PackagePlus, Ticket, Star, Boxes, FileText } from "lucide-react";
+import { LayoutDashboard, Package, LogOut, Menu, X, ShoppingBag, Tags, ChevronLeft, ChevronRight, ChevronDown, Award, Users, BarChart3, Truck, Store, MapPin, PackagePlus, Ticket, Star, Boxes, FileText } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 const navGroups = [
@@ -65,11 +65,26 @@ function AdminLayout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["Visão Geral"]));
 
   useEffect(() => {
     const stored = localStorage.getItem("@pbrn-admin-sidebar");
     if (stored === "collapsed") setCollapsed(true);
   }, []);
+
+  useEffect(() => {
+    if (collapsed) return;
+    const matched = navGroups.find((g) =>
+      g.items.some((item) =>
+        item.href === "/admin"
+          ? location.pathname === "/admin"
+          : location.pathname.startsWith(item.href)
+      )
+    );
+    if (matched && !expandedGroups.has(matched.label)) {
+      setExpandedGroups((prev) => new Set(prev).add(matched.label));
+    }
+  }, [location.pathname, collapsed]);
 
   const toggleCollapsed = () => {
     setCollapsed((prev) => {
@@ -88,6 +103,15 @@ function AdminLayout() {
   }, [isLoggedIn, isAdmin, navigate]);
 
   if (!isLoggedIn || !isAdmin) return null;
+
+  const toggleGroup = (label: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -123,51 +147,67 @@ function AdminLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden scrollbar-none [&::-webkit-scrollbar]:hidden">
-          {navGroups.map((group, gi) => (
-            <div key={group.label} className={gi > 0 ? "mt-4" : ""}>
-              {!collapsed && (
-                <div className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-widest text-white/25 select-none">
-                  {group.label}
-                </div>
-              )}
-              {collapsed && gi > 0 && (
-                <div className="mx-2 my-2 border-t border-white/5" />
-              )}
-              <div className="space-y-0.5 px-2">
-                {group.items.map((item) => {
-                  const isActive = item.href === "/admin"
-                    ? location.pathname === "/admin"
-                    : location.pathname.startsWith(item.href);
-                  return (
-                    <div key={item.href} className={`group relative ${collapsed ? "flex justify-center" : ""}`}>
-                      <Link
-                        to={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={`flex items-center rounded-lg transition-colors ${
-                          collapsed
-                            ? "h-9 w-9 justify-center mx-auto"
-                            : "gap-2.5 px-3 py-2"
-                        } ${
-                          isActive
-                            ? "bg-white/10 text-white"
-                            : "text-white/50 hover:text-white hover:bg-white/5"
-                        }`}
-                        title={collapsed ? item.label : undefined}
-                      >
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span className="text-sm truncate">{item.label}</span>}
-                      </Link>
-                      {collapsed && (
-                        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md bg-zinc-800 text-white text-xs shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
-                          {item.label}
+          {navGroups.map((group, gi) => {
+            const isOverview = group.label === "Visão Geral";
+            const isOpen = collapsed || isOverview || expandedGroups.has(group.label);
+            return (
+              <div key={group.label} className={gi > 0 ? "mt-3" : ""}>
+                {collapsed ? (
+                  gi > 0 && <div className="mx-2 my-2 border-t border-white/5" />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => !isOverview && toggleGroup(group.label)}
+                    className={`flex w-full items-center justify-between px-4 mb-1 text-[10px] font-semibold uppercase tracking-widest ${
+                      isOverview
+                        ? "text-white/25 select-none cursor-default"
+                        : "text-white/30 hover:text-white/60 select-none cursor-pointer transition-colors"
+                    }`}
+                  >
+                    <span>{group.label}</span>
+                    {!isOverview && (
+                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    )}
+                  </button>
+                )}
+                {isOpen && (
+                  <div className="space-y-0.5 px-2">
+                    {group.items.map((item) => {
+                      const isActive = item.href === "/admin"
+                        ? location.pathname === "/admin"
+                        : location.pathname.startsWith(item.href);
+                      return (
+                        <div key={item.href} className={`group relative ${collapsed ? "flex justify-center" : ""}`}>
+                          <Link
+                            to={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center rounded-lg transition-colors ${
+                              collapsed
+                                ? "h-9 w-9 justify-center mx-auto"
+                                : "gap-2.5 px-3 py-2"
+                            } ${
+                              isActive
+                                ? "bg-white/10 text-white"
+                                : "text-white/50 hover:text-white hover:bg-white/5"
+                            }`}
+                            title={collapsed ? item.label : undefined}
+                          >
+                            <item.icon className="h-4 w-4 shrink-0" />
+                            {!collapsed && <span className="text-sm truncate">{item.label}</span>}
+                          </Link>
+                          {collapsed && (
+                            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md bg-zinc-800 text-white text-xs shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                              {item.label}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Collapse toggle */}
