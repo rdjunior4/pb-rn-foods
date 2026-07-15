@@ -66,7 +66,7 @@ export function HeroBanner() {
         interval={carouselInterval}
         onNext={nextSlide}
       />
-      <div className="group relative overflow-hidden bg-brand-black min-h-[300px] sm:min-h-[350px] lg:h-[450px] flex items-center">
+      <div className="group relative overflow-hidden bg-brand-black min-h-[260px] sm:min-h-[350px] lg:h-[450px] max-h-[420px] sm:max-h-none flex items-center">
         <img
           src={(isMobile && displayBanner?.mobileImage) ? displayBanner.mobileImage : (displayBanner?.image || defaultHeroImg)}
           alt={displayBanner?.title || ""}
@@ -84,7 +84,7 @@ export function HeroBanner() {
         {hasAnyText && (
           <div className="relative z-10 w-full mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] py-10 sm:py-14 lg:py-16">
             {hasTitle && (
-              <h1 className="max-w-[45%] text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-white">
+              <h1 className="max-w-[85%] sm:max-w-[45%] text-2xl sm:text-4xl lg:text-5xl font-black leading-[1.05] tracking-tight text-white">
                 {displayBanner?.title || heroTitle}
               </h1>
             )}
@@ -122,15 +122,15 @@ export function HeroBanner() {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/30 backdrop-blur-sm text-white/70 hover:bg-black/50 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:bg-black/60 hover:text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/30 backdrop-blur-sm text-white/70 hover:bg-black/50 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-black/40 backdrop-blur-sm text-white/80 hover:bg-black/60 hover:text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
               {activeBanners.map((_, i) => (

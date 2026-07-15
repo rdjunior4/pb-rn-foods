@@ -439,6 +439,8 @@ function ProductPage() {
 
       <ReviewsSection productId={product.id} />
 
+      <div className="h-20 md:hidden" aria-hidden="true" />
+
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background p-3 md:hidden">
         <button
           onClick={handleAdd}

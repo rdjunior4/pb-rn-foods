@@ -54,25 +54,25 @@ function CartPage() {
 
   return (
     <CustomerLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Carrinho</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Carrinho</h1>
           <p className="text-muted-foreground text-sm mt-1">{totalItems} {totalItems === 1 ? "item" : "itens"} no carrinho</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={clearCart}
-            className="inline-flex items-center gap-1.5 h-9 rounded-xl border border-border/40 text-xs font-medium px-4 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
+            className="inline-flex items-center gap-1.5 h-9 rounded-xl border border-border/40 text-xs font-medium px-3 sm:px-4 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Limpar
+            <span className="hidden sm:inline">Limpar</span>
           </button>
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 h-9 rounded-xl border border-border/40 text-xs font-medium px-4 hover:bg-muted transition-colors"
+            className="inline-flex items-center gap-1.5 h-9 rounded-xl border border-border/40 text-xs font-medium px-3 sm:px-4 hover:bg-muted transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Continuar
+            <span className="hidden sm:inline">Continuar</span>
           </Link>
         </div>
       </div>

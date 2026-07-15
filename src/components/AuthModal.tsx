@@ -215,7 +215,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         </div>
 
         {/* Top banner - mobile branding */}
-        <div className="relative lg:hidden shrink-0 min-h-[180px] overflow-hidden">
+        <div className="relative lg:hidden shrink-0 h-[100px] sm:h-[140px] overflow-hidden">
           <img
             src={heroMobileImg}
             alt=""

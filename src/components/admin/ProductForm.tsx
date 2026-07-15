@@ -570,7 +570,7 @@ export function ProductForm({
                     </div>
 
                     {/* Summary row */}
-                    <div className={`flex items-center gap-4 text-xs pt-2 border-t font-medium ${
+                    <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 text-xs pt-2 border-t font-medium ${
                       isTierSaved ? "border-white/20" : "border-zinc-100"
                     }`}>
                       <span className={isTierSaved ? "text-white" : "text-zinc-500"}>
@@ -749,14 +749,14 @@ export function ProductForm({
             {specFields.map((field, idx) => (
               <div
                 key={field.id}
-                className="flex items-center gap-2"
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
               >
                 <input
                   {...register(`specs.${idx}.label`)}
                   placeholder="Campo"
-                  className="w-[180px] rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-zinc-300"
+                  className="w-full sm:w-[180px] rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-zinc-300"
                 />
-                <span className="text-zinc-300">:</span>
+                <span className="text-zinc-300 hidden sm:inline">:</span>
                 <input
                   {...register(`specs.${idx}.value`)}
                   placeholder="Valor"
@@ -1145,7 +1145,7 @@ export function ProductForm({
       </div>
 
       {/* ===== ACTIONS ===== */}
-      <div className="flex items-center justify-center gap-3 pt-2">
+      <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
         <button
           type="submit"
           disabled={isSubmitting}

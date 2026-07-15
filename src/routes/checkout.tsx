@@ -334,11 +334,11 @@ function CheckoutPage() {
         <div className="space-y-6">
           {/* ═══════ STEP 1: Como deseja receber? ═══════ */}
           <div className="rounded-2xl border border-border/40 bg-card p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                 1
               </span>
-              <h2 className="font-semibold text-lg">Como deseja receber?</h2>
+              <h2 className="font-semibold text-base sm:text-lg">Como deseja receber?</h2>
               {selectedCarrier && (
                 <span className="ml-auto text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
                   Frete grátis
@@ -416,11 +416,11 @@ function CheckoutPage() {
           {/* ═══════ STEP 2: Endereço (só para entrega) ═══════ */}
           {selectedCarrier === "propria" && (
             <div className="rounded-2xl border border-border/40 bg-card p-6">
-              <div className="flex items-center gap-3 mb-5">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
+              <div className="flex items-center gap-3 mb-5 flex-wrap">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                   2
                 </span>
-                <h2 className="font-semibold text-lg">Endereço de entrega</h2>
+                <h2 className="font-semibold text-base sm:text-lg">Endereço de entrega</h2>
                 {locationDetected && location && (
                   <span className="inline-flex items-center gap-1.5 text-xs text-primary ml-auto bg-primary/5 px-2.5 py-1 rounded-full">
                     <Navigation className="h-3 w-3" />
@@ -487,8 +487,8 @@ function CheckoutPage() {
                     className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="col-span-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
                     <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Bairro</label>
                     <input
                       value={neighborhood}
@@ -543,11 +543,11 @@ function CheckoutPage() {
           {/* ═══════ STEP 2: Informações de retirada ═══════ */}
           {selectedCarrier === "retirada" && (
             <div className="rounded-2xl border border-border/40 bg-card p-6">
-              <div className="flex items-center gap-3 mb-5">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
+              <div className="flex items-center gap-3 mb-5 flex-wrap">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                   2
                 </span>
-                <h2 className="font-semibold text-lg">Retirada no local</h2>
+                <h2 className="font-semibold text-base sm:text-lg">Retirada no local</h2>
               </div>
               <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-5">
                 <div className="flex items-start gap-3">
@@ -582,11 +582,11 @@ function CheckoutPage() {
           {/* ═══════ STEP 3: Dados pessoais ═══════ */}
           {selectedCarrier && (
           <div className="rounded-2xl border border-border/40 bg-card p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                 {selectedCarrier === "retirada" ? "3" : "3"}
               </span>
-              <h2 className="font-semibold text-lg">Dados pessoais</h2>
+              <h2 className="font-semibold text-base sm:text-lg">Dados pessoais</h2>
             </div>
             <div className="space-y-4">
               {selectedCarrier === "propria" && (
@@ -634,11 +634,11 @@ function CheckoutPage() {
           {/* ═══════ STEP 4: Pagamento ═══════ */}
           {selectedCarrier && (
           <div className="rounded-2xl border border-border/40 bg-card p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20">
+            <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                 {selectedCarrier === "retirada" ? "4" : "4"}
               </span>
-              <h2 className="font-semibold text-lg">Pagamento</h2>
+              <h2 className="font-semibold text-base sm:text-lg">Pagamento</h2>
             </div>
             <div className="space-y-3">
               {[

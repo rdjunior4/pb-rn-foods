@@ -16,7 +16,7 @@ export function BenefitsBar() {
 
   return (
     <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] mt-10">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {displayItems.map((b, i) => {
           const IconComp = (Icons as any)[b.icon] || Icons.ShieldCheck;
           return (

@@ -61,9 +61,9 @@ function CategoryPage() {
         <span className="text-foreground font-medium">{category.name}</span>
       </div>
 
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{category.name}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-3xl font-bold truncate">{category.name}</h1>
           <p className="text-sm text-muted-foreground mt-1">{sortedProducts.length} produtos</p>
         </div>
         <div className="flex items-center gap-2">

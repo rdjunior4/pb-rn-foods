@@ -127,25 +127,25 @@ function AccountPage() {
       {/* ─── Full Red Block ─── */}
       <div className="bg-red-600 -mt-8 pt-12 sm:pt-14 pb-10 sm:pb-12 mb-0">
         {/* Title row + Buttons */}
-        <div className="px-4 sm:px-6 lg:px-[30px] mb-6 sm:mb-8 flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Minha conta</h1>
+        <div className="px-4 sm:px-6 lg:px-[30px] mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">Minha conta</h1>
             <p className="text-white/50 text-sm mt-1">Gerencie seus dados e acompanhe seus pedidos</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setEditOpen(true)}
-              className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-white/40 text-white bg-transparent text-xs font-bold px-5 hover:bg-white/10 transition-all"
+              className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-white/40 text-white bg-transparent text-xs font-bold px-4 sm:px-5 hover:bg-white/10 transition-all"
             >
               <Pencil className="h-3.5 w-3.5" />
-              Editar
+              <span className="hidden sm:inline">Editar</span>
             </button>
             <button
               onClick={logout}
-              className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-black/30 text-white text-xs font-bold px-5 hover:bg-black/50 transition-all"
+              className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-black/30 text-white text-xs font-bold px-4 sm:px-5 hover:bg-black/50 transition-all"
             >
               <LogOut className="h-3.5 w-3.5" />
-              Sair
+              <span className="hidden sm:inline">Sair</span>
             </button>
           </div>
         </div>

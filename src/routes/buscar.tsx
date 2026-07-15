@@ -64,10 +64,10 @@ function SearchPage() {
       )}
 
       {!isLoading && q && (
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <SlidersHorizontal className="h-4 w-4" />
-            <span>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+            <SlidersHorizontal className="h-4 w-4 shrink-0" />
+            <span className="truncate">
               {results.length} resultado{results.length !== 1 ? "s" : ""} para "
               <strong className="text-foreground">{q}</strong>"
             </span>
