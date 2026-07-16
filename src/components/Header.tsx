@@ -19,20 +19,25 @@ import {
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { useCategories } from "@/lib/hooks";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useCategories, useProducts } from "@/lib/hooks";
+import { formatCurrency } from "@/lib/format";
 
 export function Header() {
   const { totalItems } = useCart();
   const { user, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
   const { data: categories = [] } = useCategories();
+  const { data: allProducts = [] } = useProducts();
   const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<"login" | "register">("login");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
@@ -40,12 +45,107 @@ export function Header() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const suggestions = useMemo(() => {
+    if (!search.trim() || search.trim().length < 2) return [];
+    const q = search.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return allProducts
+      .filter((p) => {
+        const name = p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const brand = (p.brand || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return name.includes(q) || brand.includes(q);
+      })
+      .slice(0, 6);
+  }, [search, allProducts]);
+
+  const showSuggestions = searchFocused && suggestions.length > 0;
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
       navigate({ to: "/buscar", search: { q: search.trim() } });
+      setSearchFocused(false);
+      inputRef.current?.blur();
     }
   };
+
+  const handleSuggestionClick = useCallback((slug: string) => {
+    setSearchFocused(false);
+    navigate({ to: `/produto/${slug}` });
+  }, [navigate]);
+
+  const SearchInput = ({ className = "" }: { className?: string }) => (
+    <div className={`relative ${className}`} ref={searchRef}>
+      <form onSubmit={handleSearch}>
+        <input
+          ref={inputRef}
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => setSearchFocused(true)}
+          placeholder="Buscar produtos, marcas..."
+          className="w-full h-10 rounded border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
+        />
+        <button
+          type="submit"
+          aria-label="Buscar"
+          className="absolute right-1 top-1 inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
+        >
+          <Search className="h-4 w-4" />
+        </button>
+      </form>
+
+      {showSuggestions && (
+        <div className="absolute top-full left-0 right-0 mt-1.5 rounded-lg border border-border/60 bg-card shadow-xl overflow-hidden z-50">
+          <div className="p-2">
+            {suggestions.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => handleSuggestionClick(p.slug)}
+                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left group"
+              >
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  className="h-12 w-12 rounded-lg object-cover shrink-0 border border-border/40"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                    {p.name}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground truncate">
+                    {p.brand}
+                  </div>
+                </div>
+                <div className="text-sm font-bold text-foreground shrink-0">
+                  {formatCurrency(p.price)}
+                  <span className="text-[9px] text-muted-foreground ml-0.5">/{p.unit}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="border-t border-border/40 px-3 py-2">
+            <button
+              onClick={handleSearch}
+              className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-hover transition-colors"
+            >
+              <Search className="h-3 w-3" />
+              Ver todos os resultados para "{search}"
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -72,24 +172,7 @@ export function Header() {
             </Link>
           </div>
 
-          <form onSubmit={handleSearch} className="hidden sm:block flex-1 mx-4 lg:mx-8">
-            <div className="relative">
-              <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar produtos, marcas..."
-                className="w-full h-10 rounded border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
-              />
-              <button
-                type="submit"
-                aria-label="Buscar"
-                className="absolute right-1 top-1 inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-            </div>
-          </form>
+          <SearchInput className="hidden sm:block flex-1 mx-4 lg:mx-8" />
 
           <div className="flex items-center gap-2">
             <DropdownMenu>
@@ -187,24 +270,7 @@ export function Header() {
           </div>
         </div>
 
-        <form onSubmit={handleSearch} className="sm:hidden mt-3">
-          <div className="relative">
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar produtos..."
-              className="w-full h-10 rounded border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-            <button
-              type="submit"
-              aria-label="Buscar"
-              className="absolute right-1 top-1 inline-flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
-            >
-              <Search className="h-4 w-4" />
-            </button>
-          </div>
-        </form>
+        <SearchInput className="sm:hidden mt-3" />
       </div>
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 
