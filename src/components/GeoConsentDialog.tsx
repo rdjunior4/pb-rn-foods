@@ -34,10 +34,10 @@ export function GeoConsentDialog({ onConsent }: GeoConsentDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-card border border-border/40 shadow-2xl p-6">
+      <div className="w-full max-w-md rounded-lg bg-card border border-border/40 shadow-2xl p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <MapPin className="h-5 w-5 text-primary" />
             </div>
             <h3 className="font-bold text-lg">Localização</h3>
@@ -55,7 +55,7 @@ export function GeoConsentDialog({ onConsent }: GeoConsentDialogProps) {
           e determinar a distribuidora mais próxima.
         </p>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-xl px-3 py-2 mb-5">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 mb-5">
           <Shield className="h-3.5 w-3.5 shrink-0" />
           <span>Sua localização é usada apenas para cálculo de frete e distribuidoras. Não armazenamos seus dados de localização.</span>
         </div>
@@ -63,13 +63,13 @@ export function GeoConsentDialog({ onConsent }: GeoConsentDialogProps) {
         <div className="flex gap-2">
           <button
             onClick={handleReject}
-            className="flex-1 h-11 rounded-xl border border-border/40 text-sm font-medium hover:bg-accent transition-colors"
+            className="flex-1 h-11 rounded-lg border border-border/40 text-sm font-medium hover:bg-accent transition-colors"
           >
             Agora não
           </button>
           <button
             onClick={handleAccept}
-            className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
+            className="flex-1 h-11 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-colors"
           >
             Permitir
           </button>

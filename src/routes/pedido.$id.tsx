@@ -16,6 +16,7 @@ import { useOrderById, useOrderRealtime, useAdminDistributors } from "@/lib/hook
 import { formatCurrency, formatDate } from "@/lib/format";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { statusConfig, statusSteps } from "@/lib/constants";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/pedido/$id")({
   component: PedidoDetail,
@@ -25,6 +26,7 @@ function PedidoDetail() {
   const { id } = Route.useParams();
   const { data: order, isLoading } = useOrderById(id);
   useOrderRealtime(id);
+  const { user, isLoggedIn, isAdmin } = useAuth();
 
   const { data: distributors = [] } = useAdminDistributors();
   const orderDist = useMemo(() => {
@@ -47,7 +49,7 @@ function PedidoDetail() {
     return (
       <CustomerLayout>
         <div className="text-center py-24">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-muted/50 to-muted mb-8">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-muted/50 to-muted mb-8">
             <Package className="h-12 w-12 text-muted-foreground/40" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Pedido não encontrado</h1>
@@ -56,7 +58,30 @@ function PedidoDetail() {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-8 py-3.5 text-sm font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground px-8 py-3.5 text-sm font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar ao início
+          </Link>
+        </div>
+      </CustomerLayout>
+    );
+  }
+
+  if (!isLoggedIn || (order.customerId !== user?.id && !isAdmin)) {
+    return (
+      <CustomerLayout>
+        <div className="text-center py-24">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-muted/50 to-muted mb-8">
+            <Package className="h-12 w-12 text-muted-foreground/40" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2">Pedido não encontrado</h1>
+          <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+            Verifique se o número do pedido está correto.
+          </p>
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground px-8 py-3.5 text-sm font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar ao início
@@ -88,14 +113,14 @@ function PedidoDetail() {
               Realizado em {formatDate(order.createdAt)}
             </p>
           </div>
-          <div className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${status.color}`}>
+          <div className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ${status.color}`}>
             {status.label}
           </div>
         </div>
       </div>
 
       {!isCancelled && (
-        <div className="rounded-2xl border border-border/40 bg-card p-6 mb-8">
+        <div className="rounded-lg border border-border/40 bg-card p-6 mb-8">
           <h2 className="text-sm font-bold text-foreground mb-4">Acompanhamento</h2>
           <div className="flex items-center gap-1 overflow-x-auto pb-2">
             {statusSteps.map((step, idx) => {
@@ -105,7 +130,7 @@ function PedidoDetail() {
               return (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold whitespace-nowrap transition-colors ${
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold whitespace-nowrap transition-colors ${
                       active
                         ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                         : done
@@ -126,7 +151,7 @@ function PedidoDetail() {
       )}
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="rounded-2xl border border-border/40 bg-card p-6 space-y-4">
+        <div className="rounded-lg border border-border/40 bg-card p-6 space-y-4">
           <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" />
             Endereço de entrega
@@ -145,7 +170,7 @@ function PedidoDetail() {
             </div>
           )}
           {orderDist && (
-            <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-3 mt-3">
+            <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3 mt-3">
               <div className="h-9 w-9 rounded-lg flex items-center justify-center text-white text-sm font-bold" style={{ backgroundColor: orderDist.color }}>
                 <Store className="h-4 w-4" />
               </div>
@@ -157,7 +182,7 @@ function PedidoDetail() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-border/40 bg-card p-6 space-y-4">
+        <div className="rounded-lg border border-border/40 bg-card p-6 space-y-4">
           <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-primary" />
             Pagamento
@@ -192,14 +217,14 @@ function PedidoDetail() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border/40 bg-card p-6 mt-6">
+      <div className="rounded-lg border border-border/40 bg-card p-6 mt-6">
         <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
           <Package className="h-4 w-4 text-primary" />
           Itens do pedido
         </h2>
         <div className="space-y-3">
           {order.items.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-4 rounded-xl bg-muted/30 p-3">
+            <div key={idx} className="flex items-center gap-4 rounded-lg bg-muted/30 p-3">
               <img
                 src={item.image || `https://picsum.photos/seed/${item.productName}/80/80`}
                 alt={item.productName}
@@ -220,7 +245,7 @@ function PedidoDetail() {
       </div>
 
       {order.customerPhone && (
-        <div className="rounded-2xl border border-border/40 bg-card p-6 mt-6">
+        <div className="rounded-lg border border-border/40 bg-card p-6 mt-6">
           <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <Phone className="h-4 w-4 text-primary" />
             Contato

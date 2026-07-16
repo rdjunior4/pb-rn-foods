@@ -35,14 +35,14 @@ function CartPage() {
     return (
       <CustomerLayout>
         <div className="text-center py-24">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-muted/50 to-muted mb-8">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-muted/50 to-muted mb-8">
             <ShoppingBag className="h-12 w-12 text-muted-foreground/40" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Carrinho vazio</h1>
           <p className="text-muted-foreground mb-8 max-w-sm mx-auto">Adicione produtos para começar suas compras</p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-8 py-3.5 font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-8 py-3.5 font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             Explorar produtos
             <ArrowRight className="h-4 w-4" />
@@ -62,14 +62,14 @@ function CartPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={clearCart}
-            className="inline-flex items-center gap-1.5 h-9 rounded-xl border border-border/40 text-xs font-medium px-3 sm:px-4 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
+            className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-border/40 text-xs font-medium px-3 sm:px-4 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Limpar</span>
           </button>
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 h-9 rounded-xl border border-border/40 text-xs font-medium px-3 sm:px-4 hover:bg-muted transition-colors"
+            className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-border/40 text-xs font-medium px-3 sm:px-4 hover:bg-muted transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Continuar</span>
@@ -82,14 +82,14 @@ function CartPage() {
           {cartProducts.map((p) => (
             <div
               key={`${p!.id}-${p!.variantId || ""}`}
-              className="group rounded-2xl border border-border/40 bg-card p-5 hover:shadow-md transition-all"
+              className="group rounded-lg border border-border/40 bg-card p-5 hover:shadow-md transition-all"
             >
               <div className="flex gap-4">
                 <Link to="/produto/$slug" params={{ slug: p!.slug }} className="shrink-0">
                   <img
                     src={p!.image}
                     alt={p!.name}
-                    className="h-28 w-28 rounded-xl object-cover bg-muted group-hover:scale-105 transition-transform duration-300"
+                    className="h-28 w-28 rounded-lg object-cover bg-muted group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
                 <div className="flex-1 min-w-0">
@@ -109,7 +109,7 @@ function CartPage() {
                     </div>
                     <button
                       onClick={() => removeItem(p!.id, p!.variantId)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors shrink-0"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -119,14 +119,14 @@ function CartPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => updateQuantity(p!.id, p!.quantity - 1, p!.variantId)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border/40 hover:bg-muted transition-colors"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 hover:bg-muted transition-colors"
                       >
                         <Minus className="h-3.5 w-3.5" />
                       </button>
                       <span className="w-12 text-center text-sm font-bold">{p!.quantity}</span>
                       <button
                         onClick={() => addItem(p!.id, 1, p!.variantId, p!.unitPrice)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border/40 hover:bg-muted transition-colors"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 hover:bg-muted transition-colors"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </button>
@@ -147,7 +147,7 @@ function CartPage() {
         </div>
 
         <div className="lg:sticky lg:top-24 h-fit">
-          <div className="rounded-2xl border border-border/40 bg-card p-6 space-y-4">
+          <div className="rounded-lg border border-border/40 bg-card p-6 space-y-4">
             <h3 className="font-semibold text-lg">Resumo do pedido</h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
@@ -165,7 +165,7 @@ function CartPage() {
             </div>
             <Link
               to="/checkout"
-              className="block w-full text-center rounded-xl bg-primary text-primary-foreground font-semibold py-3.5 hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+              className="block w-full text-center rounded-lg bg-primary text-primary-foreground font-semibold py-3.5 hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
             >
               Finalizar pedido
             </Link>

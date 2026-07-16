@@ -72,7 +72,7 @@ function NewProduct() {
       <div className="flex items-center gap-4">
         <Link
           to="/admin/produtos"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -82,9 +82,9 @@ function NewProduct() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-zinc-200 p-6">
+      <div className="bg-white rounded-lg border border-zinc-200 p-6">
         <div className="flex items-center gap-3 mb-6">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-100">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
             <Package className="h-4 w-4 text-zinc-600" />
           </span>
           <h2 className="text-sm font-semibold text-zinc-900">Informações do produto</h2>

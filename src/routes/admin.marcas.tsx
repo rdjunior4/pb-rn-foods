@@ -200,7 +200,7 @@ function AdminMarcas() {
       </div>
 
       {showForm && (
-        <div className="rounded-xl border bg-white p-5 space-y-4">
+        <div className="rounded-lg border bg-white p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-900">
               {editBrand ? "Editar marca" : "Nova marca"}
@@ -321,14 +321,14 @@ function AdminMarcas() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-zinc-200">
+        <div className="text-center py-16 bg-white rounded-lg border border-zinc-200">
           <Package className="h-10 w-10 text-zinc-300 mx-auto mb-3" />
           <p className="text-sm text-zinc-500">
             {search ? "Nenhuma marca encontrada" : "Nenhuma marca cadastrada"}
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50">

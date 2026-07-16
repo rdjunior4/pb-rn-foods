@@ -46,7 +46,7 @@ export function CombosSection() {
         {activeCombos.slice(0, 4).map((combo) => (
           <div
             key={combo.id}
-            className="group relative bg-white rounded-xl border border-border/40 overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+            className="group relative bg-white rounded-lg border border-border/40 overflow-hidden hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
           >
             {combo.badge && (
               <div className="absolute top-3 left-3 z-10">

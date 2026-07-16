@@ -11,7 +11,7 @@ const helpers = [
 ];
 
 const business = [
-  { label: "Cadastro CNPJ", to: "/entrar" },
+  { label: "Cadastro CNPJ", to: "/entrar", search: { tab: "register" as const, redirect: "/" } },
   { label: "Compras no atacado", to: "#" },
   { label: "Lista de desejos", to: "#" },
   { label: "Indique e ganhe", to: "#" },
@@ -19,10 +19,10 @@ const business = [
 ];
 
 const social = [
-  { icon: Instagram, href: "#", label: "Instagram" },
+  { icon: Instagram, href: "https://www.instagram.com/pbfoodsdistribuidora/", label: "Instagram" },
   { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Youtube, href: "#", label: "Youtube" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Youtube, href: "https://www.youtube.com/watch?v=tlER4WXP6CU", label: "Youtube" },
+  { icon: Linkedin, href: "https://uk.linkedin.com/company/pb-foods", label: "LinkedIn" },
 ];
 
 export function Footer() {
@@ -71,6 +71,8 @@ export function Footer() {
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
+                  target={s.href === "#" ? undefined : "_blank"}
+                  rel={s.href === "#" ? undefined : "noopener noreferrer"}
                   className="inline-flex h-9 w-9 items-center justify-center rounded border border-white/10 text-white/40 hover:border-primary/40 hover:text-primary hover:bg-primary/10 transition-all"
                 >
                   <s.icon className="h-4 w-4" />
@@ -112,7 +114,7 @@ export function Footer() {
             <ul className="space-y-3">
               {business.map((b) => (
                 <li key={b.label}>
-                  <Link to={b.to} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
+                  <Link to={b.to} search={"search" in b ? b.search : undefined} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
                     <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
                     {b.label}
                   </Link>

@@ -2,9 +2,16 @@ import type { Product, Banner, Order, Category, Brand, Distributor, ProductSeed,
 import { getSupabase, isSupabaseConfigured } from "./supabase";
 
 // ============================================================
-// IN-MEMORY CACHE (populated by syncFromSupabase)
-// No localStorage — Supabase is the only source of truth.
+// IN-MEMORY CACHE (populated by syncFromSupabase or localStorage)
+// Supabase = source of truth when configured
+// localStorage = fallback when Supabase is not available
 // ============================================================
+
+const LS_KEY = "@pbrn-admin-store";
+const LS_ORDERS_KEY = "@pbrn-admin-orders";
+const LS_COUPONS_KEY = "@pbrn-admin-coupons";
+const LS_REVIEWS_KEY = "@pbrn-admin-reviews";
+const LS_STOCK_KEY = "@pbrn-admin-stock";
 
 export interface AdminStore {
   products: Product[];
@@ -30,13 +37,61 @@ let _orders: Order[] = [];
 let _coupons: Coupon[] = [];
 let _reviews: ProductReview[] = [];
 let _stockMovements: StockMovement[] = [];
+let _initialized = false;
+
+// ============================================================
+// LOCALSTORAGE HELPERS
+// ============================================================
+
+function lsGet<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function lsSet(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage full or unavailable — silently ignore
+  }
+}
+
+function persistToLs(): void {
+  if (isSupabaseConfigured()) return; // Supabase is source of truth
+  lsSet(LS_KEY, _store);
+  lsSet(LS_ORDERS_KEY, _orders);
+  lsSet(LS_COUPONS_KEY, _coupons);
+  lsSet(LS_REVIEWS_KEY, _reviews);
+  lsSet(LS_STOCK_KEY, _stockMovements);
+}
+
+function loadFromLs(): void {
+  if (_initialized) return;
+  _initialized = true;
+
+  const stored = lsGet<AdminStore>(LS_KEY);
+  if (stored) {
+    _store = stored;
+  }
+
+  _orders = lsGet<Order[]>(LS_ORDERS_KEY) || [];
+  _coupons = lsGet<Coupon[]>(LS_COUPONS_KEY) || [];
+  _reviews = lsGet<ProductReview[]>(LS_REVIEWS_KEY) || [];
+  _stockMovements = lsGet<StockMovement[]>(LS_STOCK_KEY) || [];
+}
 
 export function loadStore(): AdminStore {
+  if (!_initialized) loadFromLs();
   return _store;
 }
 
 export function saveStore(store: AdminStore): void {
   _store = store;
+  persistToLs();
 }
 
 export function resetStore(): void {
@@ -49,6 +104,11 @@ export function resetStore(): void {
     combos: [],
     customers: [],
   };
+  _orders = [];
+  _coupons = [];
+  _reviews = [];
+  _stockMovements = [];
+  persistToLs();
 }
 
 export function loadOrders(): Order[] {
@@ -71,14 +131,8 @@ export function generateId(): string {
 }
 
 export function generateOrderId(): string {
-  const date = new Date();
-  const y = date.getFullYear().toString().slice(-2);
-  const m = (date.getMonth() + 1).toString().padStart(2, "0");
-  const d = date.getDate().toString().padStart(2, "0");
-  const h = date.getHours().toString().padStart(2, "0");
-  const mi = date.getMinutes().toString().padStart(2, "0");
-  const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `PN${y}${m}${d}${h}${mi}${rnd}`;
+  const uuid = generateId().replace(/-/g, "").slice(0, 12).toUpperCase();
+  return `ORD-${uuid}`;
 }
 
 export function slugify(text: string): string {
@@ -96,17 +150,22 @@ export function slugify(text: string): string {
 // ============================================================
 
 export function getCombos(): Combo[] {
+  if (!_initialized) loadFromLs();
   return _store.combos || [];
 }
 
 export function saveCombo(combo: Combo): void {
+  if (!_initialized) loadFromLs();
   const idx = _store.combos.findIndex((c) => c.id === combo.id);
   if (idx >= 0) _store.combos[idx] = combo;
   else _store.combos.push(combo);
+  persistToLs();
 }
 
 export function deleteCombo(id: string): void {
+  if (!_initialized) loadFromLs();
   _store.combos = _store.combos.filter((c) => c.id !== id);
+  persistToLs();
 }
 
 // ============================================================
@@ -114,21 +173,27 @@ export function deleteCombo(id: string): void {
 // ============================================================
 
 export function loadCoupons(): Coupon[] {
+  if (!_initialized) loadFromLs();
   return _coupons;
 }
 
 export function saveCoupons(coupons: Coupon[]): void {
   _coupons = coupons;
+  persistToLs();
 }
 
 export function saveCoupon(coupon: Coupon): void {
+  if (!_initialized) loadFromLs();
   const idx = _coupons.findIndex((c) => c.id === coupon.id);
   if (idx >= 0) _coupons[idx] = coupon;
   else _coupons.push(coupon);
+  persistToLs();
 }
 
 export function deleteCoupon(id: string): void {
+  if (!_initialized) loadFromLs();
   _coupons = _coupons.filter((c) => c.id !== id);
+  persistToLs();
 }
 
 export function validateCoupon(
@@ -160,8 +225,10 @@ export function validateCoupon(
 }
 
 export function incrementCouponUsage(id: string): void {
+  if (!_initialized) loadFromLs();
   const c = _coupons.find((c) => c.id === id);
   if (c) c.usedCount++;
+  persistToLs();
 }
 
 // ============================================================
@@ -169,23 +236,30 @@ export function incrementCouponUsage(id: string): void {
 // ============================================================
 
 export function loadReviews(): ProductReview[] {
+  if (!_initialized) loadFromLs();
   return _reviews;
 }
 
 export function saveReviews(reviews: ProductReview[]): void {
   _reviews = reviews;
+  persistToLs();
 }
 
 export function getReviewsByProduct(productId: string): ProductReview[] {
+  if (!_initialized) loadFromLs();
   return _reviews.filter((r) => r.productId === productId);
 }
 
 export function addReview(review: ProductReview): void {
+  if (!_initialized) loadFromLs();
   _reviews.push(review);
+  persistToLs();
 }
 
 export function deleteReview(id: string): void {
+  if (!_initialized) loadFromLs();
   _reviews = _reviews.filter((r) => r.id !== id);
+  persistToLs();
 }
 
 // ============================================================
@@ -193,19 +267,24 @@ export function deleteReview(id: string): void {
 // ============================================================
 
 export function loadStockMovements(): StockMovement[] {
+  if (!_initialized) loadFromLs();
   return _stockMovements;
 }
 
 export function saveStockMovements(movements: StockMovement[]): void {
   _stockMovements = movements;
+  persistToLs();
 }
 
 export function addStockMovement(movement: StockMovement): void {
+  if (!_initialized) loadFromLs();
   _stockMovements.unshift(movement);
   if (_stockMovements.length > 500) _stockMovements = _stockMovements.slice(0, 500);
+  persistToLs();
 }
 
 export function getStockMovementsByProduct(productId: string): StockMovement[] {
+  if (!_initialized) loadFromLs();
   return _stockMovements.filter((m) => m.productId === productId);
 }
 
@@ -214,14 +293,17 @@ export function getStockMovementsByProduct(productId: string): StockMovement[] {
 // ============================================================
 
 export function loadCustomers(): Customer[] {
+  if (!_initialized) loadFromLs();
   return _store.customers;
 }
 
 export function saveCustomers(customers: Customer[]): void {
   _store.customers = customers;
+  persistToLs();
 }
 
 export function getCustomerById(id: string): Customer | undefined {
+  if (!_initialized) loadFromLs();
   return _store.customers.find((c) => c.id === id);
 }
 
@@ -233,6 +315,7 @@ export function getOrCreateCustomerFromOrder(order: {
   shippingAddress?: string;
   customerId?: string;
 }): Customer {
+  if (!_initialized) loadFromLs();
   const id = order.customerId || order.customerEmail;
   const doc = order.customerDocument || "";
 
@@ -261,12 +344,14 @@ export function getOrCreateCustomerFromOrder(order: {
       notes: "",
     };
     _store.customers.push(customer);
+    persistToLs();
   }
 
   return customer;
 }
 
 export function addLoyaltyPoints(customerId: string, orderTotal: number): void {
+  if (!_initialized) loadFromLs();
   const customer = _store.customers.find((c) => c.id === customerId);
   if (!customer) return;
 
@@ -279,12 +364,14 @@ export function addLoyaltyPoints(customerId: string, orderTotal: number): void {
   } else {
     customer.loyaltyLevel = "bronze";
   }
+  persistToLs();
 }
 
 export function decrementStockForOrder(
   items: { productId: string; variantId?: string; quantity: number; productName: string }[],
   orderId: string,
 ): void {
+  if (!_initialized) loadFromLs();
   const now = new Date().toISOString();
   const movements: StockMovement[] = [];
 
@@ -328,6 +415,7 @@ export function decrementStockForOrder(
 
   _stockMovements.unshift(...movements);
   if (_stockMovements.length > 500) _stockMovements = _stockMovements.slice(0, 500);
+  persistToLs();
 }
 
 // ============================================================
@@ -338,7 +426,10 @@ let syncPromise: Promise<void> | null = null;
 
 export function syncFromSupabase(): Promise<void> {
   if (syncPromise) return syncPromise;
-  if (!isSupabaseConfigured()) return Promise.resolve();
+  if (!isSupabaseConfigured()) {
+    loadFromLs();
+    return Promise.resolve();
+  }
 
   syncPromise = (async () => {
     const supabase = getSupabase();
@@ -412,6 +503,8 @@ export function syncFromSupabase(): Promise<void> {
       if (movs.data && movs.data.length > 0) {
         _stockMovements = movs.data.map(mapDbMovement);
       }
+
+      persistToLs();
     } catch (err) {
       console.error("[syncFromSupabase] erro:", err);
     } finally {

@@ -296,7 +296,7 @@ export function BannersSection() {
   return (
     <div className="space-y-6">
       {/* Carousel toggle */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-4 flex items-center justify-between">
+      <div className="bg-white rounded-lg border border-zinc-200 p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {config.carouselEnabled ? (
             <Play className="h-4 w-4 text-emerald-600" />
@@ -334,7 +334,7 @@ export function BannersSection() {
       </div>
 
       {showForm && (
-        <div className="rounded-xl border bg-white p-6 space-y-5">
+        <div className="rounded-lg border bg-white p-6 space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-900">
               {editingId ? "Editar banner" : "Novo banner"}
@@ -579,8 +579,8 @@ export function BannersSection() {
       )}
 
       {banners.length === 0 && !showForm ? (
-        <div className="rounded-xl border border-zinc-200 p-12 text-center bg-white">
-          <div className="h-14 w-14 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-3">
+        <div className="rounded-lg border border-zinc-200 p-12 text-center bg-white">
+          <div className="h-14 w-14 rounded-lg bg-zinc-100 flex items-center justify-center mx-auto mb-3">
             <Image className="h-7 w-7 text-zinc-300" />
           </div>
           <p className="text-sm font-medium text-zinc-900">Nenhum banner cadastrado</p>
@@ -591,7 +591,7 @@ export function BannersSection() {
           {banners.map((b, idx) => (
             <div
               key={b.id}
-              className={`group bg-white rounded-xl border border-zinc-200 p-4 flex items-start gap-4 hover:shadow-md transition-all ${!b.active ? "opacity-50" : ""}`}
+              className={`group bg-white rounded-lg border border-zinc-200 p-4 flex items-start gap-4 hover:shadow-md transition-all ${!b.active ? "opacity-50" : ""}`}
             >
               <div className="flex flex-col items-center gap-0.5 pt-1">
                 <button

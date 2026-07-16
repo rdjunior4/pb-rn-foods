@@ -340,7 +340,7 @@ function AdminClientes() {
 
       {/* Stats */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
               <Users className="h-5 w-5 text-blue-600" />
@@ -351,7 +351,7 @@ function AdminClientes() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
               <TrendingUp className="h-5 w-5 text-emerald-600" />
@@ -362,7 +362,7 @@ function AdminClientes() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-violet-50 flex items-center justify-center">
               <DollarSign className="h-5 w-5 text-violet-600" />
@@ -373,7 +373,7 @@ function AdminClientes() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
               <Star className="h-5 w-5 text-amber-600" />
@@ -389,7 +389,7 @@ function AdminClientes() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-4">
+      <div className="bg-white rounded-lg border border-zinc-200 p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="relative flex-1 w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
@@ -435,8 +435,8 @@ function AdminClientes() {
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
-          <div className="h-16 w-16 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-12 text-center">
+          <div className="h-16 w-16 rounded-lg bg-zinc-100 flex items-center justify-center mx-auto mb-4">
             <Users className="h-8 w-8 text-zinc-300" />
           </div>
           <p className="text-sm font-medium text-zinc-900">Nenhum cliente encontrado</p>
@@ -445,7 +445,7 @@ function AdminClientes() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -560,7 +560,7 @@ function AdminClientes() {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setSelected(null)}
           />
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="sticky top-0 bg-white border-b border-zinc-100 px-6 py-4 flex items-center justify-between rounded-t-xl z-10">
               <div className="flex items-center gap-3">
@@ -805,7 +805,7 @@ function AdminClientes() {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={resetForm}
           />
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+          <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-zinc-900">Novo Cliente</h3>
               <button

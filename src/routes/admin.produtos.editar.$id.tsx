@@ -37,7 +37,7 @@ function EditProduct() {
         <div className="flex items-center gap-4">
           <Link
             to="/admin/produtos"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -135,7 +135,7 @@ function EditProduct() {
         <div className="flex items-center gap-4">
           <Link
             to="/admin/produtos"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -146,16 +146,16 @@ function EditProduct() {
         </div>
         <button
           onClick={() => setConfirmDelete(true)}
-          className="inline-flex items-center gap-1.5 h-9 rounded-xl border border-red-200 text-xs font-medium px-4 text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+          className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-red-200 text-xs font-medium px-4 text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
         >
           <Trash2 className="h-3.5 w-3.5" />
           Excluir
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-zinc-200 p-6">
+      <div className="bg-white rounded-lg border border-zinc-200 p-6">
         <div className="flex items-center gap-3 mb-6">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-100">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100">
             <Package className="h-4 w-4 text-zinc-600" />
           </span>
           <h2 className="text-sm font-semibold text-zinc-900">Informações do produto</h2>

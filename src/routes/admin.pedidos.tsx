@@ -328,7 +328,7 @@ function AdminOrders() {
         <div className="flex items-center gap-2 bg-zinc-100 rounded-lg p-1">
           <button
             onClick={() => setView("pipeline")}
-            className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
+            className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${
               view === "pipeline"
                 ? "bg-white text-zinc-900 shadow-sm"
                 : "text-zinc-500 hover:text-zinc-700"
@@ -339,7 +339,7 @@ function AdminOrders() {
           </button>
           <button
             onClick={() => setView("table")}
-            className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
+            className={`inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${
               view === "table"
                 ? "bg-white text-zinc-900 shadow-sm"
                 : "text-zinc-500 hover:text-zinc-700"
@@ -353,7 +353,7 @@ function AdminOrders() {
 
       {/* Stats */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-violet-50 flex items-center justify-center">
               <Package className="h-4 w-4 text-violet-600" />
@@ -364,7 +364,7 @@ function AdminOrders() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-indigo-50 flex items-center justify-center">
               <Truck className="h-4 w-4 text-indigo-600" />
@@ -375,7 +375,7 @@ function AdminOrders() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-emerald-50 flex items-center justify-center">
               <CheckCircle className="h-4 w-4 text-emerald-600" />
@@ -386,7 +386,7 @@ function AdminOrders() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-amber-50 flex items-center justify-center">
               <Clock className="h-4 w-4 text-amber-600" />
@@ -400,7 +400,7 @@ function AdminOrders() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-4">
+      <div className="bg-white rounded-lg border border-zinc-200 p-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="relative flex-1 w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
@@ -564,7 +564,7 @@ function AdminOrders() {
 
               {/* Side Panel */}
               {selected && (
-                <div className="w-80 shrink-0 bg-white rounded-xl border border-zinc-200 overflow-hidden">
+                <div className="w-80 shrink-0 bg-white rounded-lg border border-zinc-200 overflow-hidden">
                   <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-zinc-900">{selected.id}</h3>
@@ -752,8 +752,8 @@ function AdminOrders() {
       {view === "table" && (
         <>
           {orders.length === 0 ? (
-            <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
-              <div className="h-16 w-16 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-4">
+            <div className="bg-white rounded-lg border border-zinc-200 p-12 text-center">
+              <div className="h-16 w-16 rounded-lg bg-zinc-100 flex items-center justify-center mx-auto mb-4">
                 <ShoppingBag className="h-8 w-8 text-zinc-300" />
               </div>
               <p className="text-sm font-medium text-zinc-900">Nenhum pedido recebido ainda</p>
@@ -762,12 +762,12 @@ function AdminOrders() {
               </p>
             </div>
           ) : paginated.length === 0 ? (
-            <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
+            <div className="bg-white rounded-lg border border-zinc-200 p-12 text-center">
               <p className="text-sm text-zinc-400">Nenhum pedido encontrado para esta busca</p>
             </div>
           ) : (
             <>
-              <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+              <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -834,7 +834,7 @@ function AdminOrders() {
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => setSelectedId(o.id)}
-                                  className="h-9 w-9 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+                                  className="h-9 w-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                                   title="Detalhes"
                                 >
                                   <Eye className="h-4 w-4" />
@@ -847,7 +847,7 @@ function AdminOrders() {
                                         orderId: o.id,
                                       })
                                     }
-                                    className="h-9 px-3 rounded-xl text-xs font-semibold text-zinc-900 hover:bg-zinc-50 transition-colors"
+                                    className="h-9 px-3 rounded-lg text-xs font-semibold text-zinc-900 hover:bg-zinc-50 transition-colors"
                                   >
                                     Avançar
                                   </button>
@@ -860,7 +860,7 @@ function AdminOrders() {
                                         orderId: o.id,
                                       })
                                     }
-                                    className="h-9 px-3 rounded-xl text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                                    className="h-9 px-3 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors"
                                   >
                                     Cancelar
                                   </button>
@@ -885,7 +885,7 @@ function AdminOrders() {
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="h-9 w-9 flex items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="h-9 w-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -901,7 +901,7 @@ function AdminOrders() {
                         <button
                           key={p}
                           onClick={() => setPage(p)}
-                          className={`h-9 w-9 rounded-xl text-sm font-medium transition-colors ${
+                          className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors ${
                             p === page
                               ? "bg-blue-600 text-white"
                               : "text-zinc-500 hover:bg-zinc-50 border border-zinc-200"
@@ -914,7 +914,7 @@ function AdminOrders() {
                     <button
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="h-9 w-9 flex items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="h-9 w-9 flex items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </button>
@@ -933,7 +933,7 @@ function AdminOrders() {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setSelectedId(null)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+          <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
             {/* Header */}
             <div className="sticky top-0 bg-white border-b border-zinc-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
               <div>
@@ -955,7 +955,7 @@ function AdminOrders() {
                 </span>
                 <button
                   onClick={() => setSelectedId(null)}
-                  className="h-9 w-9 flex items-center justify-center rounded-xl text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+                  className="h-9 w-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -964,7 +964,7 @@ function AdminOrders() {
 
             <div className="p-6 space-y-6">
               {/* Status Timeline */}
-              <div className="bg-zinc-50 rounded-xl p-4">
+              <div className="bg-zinc-50 rounded-lg p-4">
                 <div className="flex items-center gap-1">
                   {statusOrder.map((s) => {
                     const isComplete =
@@ -1004,7 +1004,7 @@ function AdminOrders() {
 
               {/* Customer & Payment */}
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="bg-zinc-50 rounded-xl p-4">
+                <div className="bg-zinc-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center">
                       <Package className="h-4 w-4 text-blue-600" />
@@ -1023,7 +1023,7 @@ function AdminOrders() {
                     </p>
                   )}
                 </div>
-                <div className="bg-zinc-50 rounded-xl p-4">
+                <div className="bg-zinc-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="h-8 w-8 rounded-lg bg-violet-100 flex items-center justify-center">
                       <CreditCard className="h-4 w-4 text-violet-600" />
@@ -1039,7 +1039,7 @@ function AdminOrders() {
               </div>
 
               {/* Shipping Address */}
-              <div className="bg-zinc-50 rounded-xl p-4">
+              <div className="bg-zinc-50 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center">
                     <MapPin className="h-4 w-4 text-amber-600" />
@@ -1080,7 +1080,7 @@ function AdminOrders() {
               {(selectedOrder.shippingCarrier ||
                 selectedOrder.trackingCode ||
                 selectedOrder.estimatedDelivery) && (
-                <div className="bg-zinc-50 rounded-xl p-4">
+                <div className="bg-zinc-50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="h-8 w-8 rounded-lg bg-indigo-100 flex items-center justify-center">
                       <Truck className="h-4 w-4 text-indigo-600" />
@@ -1125,7 +1125,7 @@ function AdminOrders() {
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
                   Itens do pedido
                 </h3>
-                <div className="divide-y rounded-xl border border-zinc-200 overflow-hidden">
+                <div className="divide-y rounded-lg border border-zinc-200 overflow-hidden">
                   {selectedOrder.items.map((item, idx) => (
                     <div
                       key={idx}
@@ -1134,7 +1134,7 @@ function AdminOrders() {
                       <img
                         src={item.image}
                         alt=""
-                        className="h-12 w-12 rounded-xl object-cover bg-zinc-100 shrink-0"
+                        className="h-12 w-12 rounded-lg object-cover bg-zinc-100 shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-zinc-900 truncate">
@@ -1165,7 +1165,7 @@ function AdminOrders() {
             <div className="sticky bottom-0 bg-white border-t border-zinc-100 px-6 py-4 rounded-b-2xl flex items-center justify-end gap-3">
               <button
                 onClick={() => setSelectedId(null)}
-                className="text-sm text-zinc-500 hover:text-zinc-700 font-medium transition-colors px-4 py-2 rounded-xl hover:bg-zinc-100"
+                className="text-sm text-zinc-500 hover:text-zinc-700 font-medium transition-colors px-4 py-2 rounded-lg hover:bg-zinc-100"
               >
                 Fechar
               </button>
@@ -1177,7 +1177,7 @@ function AdminOrders() {
                       orderId: selectedOrder.id,
                     })
                   }
-                  className="bg-zinc-900 text-white hover:bg-zinc-800 text-sm font-semibold rounded-xl px-5 py-2.5 transition-colors shadow-sm"
+                  className="bg-zinc-900 text-white hover:bg-zinc-800 text-sm font-semibold rounded-lg px-5 py-2.5 transition-colors shadow-sm"
                 >
                   Avançar para {statusConfig[nextStatus[selectedOrder.status]!].label}
                 </button>

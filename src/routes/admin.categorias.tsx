@@ -291,7 +291,7 @@ function AdminCategories() {
 
       {/* Inline Form */}
       {showForm && (
-        <div className="bg-white rounded-xl border border-zinc-200 p-5 space-y-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-900">
               {editingId ? "Editar categoria" : "Nova categoria"}
@@ -422,8 +422,8 @@ function AdminCategories() {
 
       {/* Category List */}
       {filteredCategories.length === 0 && !showForm ? (
-        <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
-          <div className="h-14 w-14 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-3">
+        <div className="bg-white rounded-lg border border-zinc-200 p-12 text-center">
+          <div className="h-14 w-14 rounded-lg bg-zinc-100 flex items-center justify-center mx-auto mb-3">
             <Tags className="h-7 w-7 text-zinc-300" />
           </div>
           <p className="text-sm font-medium text-zinc-900">
@@ -434,7 +434,7 @@ function AdminCategories() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           {/* Table Header */}
           <div className="hidden sm:grid grid-cols-[36px_32px_40px_1fr_1fr_100px_90px] items-center gap-3 px-4 py-2.5 bg-zinc-50 border-b border-zinc-200 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider select-none">
             <span></span>

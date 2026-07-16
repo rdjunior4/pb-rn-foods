@@ -80,7 +80,7 @@ export function ReviewsSection({ productId }: ReviewsSectionProps) {
       </div>
 
       {reviews.length === 0 ? (
-        <div className="rounded-2xl border border-border/40 bg-muted/30 p-8 text-center">
+        <div className="rounded-lg border border-border/40 bg-muted/30 p-8 text-center">
           <Star className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-sm text-muted-foreground mb-4">Ainda não há avaliações para este produto</p>
           {isLoggedIn && !userAlreadyReviewed && (
@@ -96,7 +96,7 @@ export function ReviewsSection({ productId }: ReviewsSectionProps) {
       ) : (
         <div className="grid md:grid-cols-[260px_1fr] gap-8">
           <div>
-            <div className="rounded-2xl border border-border/40 bg-card p-6 text-center">
+            <div className="rounded-lg border border-border/40 bg-card p-6 text-center">
               <div className="text-4xl font-extrabold">{avgRating.toFixed(1)}</div>
               <div className="flex items-center justify-center gap-0.5 mt-2">
                 {[1, 2, 3, 4, 5].map((s) => (
@@ -136,7 +136,7 @@ export function ReviewsSection({ productId }: ReviewsSectionProps) {
 
           <div className="space-y-4">
             {showForm && (
-              <form onSubmit={handleSubmit} className="rounded-2xl border border-primary/30 bg-primary/5 p-5">
+              <form onSubmit={handleSubmit} className="rounded-lg border border-primary/30 bg-primary/5 p-5">
                 <h3 className="font-semibold mb-3">Sua avaliação</h3>
                 <div className="flex items-center gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -175,7 +175,7 @@ export function ReviewsSection({ productId }: ReviewsSectionProps) {
             )}
 
             {reviews.map((review) => (
-              <div key={review.id} className="rounded-2xl border border-border/40 bg-card p-5">
+              <div key={review.id} className="rounded-lg border border-border/40 bg-card p-5">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary shrink-0">
                     {review.userName.charAt(0).toUpperCase()}

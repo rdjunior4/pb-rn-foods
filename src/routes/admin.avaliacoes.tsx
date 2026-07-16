@@ -91,7 +91,7 @@ function ReviewsAdminPage() {
       ) : (
         <div className="grid gap-3">
           {filtered.map((review) => (
-            <div key={review.id} className="rounded-xl border border-zinc-200 bg-white p-4">
+            <div key={review.id} className="rounded-lg border border-zinc-200 bg-white p-4">
               <div className="flex items-start gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-sm font-bold text-zinc-600 shrink-0">
                   {review.userName.charAt(0).toUpperCase()}
@@ -118,7 +118,7 @@ function ReviewsAdminPage() {
                 </div>
                 <button
                   onClick={() => handleDelete(review.id)}
-                  className="h-8 w-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+                  className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>

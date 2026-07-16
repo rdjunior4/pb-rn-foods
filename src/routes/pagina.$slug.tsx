@@ -42,7 +42,7 @@ function StaticPageView() {
         <ArrowLeft className="h-4 w-4" />
         Voltar ao início
       </Link>
-      <div className="rounded-2xl border border-border/40 bg-card p-8 sm:p-10">
+      <div className="rounded-lg border border-border/40 bg-card p-8 sm:p-10">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">{page.title}</h1>
         <div dangerouslySetInnerHTML={{ __html: html }} />
       </div>

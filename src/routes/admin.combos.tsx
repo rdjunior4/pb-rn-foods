@@ -118,21 +118,21 @@ function AdminCombosPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-2 mb-1">
             <ShoppingBag className="h-4 w-4 text-zinc-400" />
             <span className="text-xs text-zinc-500">Total</span>
           </div>
           <p className="text-2xl font-bold text-zinc-900">{combos.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-2 mb-1">
             <Eye className="h-4 w-4 text-green-500" />
             <span className="text-xs text-zinc-500">Ativos</span>
           </div>
           <p className="text-2xl font-bold text-green-600">{combos.filter((c) => c.active).length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-2 mb-1">
             <Percent className="h-4 w-4 text-orange-500" />
             <span className="text-xs text-zinc-500">Desconto médio</span>
@@ -145,7 +145,7 @@ function AdminCombosPage() {
 
       {/* Combos list */}
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
+        <div className="bg-white rounded-lg border border-zinc-200 p-12 text-center">
           <ShoppingBag className="h-12 w-12 text-zinc-300 mx-auto mb-3" />
           <p className="text-sm font-medium text-zinc-900 mb-1">Nenhum combo encontrado</p>
           <p className="text-xs text-zinc-500 mb-4">
@@ -166,7 +166,7 @@ function AdminCombosPage() {
           {filtered.map((combo) => (
             <div
               key={combo.id}
-              className={`bg-white rounded-xl border overflow-hidden transition-all ${
+              className={`bg-white rounded-lg border overflow-hidden transition-all ${
                 combo.active ? "border-zinc-200 hover:shadow-md" : "border-zinc-100 opacity-60"
               }`}
             >
@@ -211,21 +211,21 @@ function AdminCombosPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => toggleActive(combo)}
-                        className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+                        className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                         title={combo.active ? "Ocultar" : "Mostrar"}
                       >
                         {combo.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                       </button>
                       <button
                         onClick={() => { setEditing(combo); setIsCreating(false); }}
-                        className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+                        className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                         title="Editar"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => setDeleteId(combo.id)}
-                        className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                         title="Excluir"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -364,14 +364,14 @@ function ComboForm({
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onCancel}>
       <div
-        className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl"
+        className="bg-white rounded-lg w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-lg font-bold text-zinc-900">
             {combo ? "Editar combo" : "Novo combo"}
           </h2>
-          <button onClick={onCancel} className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-zinc-100">
+          <button onClick={onCancel} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-zinc-100">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -540,7 +540,7 @@ function ComboForm({
 
           {/* Price preview */}
           {items.length > 0 && (
-            <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100">
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-4 border border-orange-100">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-0.5">Preço original</p>

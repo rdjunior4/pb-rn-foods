@@ -103,7 +103,7 @@ function CouponsPage() {
             return (
               <div
                 key={coupon.id}
-                className={`flex items-center gap-4 rounded-xl border bg-white p-4 transition-all ${
+                className={`flex items-center gap-4 rounded-lg border bg-white p-4 transition-all ${
                   !coupon.active || expired ? "opacity-60 border-zinc-100" : "border-zinc-200 hover:shadow-sm"
                 }`}
               >
@@ -137,13 +137,13 @@ function CouponsPage() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => { setEditing(coupon); setModalOpen(true); }}
-                    className="h-8 w-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
                     onClick={() => setDeleteId(coupon.id)}
-                    className="h-8 w-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -164,7 +164,7 @@ function CouponsPage() {
 
       {deleteId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={() => setDeleteId(null)}>
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
                 <Trash2 className="h-5 w-5 text-red-500" />
@@ -218,10 +218,10 @@ function CouponModal({ coupon, onClose, onSave }: { coupon: Coupon | null; onClo
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-zinc-100 sticky top-0 bg-white rounded-t-2xl">
           <h2 className="font-bold text-zinc-900 text-lg">{coupon ? "Editar cupom" : "Novo cupom"}</h2>
-          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-zinc-100 transition-colors">
+          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-zinc-100 transition-colors">
             <X className="h-4 w-4 text-zinc-500" />
           </button>
         </div>

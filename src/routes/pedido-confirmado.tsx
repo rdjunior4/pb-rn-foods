@@ -24,7 +24,7 @@ function PedidoConfirmado() {
   return (
     <CustomerLayout variant="gradient" maxWidth="600">
       <div className="text-center py-8">
-        <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-100 to-emerald-50 mb-8 shadow-lg shadow-emerald-100">
+        <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50 mb-8 shadow-lg shadow-emerald-100">
           <CheckCircle className="h-12 w-12 text-emerald-600" />
         </div>
 
@@ -34,8 +34,8 @@ function PedidoConfirmado() {
         </p>
 
         {id && (
-          <div className="inline-flex items-center gap-3 rounded-2xl border border-border/40 bg-card px-6 py-4 mb-8 shadow-sm">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+          <div className="inline-flex items-center gap-3 rounded-lg border border-border/40 bg-card px-6 py-4 mb-8 shadow-sm">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
               <Package className="h-5 w-5 text-primary" />
             </div>
             <div className="text-left">
@@ -46,13 +46,13 @@ function PedidoConfirmado() {
         )}
 
         {order && (
-          <div className="rounded-2xl border border-border/40 bg-card p-6 mb-6 text-left shadow-sm">
+          <div className="rounded-lg border border-border/40 bg-card p-6 mb-6 text-left shadow-sm">
             <h3 className="font-semibold mb-5 text-lg">Resumo do pedido</h3>
 
             <div className="space-y-3 mb-5">
               {order.items.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-3">
-                  <img src={item.image} alt={item.productName} className="h-14 w-14 rounded-xl object-cover bg-muted shrink-0" />
+                  <img src={item.image} alt={item.productName} className="h-14 w-14 rounded-lg object-cover bg-muted shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{item.productName}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">{item.quantity}x {formatCurrency(item.price)}</div>
@@ -140,7 +140,7 @@ function PedidoConfirmado() {
           </div>
         )}
 
-        <div className="rounded-2xl border border-border/40 bg-card p-6 mb-8 text-left shadow-sm">
+        <div className="rounded-lg border border-border/40 bg-card p-6 mb-8 text-left shadow-sm">
           <h3 className="font-semibold mb-4">Próximos passos</h3>
           <ul className="space-y-4 text-sm text-muted-foreground">
             <li className="flex items-start gap-3">
@@ -161,14 +161,14 @@ function PedidoConfirmado() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             to="/"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-border/40 bg-card px-6 py-3.5 text-sm font-semibold hover:bg-muted transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-border/40 bg-card px-6 py-3.5 text-sm font-semibold hover:bg-muted transition-colors"
           >
             <Home className="h-4 w-4" />
             Voltar ao início
           </Link>
           <Link
             to="/minha-conta"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground px-6 py-3.5 text-sm font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-6 py-3.5 text-sm font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             <ClipboardList className="h-4 w-4" />
             Meus pedidos

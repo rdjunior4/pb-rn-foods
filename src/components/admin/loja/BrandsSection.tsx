@@ -58,7 +58,7 @@ export function BrandsSection() {
             <button
               key={brand.id}
               onClick={() => toggleBrand(brand.id)}
-              className={`text-left bg-white rounded-xl border p-4 transition-all hover:shadow-md ${selected ? "border-primary ring-2 ring-primary/20" : "border-zinc-200 hover:border-zinc-300"}`}
+              className={`text-left bg-white rounded-lg border p-4 transition-all hover:shadow-md ${selected ? "border-primary ring-2 ring-primary/20" : "border-zinc-200 hover:border-zinc-300"}`}
             >
               <div className="flex items-center gap-3">
                 {brand.logo ? (
@@ -98,7 +98,7 @@ export function BrandsSection() {
         })}
       </div>
       {allBrands.length === 0 && (
-        <div className="rounded-xl border border-zinc-200 p-12 text-center bg-white">
+        <div className="rounded-lg border border-zinc-200 p-12 text-center bg-white">
           <Sparkles className="h-8 w-8 text-zinc-300 mx-auto mb-3" />
           <p className="text-sm font-medium text-zinc-900">Nenhuma marca cadastrada</p>
           <p className="text-xs text-zinc-400 mt-1">

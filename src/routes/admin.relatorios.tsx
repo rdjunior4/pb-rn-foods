@@ -158,7 +158,7 @@ function AdminRelatorios() {
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${
+                  className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
                     period === p ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
                   }`}
                 >
@@ -179,7 +179,7 @@ function AdminRelatorios() {
 
       {/* KPI Cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white rounded-lg border border-zinc-200 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-zinc-500">Receita total</span>
             <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
@@ -189,7 +189,7 @@ function AdminRelatorios() {
           <div className="text-2xl font-bold text-zinc-900">{formatCurrency(totalRevenue)}</div>
           <div className="text-xs text-zinc-400 mt-1">{completedOrders.length} pedido(s) entregue(s)</div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white rounded-lg border border-zinc-200 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-zinc-500">Ticket médio</span>
             <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
@@ -199,7 +199,7 @@ function AdminRelatorios() {
           <div className="text-2xl font-bold text-zinc-900">{formatCurrency(avgTicket)}</div>
           <div className="text-xs text-zinc-400 mt-1">Por pedido entregue</div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white rounded-lg border border-zinc-200 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-zinc-500">Pedidos ativos</span>
             <div className="h-8 w-8 rounded-lg bg-violet-50 flex items-center justify-center">
@@ -209,7 +209,7 @@ function AdminRelatorios() {
           <div className="text-2xl font-bold text-zinc-900">{activeOrders.length}</div>
           <div className="text-xs text-zinc-400 mt-1">Em andamento</div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white rounded-lg border border-zinc-200 p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-zinc-500">Cancelados</span>
             <div className="h-8 w-8 rounded-lg bg-red-50 flex items-center justify-center">
@@ -224,7 +224,7 @@ function AdminRelatorios() {
       {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Revenue by Day */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-6">
+        <div className="bg-white rounded-lg border border-zinc-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-sm font-semibold text-zinc-900">Faturamento diário</h2>
@@ -253,7 +253,7 @@ function AdminRelatorios() {
         </div>
 
         {/* Orders by Status - Donut */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-6">
+        <div className="bg-white rounded-lg border border-zinc-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-sm font-semibold text-zinc-900">Pedidos por status</h2>
@@ -304,7 +304,7 @@ function AdminRelatorios() {
       {/* Top Products & Revenue by Category */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Top Products */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-6">
+        <div className="bg-white rounded-lg border border-zinc-200 p-6">
           <h2 className="text-sm font-semibold text-zinc-900 mb-4">Top produtos</h2>
           {topProducts.length === 0 ? (
             <div className="text-center py-8 text-zinc-400 text-sm">Sem dados</div>
@@ -325,7 +325,7 @@ function AdminRelatorios() {
         </div>
 
         {/* Revenue by Category */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-6">
+        <div className="bg-white rounded-lg border border-zinc-200 p-6">
           <h2 className="text-sm font-semibold text-zinc-900 mb-4">Faturamento por categoria</h2>
           {revenueByCategory.length === 0 ? (
             <div className="text-center py-8 text-zinc-400 text-sm">Sem dados</div>
@@ -352,7 +352,7 @@ function AdminRelatorios() {
       </div>
 
       {/* Revenue by Brand */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-6">
+      <div className="bg-white rounded-lg border border-zinc-200 p-6">
         <h2 className="text-sm font-semibold text-zinc-900 mb-4">Faturamento por marca</h2>
         {revenueByBrand.length === 0 ? (
           <div className="text-center py-8 text-zinc-400 text-sm">Sem dados</div>

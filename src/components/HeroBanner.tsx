@@ -60,13 +60,13 @@ export function HeroBanner() {
     setCurrent((prev) => (prev - 1 + activeBanners.length) % Math.max(activeBanners.length, 1));
 
   return (
-    <section className="w-full">
+    <section className="w-full mx-auto max-w-[1400px]">
       <AutoCarousel
         enabled={shouldCarousel}
         interval={carouselInterval}
         onNext={nextSlide}
       />
-      <div className="group relative overflow-hidden bg-brand-black min-h-[260px] sm:min-h-[350px] lg:h-[450px] max-h-[420px] sm:max-h-none flex items-center">
+      <div className="group relative overflow-hidden bg-brand-black min-h-[260px] sm:min-h-[350px] lg:h-[450px] max-h-[420px] sm:max-h-none flex items-center rounded-lg">
         <img
           src={(isMobile && displayBanner?.mobileImage) ? displayBanner.mobileImage : (displayBanner?.image || defaultHeroImg)}
           alt={displayBanner?.title || ""}
@@ -108,7 +108,7 @@ export function HeroBanner() {
               {hasSecondaryCta && (
                 <Link
                   to="/entrar"
-                  search={{ tab: "cadastro" }}
+                  search={{ tab: "register", redirect: "/" }}
                   className="inline-flex items-center gap-2 border border-white/15 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium rounded px-6 py-3 text-sm backdrop-blur-sm"
                 >
                   Cadastre-se CNPJ

@@ -114,7 +114,7 @@ function ProductPage() {
 
       <div className="grid md:grid-cols-2 gap-6 lg:gap-12">
         <div className="space-y-3">
-          <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted group">
+          <div className="relative aspect-square rounded-lg overflow-hidden bg-muted group">
             <img
               src={images[selectedImage]}
               alt={product.name}
@@ -243,7 +243,7 @@ function ProductPage() {
             <div className="flex gap-1 bg-muted/50 rounded-lg p-1 w-fit">
               <button
                 onClick={() => setTab("desc")}
-                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
                   tab === "desc" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -251,7 +251,7 @@ function ProductPage() {
               </button>
               <button
                 onClick={() => setTab("specs")}
-                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
                   tab === "specs" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -353,7 +353,7 @@ function ProductPage() {
           <div className="flex gap-3 mt-6">
             <button
               onClick={handleAdd}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold py-3.5 hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20 active:scale-[0.98]"
+              className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold py-3.5 hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20 active:scale-[0.98]"
             >
               <ShoppingCart className="h-5 w-5" />
               Adicionar ao carrinho
@@ -444,7 +444,7 @@ function ProductPage() {
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background p-3 md:hidden">
         <button
           onClick={handleAdd}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-semibold py-3.5 hover:bg-primary-hover transition-colors shadow-lg"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground font-semibold py-3.5 hover:bg-primary-hover transition-colors shadow-lg"
         >
           <ShoppingCart className="h-5 w-5" />
           Adicionar — {formatCurrency(currentPrice * qty)}

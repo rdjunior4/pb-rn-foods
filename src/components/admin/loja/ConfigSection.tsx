@@ -26,7 +26,7 @@ export function ConfigSection() {
   return (
     <div className="space-y-6">
       {/* Store Info */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-6 space-y-5">
+      <div className="bg-white rounded-lg border border-zinc-200 p-6 space-y-5">
         <h2 className="text-sm font-semibold text-zinc-900">Informações da loja</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -73,7 +73,7 @@ export function ConfigSection() {
       </div>
 
       {/* Hero Config */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-6 space-y-5">
+      <div className="bg-white rounded-lg border border-zinc-200 p-6 space-y-5">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold text-zinc-900">Hero (Banner principal)</h2>
           {config.heroEnabled ? (

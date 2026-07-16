@@ -216,7 +216,7 @@ export function ProductForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* ===== BASIC INFO ===== */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 space-y-5">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 space-y-5">
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-zinc-400" />
           <h3 className="text-sm font-semibold text-zinc-700">Informações básicas</h3>
@@ -283,7 +283,7 @@ export function ProductForm({
       </div>
 
       {/* ===== PRICING ===== */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 space-y-5">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 space-y-5">
         <div className="flex items-center gap-2">
           <Tag className="h-4 w-4 text-zinc-400" />
           <h3 className="text-sm font-semibold text-zinc-700">Preços e estoque</h3>
@@ -403,7 +403,7 @@ export function ProductForm({
                 return (
                   <div
                     key={field.id}
-                    className={`rounded-xl border p-4 space-y-3 transition-all ${
+                    className={`rounded-lg border p-4 space-y-3 transition-all ${
                       isTierSaved
                         ? "border-primary/40 bg-primary"
                         : "border-zinc-200 bg-white"
@@ -672,7 +672,7 @@ export function ProductForm({
       </div>
 
       {/* ===== DETAILS ===== */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 space-y-4">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 text-zinc-400" />
@@ -727,7 +727,7 @@ export function ProductForm({
       </div>
 
       {/* ===== SPECS ===== */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 space-y-4">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <List className="h-4 w-4 text-zinc-400" />
@@ -787,7 +787,7 @@ export function ProductForm({
       </div>
 
       {/* ===== IMAGES ===== */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 space-y-4">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-zinc-400" />
@@ -824,7 +824,7 @@ export function ProductForm({
                 onDragOver={handleDragOver}
                 onDrop={() => handleDrop(idx)}
                 onDragEnd={handleDragEnd}
-                className={`group relative aspect-square rounded-xl overflow-hidden border-2 bg-zinc-100 cursor-grab active:cursor-grabbing transition-all ${
+                className={`group relative aspect-square rounded-lg overflow-hidden border-2 bg-zinc-100 cursor-grab active:cursor-grabbing transition-all ${
                   dragIdx === idx
                     ? "border-primary shadow-lg opacity-50 scale-95"
                     : "border-zinc-200 hover:border-zinc-300"
@@ -859,7 +859,7 @@ export function ProductForm({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="aspect-square rounded-xl border-2 border-dashed border-zinc-200 hover:border-zinc-300 bg-zinc-50 hover:bg-zinc-100 transition-colors flex flex-col items-center justify-center gap-1.5"
+              className="aspect-square rounded-lg border-2 border-dashed border-zinc-200 hover:border-zinc-300 bg-zinc-50 hover:bg-zinc-100 transition-colors flex flex-col items-center justify-center gap-1.5"
             >
               <ImagePlus className="h-6 w-6 text-zinc-300" />
               <span className="text-xs text-zinc-400 font-medium">Adicionar</span>
@@ -868,7 +868,7 @@ export function ProductForm({
         ) : (
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-zinc-200 rounded-xl bg-zinc-50 hover:bg-zinc-100 hover:border-zinc-300 transition-colors cursor-pointer"
+            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 hover:border-zinc-300 transition-colors cursor-pointer"
           >
             <ImagePlus className="h-10 w-10 text-zinc-300 mb-2" />
             <p className="text-sm text-zinc-500 font-medium">Clique para adicionar imagens</p>
@@ -886,7 +886,7 @@ export function ProductForm({
       </div>
 
       {/* ===== LIVE PREVIEW ===== */}
-      <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+      <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden">
         <div className="flex items-center gap-2 px-5 py-3 bg-zinc-50 border-b border-zinc-200">
           <Eye className="h-4 w-4 text-zinc-400" />
           <span className="text-sm font-semibold text-zinc-700">Prévia do produto</span>
@@ -897,7 +897,7 @@ export function ProductForm({
           <div className="grid md:grid-cols-[340px_1fr] gap-8">
             {/* Image */}
             <div className="space-y-3">
-              <div className="relative aspect-square rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200">
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-zinc-100 border border-zinc-200">
                 {allImages.length > 0 ? (
                   <img
                     src={allImages[0]}
@@ -1000,9 +1000,9 @@ export function ProductForm({
                 if (validTiers.length === 0) return null;
 
                 return (
-                  <div className="mt-5 rounded-2xl bg-primary p-5 shadow-lg shadow-primary/20">
+                  <div className="mt-5 rounded-lg bg-primary p-5 shadow-lg shadow-primary/20">
                     <div className="flex items-center gap-2.5 mb-4">
-                      <span className="inline-flex items-center justify-center h-8 w-8 rounded-xl bg-white/25 backdrop-blur-sm">
+                      <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-white/25 backdrop-blur-sm">
                         <ShoppingCart className="h-4 w-4 text-white" />
                       </span>
                       <span className="text-base font-bold text-white tracking-tight drop-shadow-sm">
@@ -1024,7 +1024,7 @@ export function ProductForm({
                           tier.packageType === "pt" ? "Peça" : "Unidade";
 
                         return (
-                          <div key={i} className="relative rounded-xl bg-white/25 backdrop-blur-sm border border-white/30 p-5 pt-6 pr-8 text-center hover:bg-white/30 transition-colors">
+                          <div key={i} className="relative rounded-lg bg-white/25 backdrop-blur-sm border border-white/30 p-5 pt-6 pr-8 text-center hover:bg-white/30 transition-colors">
                             {discount > 0 && (
                               <span className="absolute -top-3 -right-3 inline-flex items-center justify-center h-8 min-w-[32px] rounded-full bg-white text-primary text-sm font-bold shadow-lg shadow-black/20">
                                 -{discount}%
@@ -1096,7 +1096,7 @@ export function ProductForm({
           <div className="grid md:grid-cols-2 gap-6">
             {/* Details */}
             {validDetails.length > 0 && (
-              <div className="rounded-xl border border-zinc-200 p-4">
+              <div className="rounded-lg border border-zinc-200 p-4">
                 <h3 className="text-sm font-semibold text-zinc-900 mb-3 flex items-center gap-2">
                   <Info className="h-4 w-4 text-zinc-400" />
                   Detalhes do produto
@@ -1117,7 +1117,7 @@ export function ProductForm({
 
             {/* Specs */}
             {validSpecs.length > 0 && (
-              <div className="rounded-xl border border-zinc-200 p-4">
+              <div className="rounded-lg border border-zinc-200 p-4">
                 <h3 className="text-sm font-semibold text-zinc-900 mb-3 flex items-center gap-2">
                   <List className="h-4 w-4 text-zinc-400" />
                   Especificações técnicas

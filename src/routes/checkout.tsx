@@ -192,7 +192,7 @@ function CheckoutPage() {
     return (
       <CustomerLayout>
         <div className="text-center py-24">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-muted/50 to-muted mb-8">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-muted/50 to-muted mb-8">
             <Truck className="h-12 w-12 text-muted-foreground/40" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Carrinho vazio</h1>
@@ -201,7 +201,7 @@ function CheckoutPage() {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-8 py-3.5 font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-8 py-3.5 font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             Explorar produtos
             <ArrowRight className="h-4 w-4" />
@@ -333,9 +333,9 @@ function CheckoutPage() {
       <div className="grid lg:grid-cols-[1fr_400px] gap-8">
         <div className="space-y-6">
           {/* ═══════ STEP 1: Como deseja receber? ═══════ */}
-          <div className="rounded-2xl border border-border/40 bg-card p-6">
+          <div className="rounded-lg border border-border/40 bg-card p-6">
             <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                 1
               </span>
               <h2 className="font-semibold text-base sm:text-lg">Como deseja receber?</h2>
@@ -347,7 +347,7 @@ function CheckoutPage() {
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <label
-                className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 p-6 cursor-pointer transition-all text-center ${
+                className={`relative flex flex-col items-center gap-3 rounded-lg border-2 p-6 cursor-pointer transition-all text-center ${
                   selectedCarrier === "propria"
                     ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
                     : "border-border/40 hover:border-border hover:bg-zinc-50/50"
@@ -361,7 +361,7 @@ function CheckoutPage() {
                   onChange={(e) => setSelectedCarrier(e.target.value)}
                   className="sr-only"
                 />
-                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center ${
+                <div className={`h-14 w-14 rounded-lg flex items-center justify-center ${
                   selectedCarrier === "propria" ? "bg-primary/10" : "bg-zinc-100"
                 }`}>
                   <Truck className={`h-7 w-7 ${selectedCarrier === "propria" ? "text-primary" : "text-zinc-400"}`} />
@@ -378,7 +378,7 @@ function CheckoutPage() {
               </label>
 
               <label
-                className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 p-6 cursor-pointer transition-all text-center ${
+                className={`relative flex flex-col items-center gap-3 rounded-lg border-2 p-6 cursor-pointer transition-all text-center ${
                   selectedCarrier === "retirada"
                     ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
                     : "border-border/40 hover:border-border hover:bg-zinc-50/50"
@@ -392,7 +392,7 @@ function CheckoutPage() {
                   onChange={(e) => setSelectedCarrier(e.target.value)}
                   className="sr-only"
                 />
-                <div className={`h-14 w-14 rounded-2xl flex items-center justify-center ${
+                <div className={`h-14 w-14 rounded-lg flex items-center justify-center ${
                   selectedCarrier === "retirada" ? "bg-primary/10" : "bg-zinc-100"
                 }`}>
                   <Store className={`h-7 w-7 ${selectedCarrier === "retirada" ? "text-primary" : "text-zinc-400"}`} />
@@ -415,9 +415,9 @@ function CheckoutPage() {
 
           {/* ═══════ STEP 2: Endereço (só para entrega) ═══════ */}
           {selectedCarrier === "propria" && (
-            <div className="rounded-2xl border border-border/40 bg-card p-6">
+            <div className="rounded-lg border border-border/40 bg-card p-6">
               <div className="flex items-center gap-3 mb-5 flex-wrap">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                   2
                 </span>
                 <h2 className="font-semibold text-base sm:text-lg">Endereço de entrega</h2>
@@ -431,7 +431,7 @@ function CheckoutPage() {
 
               {deliveryState && (
                 <div
-                  className={`mb-5 flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium ${
+                  className={`mb-5 flex items-center gap-2.5 rounded-lg px-4 py-3 text-sm font-medium ${
                     freeShipping
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : "bg-amber-50 text-amber-700 border border-amber-200"
@@ -460,7 +460,7 @@ function CheckoutPage() {
                         value={cep}
                         onChange={(e) => handleCepChange(e.target.value)}
                         placeholder="00000-000"
-                        className="w-full h-11 rounded-xl border border-border/40 bg-background pl-3 pr-10 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        className="w-full h-11 rounded-lg border border-border/40 bg-background pl-3 pr-10 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                       />
                       {loadingCep && (
                         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary animate-spin" />
@@ -474,7 +474,7 @@ function CheckoutPage() {
                       value={number}
                       onChange={(e) => setNumber(e.target.value)}
                       placeholder="123"
-                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                      className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                   </div>
                 </div>
@@ -484,7 +484,7 @@ function CheckoutPage() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Rua, avenida..."
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -494,7 +494,7 @@ function CheckoutPage() {
                       value={neighborhood}
                       onChange={(e) => setNeighborhood(e.target.value)}
                       placeholder="Bairro"
-                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                      className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                   </div>
                   <div>
@@ -502,7 +502,7 @@ function CheckoutPage() {
                     <input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                      className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                   </div>
                   <div>
@@ -510,14 +510,14 @@ function CheckoutPage() {
                     <input
                       value={state}
                       onChange={(e) => setState(e.target.value)}
-                      className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                      className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                   </div>
                 </div>
               </div>
 
               {detectedDistributor && (
-                <div className="mt-4 rounded-xl bg-primary/5 border border-primary/10 p-4">
+                <div className="mt-4 rounded-lg bg-primary/5 border border-primary/10 p-4">
                   <div className="flex items-center gap-3">
                     <div
                       className="h-9 w-9 rounded-lg flex items-center justify-center"
@@ -542,16 +542,16 @@ function CheckoutPage() {
 
           {/* ═══════ STEP 2: Informações de retirada ═══════ */}
           {selectedCarrier === "retirada" && (
-            <div className="rounded-2xl border border-border/40 bg-card p-6">
+            <div className="rounded-lg border border-border/40 bg-card p-6">
               <div className="flex items-center gap-3 mb-5 flex-wrap">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                   2
                 </span>
                 <h2 className="font-semibold text-base sm:text-lg">Retirada no local</h2>
               </div>
-              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-5">
+              <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-5">
                 <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                  <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
                     <CheckCircle className="h-5 w-5 text-emerald-600" />
                   </div>
                   <div className="space-y-2">
@@ -573,7 +573,7 @@ function CheckoutPage() {
                   value={phone}
                   onChange={(e) => setPhone(formatPhone(e.target.value))}
                   placeholder="Nome completo"
-                  className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
             </div>
@@ -581,9 +581,9 @@ function CheckoutPage() {
 
           {/* ═══════ STEP 3: Dados pessoais ═══════ */}
           {selectedCarrier && (
-          <div className="rounded-2xl border border-border/40 bg-card p-6">
+          <div className="rounded-lg border border-border/40 bg-card p-6">
             <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                 {selectedCarrier === "retirada" ? "3" : "3"}
               </span>
               <h2 className="font-semibold text-base sm:text-lg">Dados pessoais</h2>
@@ -596,7 +596,7 @@ function CheckoutPage() {
                     value={phone}
                     onChange={(e) => setPhone(formatPhone(e.target.value))}
                     placeholder="(83) 99999-9999"
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
               )}
@@ -609,7 +609,7 @@ function CheckoutPage() {
                       setDocType(e.target.value as DocumentType);
                       setDocNumber("");
                     }}
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background pl-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full h-11 rounded-lg border border-border/40 bg-background pl-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   >
                     <option value="cpf">CPF</option>
                     <option value="cnpj">CNPJ</option>
@@ -623,7 +623,7 @@ function CheckoutPage() {
                     value={docNumber}
                     onChange={(e) => setDocNumber(formatDoc(e.target.value, docType))}
                     placeholder={docType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
-                    className="w-full h-11 rounded-xl border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full h-11 rounded-lg border border-border/40 bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
               </div>
@@ -633,9 +633,9 @@ function CheckoutPage() {
 
           {/* ═══════ STEP 4: Pagamento ═══════ */}
           {selectedCarrier && (
-          <div className="rounded-2xl border border-border/40 bg-card p-6">
+          <div className="rounded-lg border border-border/40 bg-card p-6">
             <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground shadow-sm shadow-primary/20 shrink-0">
                 {selectedCarrier === "retirada" ? "4" : "4"}
               </span>
               <h2 className="font-semibold text-base sm:text-lg">Pagamento</h2>
@@ -648,7 +648,7 @@ function CheckoutPage() {
               ].map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-all ${payment === opt.value ? "border-primary bg-primary/5 shadow-sm shadow-primary/10" : "border-border/40 hover:border-border"}`}
+                  className={`flex items-center gap-3 rounded-lg border p-4 cursor-pointer transition-all ${payment === opt.value ? "border-primary bg-primary/5 shadow-sm shadow-primary/10" : "border-border/40 hover:border-border"}`}
                 >
                   <input
                     type="radio"
@@ -667,7 +667,7 @@ function CheckoutPage() {
           )}
 
           {!detectedDistributor && selectedCarrier === "propria" && city && (
-            <div className="flex items-center gap-2.5 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-center gap-2.5 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               Nenhuma distribuidora atende a sua região. O pedido será processado sem distribuidora definida.
             </div>
@@ -676,7 +676,7 @@ function CheckoutPage() {
           <button
             onClick={handleFinish}
             disabled={isSubmitting || !selectedCarrier}
-            className="w-full rounded-xl bg-primary text-primary-foreground font-semibold py-4 hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:pointer-events-none"
+            className="w-full rounded-lg bg-primary text-primary-foreground font-semibold py-4 hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:pointer-events-none"
           >
             {isSubmitting ? (
               <>
@@ -693,7 +693,7 @@ function CheckoutPage() {
         </div>
 
         <div className="lg:sticky lg:top-24 h-fit">
-          <div className="rounded-2xl border border-border/40 bg-card p-6">
+          <div className="rounded-lg border border-border/40 bg-card p-6">
             <h3 className="font-semibold text-lg mb-5">Resumo ({totalItems} itens)</h3>
             <div className="space-y-3">
               {cartProducts.map((p) => (
@@ -701,7 +701,7 @@ function CheckoutPage() {
                   <img
                     src={p!.image}
                     alt={p!.name}
-                    className="h-16 w-16 rounded-xl object-cover shrink-0"
+                    className="h-16 w-16 rounded-lg object-cover shrink-0"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-medium truncate">{p!.name}</div>
@@ -770,7 +770,7 @@ function CheckoutPage() {
                 {couponError && <p className="text-xs text-destructive mt-1.5">{couponError}</p>}
               </div>
             )}
-            <div className="flex items-center justify-center gap-2 mt-5 text-xs text-muted-foreground bg-muted/30 rounded-xl py-2.5">
+            <div className="flex items-center justify-center gap-2 mt-5 text-xs text-muted-foreground bg-muted/30 rounded-lg py-2.5">
               <Truck className="h-3.5 w-3.5" />
               {freeShipping
                 ? `Frete grátis para ${deliveryState}`

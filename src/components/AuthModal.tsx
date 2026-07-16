@@ -235,7 +235,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
             <div className="w-full max-w-sm mx-auto">
             <div className="mb-8 text-left">
               <div className="flex items-center gap-4 mb-3">
-                <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                   {tab === "register" ? (
                     <UserPlus className="h-6 w-6" />
                   ) : (
@@ -264,7 +264,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                        className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder="Seu nome completo"
                       />
                     </div>
@@ -278,7 +278,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                         type="text"
                         value={document}
                         onChange={(e) => handleDocChange(e.target.value)}
-                        className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                        className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder={docLabels[documentType].placeholder}
                       />
                     </div>
@@ -309,7 +309,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="seu@email.com"
                   />
                 </div>
@@ -323,7 +323,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="********"
                   />
                   <button
@@ -345,7 +345,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                      className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                       placeholder="********"
                     />
                     <button
@@ -360,14 +360,14 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               )}
 
               {error && (
-                <div className="flex items-center gap-2.5 text-sm text-destructive bg-destructive/5 border border-destructive/15 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-2.5 text-sm text-destructive bg-destructive/5 border border-destructive/15 rounded-lg px-4 py-3">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />
                   {error}
                 </div>
               )}
 
               {successMessage && (
-                <div className="flex items-start gap-2.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                <div className="flex items-start gap-2.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3">
                   <CheckCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{successMessage}</span>
                 </div>
@@ -376,7 +376,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
@@ -402,7 +402,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 <button
                   type="button"
                   onClick={() => switchTab("register")}
-                  className="w-full h-11 rounded-xl border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
+                  className="w-full h-11 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
                 >
                   Criar conta
                 </button>
@@ -412,7 +412,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 <button
                   type="button"
                   onClick={() => switchTab("login")}
-                  className="w-full h-11 rounded-xl border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
+                  className="w-full h-11 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
                 >
                   Entrar na conta
                 </button>
@@ -434,7 +434,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+              <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                 <KeyRound className="h-5 w-5" />
               </div>
               <div>
@@ -460,19 +460,19 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     placeholder="seu@email.com"
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                   />
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowReset(false)}
-                    className="flex-1 h-12 rounded-xl bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
+                    className="flex-1 h-12 rounded-lg bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleRequestReset}
-                    className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
+                    className="flex-1 h-12 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
                   >
                     Enviar código
                   </button>
@@ -490,7 +490,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     onChange={(e) => setResetCode(e.target.value)}
                     placeholder="000000"
                     maxLength={6}
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40 text-center text-lg tracking-[0.3em] font-mono"
+                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40 text-center text-lg tracking-[0.3em] font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -500,19 +500,19 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     value={resetNewPassword}
                     onChange={(e) => setResetNewPassword(e.target.value)}
                     placeholder="********"
-                    className="w-full h-12 rounded-xl border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                   />
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setResetStep("email")}
-                    className="flex-1 h-12 rounded-xl bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
+                    className="flex-1 h-12 rounded-lg bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
                   >
                     Voltar
                   </button>
                   <button
                     onClick={handleConfirmReset}
-                    className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
+                    className="flex-1 h-12 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
                   >
                     Redefinir
                   </button>

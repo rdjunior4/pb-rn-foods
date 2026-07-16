@@ -88,9 +88,9 @@ function AdminLogistica() {
 
       {/* ═══════ KPIs ═══════ */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
               <Truck className="h-5 w-5 text-blue-600" />
             </div>
             <div>
@@ -99,9 +99,9 @@ function AdminLogistica() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-violet-50 flex items-center justify-center">
               <Store className="h-5 w-5 text-violet-600" />
             </div>
             <div>
@@ -110,9 +110,9 @@ function AdminLogistica() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
               <Package className="h-5 w-5 text-amber-600" />
             </div>
             <div>
@@ -121,9 +121,9 @@ function AdminLogistica() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="bg-white rounded-lg border border-zinc-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
               <CheckCircle className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
@@ -136,7 +136,7 @@ function AdminLogistica() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* ═══════ Entregas Próprias pendentes ═══════ */}
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-100 flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
               <Truck className="h-4 w-4 text-blue-600" />
@@ -198,7 +198,7 @@ function AdminLogistica() {
         </div>
 
         {/* ═══════ Retiradas pendentes ═══════ */}
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-100 flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-violet-50 flex items-center justify-center">
               <Store className="h-4 w-4 text-violet-600" />
@@ -260,7 +260,7 @@ function AdminLogistica() {
       </div>
 
       {/* ═══════ Todos os pedidos ativos ═══════ */}
-      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
         <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center">
@@ -362,7 +362,7 @@ function AdminLogistica() {
 
       {/* ═══════ Info cards ═══════ */}
       <div className="grid sm:grid-cols-2 gap-4">
-        <div className="bg-blue-50 rounded-xl border border-blue-200 p-5">
+        <div className="bg-blue-50 rounded-lg border border-blue-200 p-5">
           <div className="flex items-start gap-3">
             <Truck className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
             <div>
@@ -373,7 +373,7 @@ function AdminLogistica() {
             </div>
           </div>
         </div>
-        <div className="bg-violet-50 rounded-xl border border-violet-200 p-5">
+        <div className="bg-violet-50 rounded-lg border border-violet-200 p-5">
           <div className="flex items-start gap-3">
             <Store className="h-5 w-5 text-violet-600 mt-0.5 shrink-0" />
             <div>

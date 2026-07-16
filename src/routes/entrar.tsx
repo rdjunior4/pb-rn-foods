@@ -1,14 +1,34 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { AuthModal } from "@/components/AuthModal";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/entrar")({
-  component: RedirectHome,
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: ((search.tab as string) || "login") as "login" | "register",
+    redirect: (search.redirect as string) || "/",
+  }),
+  component: EntrarPage,
 });
 
-function RedirectHome() {
+function EntrarPage() {
   const navigate = useNavigate();
+  const { tab, redirect } = Route.useSearch();
+  const { isLoggedIn } = useAuth();
+
   useEffect(() => {
-    navigate({ to: "/", replace: true });
-  }, [navigate]);
-  return null;
+    if (isLoggedIn) {
+      navigate({ to: redirect, replace: true });
+    }
+  }, [isLoggedIn, navigate, redirect]);
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <AuthModal
+        open={true}
+        onClose={() => navigate({ to: redirect, replace: true })}
+        initialTab={tab}
+      />
+    </div>
+  );
 }

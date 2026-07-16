@@ -95,14 +95,15 @@ function AccountPage() {
     return (
     <CustomerLayout maxWidth="1400" noPadding fullWidth>
         <div className="text-center py-24">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 mb-8 ring-1 ring-primary/10">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 mb-8 ring-1 ring-primary/10">
             <User className="h-12 w-12 text-primary/40" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Faça login para continuar</h1>
           <p className="text-muted-foreground mt-2 mb-8 max-w-sm mx-auto">Acesse sua conta para ver pedidos, favoritos e muito mais.</p>
           <Link
             to="/entrar"
-            className="inline-flex items-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground font-semibold px-8 text-sm hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+            search={{ tab: "login", redirect: "/minha-conta" }}
+            className="inline-flex items-center gap-2 h-12 rounded-lg bg-primary text-primary-foreground font-semibold px-8 text-sm hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             Entrar agora
             <ChevronRight className="h-4 w-4" />
@@ -126,81 +127,83 @@ function AccountPage() {
     <CustomerLayout maxWidth="1400" noPadding fullWidth>
       {/* ─── Full Red Block ─── */}
       <div className="bg-red-600 -mt-8 pt-12 sm:pt-14 pb-10 sm:pb-12 mb-0">
-        {/* Title row + Buttons */}
-        <div className="px-4 sm:px-6 lg:px-[30px] mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">Minha conta</h1>
-            <p className="text-white/50 text-sm mt-1">Gerencie seus dados e acompanhe seus pedidos</p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setEditOpen(true)}
-              className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-white/40 text-white bg-transparent text-xs font-bold px-4 sm:px-5 hover:bg-white/10 transition-all"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Editar</span>
-            </button>
-            <button
-              onClick={logout}
-              className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-black/30 text-white text-xs font-bold px-4 sm:px-5 hover:bg-black/50 transition-all"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Sair</span>
-            </button>
-          </div>
-        </div>
-
-        {/* User info */}
-        <div className="px-4 sm:px-6 lg:px-[30px] space-y-5 border-t border-white/10 pt-5">
-          {/* Avatar + Name + Contact */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="relative shrink-0 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="h-16 w-16 rounded-2xl object-cover shadow-lg ring-2 ring-white/20" />
-              ) : (
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-red-700 text-xl font-black shadow-lg">
-                  {initials}
-                </div>
-              )}
-              <div className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Camera className="h-5 w-5 text-white" />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-400 border-2 border-red-600" />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-              />
+        <div className="max-w-[1400px] mx-auto">
+          {/* Title row + Buttons */}
+          <div className="px-4 sm:px-6 lg:px-[30px] mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">Minha conta</h1>
+              <p className="text-white/50 text-sm mt-1">Gerencie seus dados e acompanhe seus pedidos</p>
             </div>
-            <div>
-              <h2 className="text-xl font-black text-white tracking-tight">{user!.name}</h2>
-              <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                <span className="inline-flex items-center gap-1 rounded-full bg-white text-red-700 px-2.5 py-0.5 text-[11px] font-bold">
-                  <Award className="h-3 w-3" />
-                  {user!.documentType === "cnpj" ? "CNPJ" : "CPF"}
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/15 text-white/80 px-2.5 py-0.5 text-[11px] font-semibold">
-                  <Clock className="h-3 w-3" />
-                  Desde {new Date(user!.createdAt).getFullYear()}
-                </span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-6 text-sm border-t border-white/10 pt-3 mt-3">
-                <span className="flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 text-white/50" />
-                  <span className="text-white/80">{user!.email}</span>
-                </span>
-                <span className="hidden sm:flex items-center gap-2">
-                  <DocIcon className="h-3.5 w-3.5 text-white/50" />
-                  <span className="text-white/80">{formattedDoc}</span>
-                </span>
-                {user!.phone && (
-                  <span className="flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 text-white/50" />
-                    <span className="text-white/80">{user!.phone}</span>
-                  </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setEditOpen(true)}
+                className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-white/40 text-white bg-transparent text-xs font-bold px-4 sm:px-5 hover:bg-white/10 transition-all"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Editar</span>
+              </button>
+              <button
+                onClick={logout}
+                className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-black/30 text-white text-xs font-bold px-4 sm:px-5 hover:bg-black/50 transition-all"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Sair</span>
+              </button>
+            </div>
+          </div>
+
+          {/* User info */}
+          <div className="px-4 sm:px-6 lg:px-[30px] space-y-5 border-t border-white/10 pt-5">
+            {/* Avatar + Name + Contact */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="relative shrink-0 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="h-16 w-16 rounded-lg object-cover shadow-lg ring-2 ring-white/20" />
+                ) : (
+                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-lg bg-white text-red-700 text-xl font-black shadow-lg">
+                    {initials}
+                  </div>
                 )}
+                <div className="absolute inset-0 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Camera className="h-5 w-5 text-white" />
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-400 border-2 border-red-600" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-white tracking-tight">{user!.name}</h2>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white text-red-700 px-2.5 py-0.5 text-[11px] font-bold">
+                    <Award className="h-3 w-3" />
+                    {user!.documentType === "cnpj" ? "CNPJ" : "CPF"}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/15 text-white/80 px-2.5 py-0.5 text-[11px] font-semibold">
+                    <Clock className="h-3 w-3" />
+                    Desde {new Date(user!.createdAt).getFullYear()}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-6 text-sm border-t border-white/10 pt-3 mt-3">
+                  <span className="flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5 text-white/50" />
+                    <span className="text-white/80">{user!.email}</span>
+                  </span>
+                  <span className="hidden sm:flex items-center gap-2">
+                    <DocIcon className="h-3.5 w-3.5 text-white/50" />
+                    <span className="text-white/80">{formattedDoc}</span>
+                  </span>
+                  {user!.phone && (
+                    <span className="flex items-center gap-2">
+                      <Phone className="h-3.5 w-3.5 text-white/50" />
+                      <span className="text-white/80">{user!.phone}</span>
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

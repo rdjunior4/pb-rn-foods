@@ -306,10 +306,10 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
   const selectedSection = selectedId ? sections.find((s) => s.id === selectedId) : null;
 
   return (
-    <div className="flex gap-0 bg-zinc-100 rounded-xl overflow-hidden border border-zinc-200" style={{ height: "calc(100vh - 280px)", minHeight: "600px" }}>
+    <div className="flex gap-0 bg-zinc-100 rounded-lg overflow-hidden border border-zinc-200" style={{ height: "calc(100vh - 280px)", minHeight: "600px" }}>
       {/* Left: Live Preview */}
       <div className="flex-1 overflow-y-auto bg-zinc-100 p-4">
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 min-h-full overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border border-zinc-200 min-h-full overflow-hidden">
           {/* Browser chrome */}
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-200 bg-zinc-50">
             <div className="flex gap-1.5">
@@ -318,7 +318,7 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
               <div className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
             </div>
             <div className="flex-1 flex items-center justify-center">
-              <div className="bg-white border border-zinc-200 rounded-md px-3 py-0.5 text-[10px] text-zinc-400 font-mono">
+              <div className="bg-white border border-zinc-200 rounded-lg px-3 py-0.5 text-[10px] text-zinc-400 font-mono">
                 pbrnfoods.com.br
               </div>
             </div>
@@ -332,7 +332,7 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
           <div className="min-h-[500px]">
             {sections.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[500px] text-center p-8">
-                <div className="h-16 w-16 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
+                <div className="h-16 w-16 rounded-lg bg-zinc-100 flex items-center justify-center mb-4">
                   <LayoutGrid className="h-8 w-8 text-zinc-300" />
                 </div>
                 <p className="text-sm font-medium text-zinc-900 mb-1">Página vazia</p>
@@ -366,7 +366,7 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
                       <SectionMiniPreview section={section} />
 
                       {/* Label overlay */}
-                      <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-zinc-200/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm border border-zinc-200/50 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Icon className="h-3 w-3 text-zinc-500" />
                         <span className="text-[10px] font-semibold text-zinc-700">
                           {section.title || preview.label}
@@ -385,7 +385,7 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
                         <div className="flex items-center gap-1 bg-white rounded-lg shadow-lg border border-zinc-200 p-1">
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleActive(section.id); }}
-                            className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
+                            className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
                             title={section.active ? "Ocultar" : "Mostrar"}
                           >
                             {section.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
@@ -393,7 +393,7 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
                           <button
                             onClick={(e) => { e.stopPropagation(); moveUp(idx); }}
                             disabled={idx === 0}
-                            className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 disabled:opacity-30"
+                            className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 disabled:opacity-30"
                             title="Mover para cima"
                           >
                             <span className="text-xs">↑</span>
@@ -401,14 +401,14 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
                           <button
                             onClick={(e) => { e.stopPropagation(); moveDown(idx); }}
                             disabled={idx === sections.length - 1}
-                            className="h-7 w-7 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 disabled:opacity-30"
+                            className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 disabled:opacity-30"
                             title="Mover para baixo"
                           >
                             <span className="text-xs">↓</span>
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); removeSection(section.id); }}
-                            className="h-7 w-7 flex items-center justify-center rounded-md text-red-400 hover:text-red-600 hover:bg-red-50"
+                            className="h-7 w-7 flex items-center justify-center rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50"
                             title="Remover"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -472,9 +472,9 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
                         <button
                           key={item.type}
                           onClick={() => addSection(item.type)}
-                          className="group flex flex-col items-center gap-2 p-4 rounded-xl border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-50 transition-all"
+                          className="group flex flex-col items-center gap-2 p-4 rounded-lg border border-zinc-200 hover:border-zinc-900 hover:bg-zinc-50 transition-all"
                         >
-                          <div className="h-10 w-10 rounded-xl bg-zinc-100 group-hover:bg-zinc-900 flex items-center justify-center transition-colors">
+                          <div className="h-10 w-10 rounded-lg bg-zinc-100 group-hover:bg-zinc-900 flex items-center justify-center transition-colors">
                             <Icon className="h-5 w-5 text-zinc-500 group-hover:text-white transition-colors" />
                           </div>
                           <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-900">
@@ -524,7 +524,7 @@ function SectionSettings({
   return (
     <div className="space-y-5">
       {/* Section header */}
-      <div className={`rounded-xl bg-gradient-to-r ${preview.bg} p-4 flex items-center gap-3`}>
+      <div className={`rounded-lg bg-gradient-to-r ${preview.bg} p-4 flex items-center gap-3`}>
         <div className="h-10 w-10 rounded-lg bg-white/80 flex items-center justify-center">
           <Icon className="h-5 w-5 text-zinc-700" />
         </div>

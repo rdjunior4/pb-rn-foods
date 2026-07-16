@@ -418,12 +418,12 @@ function AdminDistribuidoras() {
           {distributors.map((d) => (
             <div
               key={d.id}
-              className={`bg-white rounded-xl border border-zinc-200 p-5 transition-all hover:shadow-md ${!d.active ? "opacity-50" : ""}`}
+              className={`bg-white rounded-lg border border-zinc-200 p-5 transition-all hover:shadow-md ${!d.active ? "opacity-50" : ""}`}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div
-                    className="h-10 w-10 rounded-xl flex items-center justify-center"
+                    className="h-10 w-10 rounded-lg flex items-center justify-center"
                     style={{ backgroundColor: d.color + "15" }}
                   >
                     <MapPin className="h-5 w-5" style={{ color: d.color }} />
@@ -494,7 +494,7 @@ function AdminDistribuidoras() {
       )}
 
       {distributors.length === 0 && !showForm && (
-        <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
+        <div className="bg-white rounded-lg border border-zinc-200 p-12 text-center">
           <MapPin className="h-10 w-10 text-zinc-300 mx-auto mb-3" />
           <p className="text-sm font-medium text-zinc-900">Nenhuma distribuidora</p>
           <p className="text-xs text-zinc-400 mt-1">Adicione a primeira distribuidora</p>
@@ -502,7 +502,7 @@ function AdminDistribuidoras() {
       )}
 
       {showForm && (
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-900">
               {editing ? "Editar distribuidora" : "Nova distribuidora"}
@@ -795,7 +795,7 @@ function AdminDistribuidoras() {
               </button>
             </div>
 
-            <div className="rounded-xl border border-zinc-200 overflow-hidden h-[400px]">
+            <div className="rounded-lg border border-zinc-200 overflow-hidden h-[400px]">
               <MapContainer
                 center={center}
                 zoom={hasCoords ? 10 : 7}

@@ -73,14 +73,14 @@ export function ProductCard({ product }: { product: Product }) {
           <button
             onClick={(e) => { e.stopPropagation(); addItem(product.id); }}
             aria-label="Adicionar ao carrinho"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground hover:bg-primary-hover active:scale-90 transition-all shadow-sm hover:shadow-md hover:shadow-primary/20"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover active:scale-90 transition-all shadow-sm hover:shadow-md hover:shadow-primary/20"
           >
             <ShoppingCart className="h-[18px] w-[18px]" />
           </button>
         </div>
 
         {qty > 0 && (
-          <div className="absolute bottom-[68px] right-3 text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-md">
+          <div className="absolute bottom-[68px] right-3 text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-lg">
             {qty} no carrinho
           </div>
         )}

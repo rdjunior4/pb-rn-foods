@@ -24,7 +24,7 @@ export function ProductSection({
 
   return (
     <section className={`mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] ${variant === "alt" ? "mt-14" : "mt-10"}`}>
-      <div className={isFeatured ? "rounded-2xl border-2 border-primary/20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent p-5 sm:p-6 shadow-sm" : ""}>
+      <div className={isFeatured ? "rounded-lg border-2 border-primary/20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent p-5 sm:p-6 shadow-sm" : ""}>
         <div className="flex items-end justify-between mb-6 gap-4">
           <div>
             <div className="flex items-center gap-3">

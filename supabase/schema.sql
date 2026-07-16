@@ -900,6 +900,14 @@ DECLARE
 BEGIN
   v_order_id := p_order->>'id';
 
+  -- 0. Validar identidade: usuario autenticado so pode criar pedido para si mesmo
+  IF auth.uid() IS NOT NULL AND (p_order->>'customerId') IS NOT NULL THEN
+    IF auth.uid() <> (p_order->>'customerId')::UUID THEN
+      RETURN QUERY SELECT v_order_id, FALSE, 'Acesso negado: voce so pode criar pedidos para sua propria conta'::TEXT;
+      RETURN;
+    END IF;
+  END IF;
+
   -- 1. Validar cupom se fornecido
   IF p_coupon_id IS NOT NULL AND p_coupon_code IS NOT NULL THEN
     SELECT v.ok, v.error INTO v_coupon_valid, v_coupon_error

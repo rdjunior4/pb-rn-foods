@@ -105,9 +105,9 @@ function renderSection(
         <section
           key={section.id}
           className={`mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] mt-10 ${
-            section.style === "card" ? "rounded-2xl border border-border/40 bg-card p-6" :
-            section.style === "highlighted" ? "rounded-2xl border border-primary/20 bg-primary/5 p-6" :
-            section.style === "gradient" ? "rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-primary/10 p-6" :
+            section.style === "card" ? "rounded-lg border border-border/40 bg-card p-6" :
+            section.style === "highlighted" ? "rounded-lg border border-primary/20 bg-primary/5 p-6" :
+            section.style === "gradient" ? "rounded-lg bg-gradient-to-br from-primary/5 via-transparent to-primary/10 p-6" :
             ""
           }`}
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(section.html) }}

@@ -68,28 +68,28 @@ function StockPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="rounded-xl border border-zinc-200 bg-white p-4">
+        <div className="rounded-lg border border-zinc-200 bg-white p-4">
           <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium">
             <Boxes className="h-4 w-4" />
             Total
           </div>
           <div className="text-2xl font-bold text-zinc-900 mt-1">{stats.total}</div>
         </div>
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
           <div className="flex items-center gap-2 text-emerald-600 text-xs font-medium">
             <TrendingUp className="h-4 w-4" />
             Em estoque
           </div>
           <div className="text-2xl font-bold text-emerald-700 mt-1">{stats.ok}</div>
         </div>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
           <div className="flex items-center gap-2 text-amber-600 text-xs font-medium">
             <AlertTriangle className="h-4 w-4" />
             Estoque baixo
           </div>
           <div className="text-2xl font-bold text-amber-700 mt-1">{stats.low}</div>
         </div>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <div className="flex items-center gap-2 text-red-600 text-xs font-medium">
             <TrendingDown className="h-4 w-4" />
             Esgotado
@@ -129,7 +129,7 @@ function StockPage() {
             ok: "border-zinc-200 bg-white",
           };
           return (
-            <div key={product.id} className={`flex items-center gap-4 rounded-xl border p-3.5 ${colors[level]}`}>
+            <div key={product.id} className={`flex items-center gap-4 rounded-lg border p-3.5 ${colors[level]}`}>
               <img src={product.image} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-zinc-900 truncate">{product.name}</div>
@@ -143,14 +143,14 @@ function StockPage() {
               </div>
               <button
                 onClick={() => setHistoryProduct(product)}
-                className="h-8 w-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                 title="Histórico"
               >
                 <History className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setAdjustProduct(product)}
-                className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 text-white px-3 py-1.5 text-xs font-medium hover:bg-zinc-800 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 text-white px-3 py-1.5 text-xs font-medium hover:bg-zinc-800 transition-colors"
               >
                 <Edit3 className="h-3 w-3" />
                 Ajustar
@@ -196,10 +196,10 @@ function AdjustModal({ product, onClose, onSave }: { product: Product; onClose: 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-sm rounded-lg bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-zinc-100">
           <h2 className="font-bold text-zinc-900">Ajustar estoque</h2>
-          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-zinc-100">
+          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-zinc-100">
             <X className="h-4 w-4 text-zinc-500" />
           </button>
         </div>
@@ -260,13 +260,13 @@ function HistoryModal({ product, movements, onClose }: { product: Product; movem
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-lg max-h-[80vh] flex flex-col rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg max-h-[80vh] flex flex-col rounded-lg bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-zinc-100">
           <div>
             <h2 className="font-bold text-zinc-900">Histórico de movimentações</h2>
             <p className="text-xs text-zinc-500 mt-0.5">{product.name}</p>
           </div>
-          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-zinc-100">
+          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-zinc-100">
             <X className="h-4 w-4 text-zinc-500" />
           </button>
         </div>

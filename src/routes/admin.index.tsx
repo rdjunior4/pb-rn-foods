@@ -367,7 +367,7 @@ function AdminDashboard() {
       </div>
 
       {/* Period Filter */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-4">
+      <div className="bg-white rounded-lg border border-zinc-200 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex items-center gap-2 text-sm text-zinc-500 shrink-0">
             <CalendarDays className="h-4 w-4" />
@@ -414,11 +414,11 @@ function AdminDashboard() {
           <Link
             key={c.label}
             to={c.href}
-            className="group bg-white rounded-xl border border-zinc-200 p-5 hover:shadow-md hover:border-zinc-300 transition-all"
+            className="group bg-white rounded-lg border border-zinc-200 p-5 hover:shadow-md hover:border-zinc-300 transition-all"
           >
             <div className="flex items-start justify-between mb-3">
               <div
-                className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${c.bg}`}
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${c.bg}`}
               >
                 <c.icon className={`h-5 w-5 ${c.color}`} />
               </div>
@@ -432,7 +432,7 @@ function AdminDashboard() {
       </div>
 
       {/* Pedidos por status */}
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="bg-white rounded-lg border border-zinc-200 p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-zinc-900">Pedidos por status</h2>
           <Link
@@ -455,7 +455,7 @@ function AdminDashboard() {
           ).map((s) => (
             <div
               key={s}
-              className="text-center p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 transition-colors"
+              className="text-center p-3 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-colors"
             >
               <div className={`h-2.5 w-2.5 rounded-full mx-auto mb-2 ${statusDot[s]}`} />
               <div className="text-lg font-bold text-zinc-900">{ordersByStatus[s] || 0}</div>
@@ -468,7 +468,7 @@ function AdminDashboard() {
       {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Revenue Chart - wider */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-zinc-200 p-6">
+        <div className="lg:col-span-3 bg-white rounded-lg border border-zinc-200 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-base font-semibold text-zinc-900">Receita</h2>
@@ -533,7 +533,7 @@ function AdminDashboard() {
         </div>
 
         {/* Revenue by Category - narrower */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200 p-6">
+        <div className="lg:col-span-2 bg-white rounded-lg border border-zinc-200 p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-base font-semibold text-zinc-900">Por categoria</h2>
@@ -577,7 +577,7 @@ function AdminDashboard() {
       {/* Bottom Row: Top Products + Stock + Quick Stats */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Top Produtos */}
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center">
@@ -600,7 +600,7 @@ function AdminDashboard() {
                     className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-zinc-50 transition-colors"
                   >
                     <span
-                      className={`h-6 w-6 rounded-md flex items-center justify-center text-[11px] font-bold shrink-0 ${
+                      className={`h-6 w-6 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0 ${
                         i === 0
                           ? "bg-amber-100 text-amber-700"
                           : i === 1
@@ -627,7 +627,7 @@ function AdminDashboard() {
         </div>
 
         {/* Estoque baixo */}
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
             <div className="flex items-center gap-3">
               <div
@@ -651,7 +651,7 @@ function AdminDashboard() {
           <div className="p-4">
             {stockData.length === 0 && outOfStock.length === 0 ? (
               <div className="text-center py-6">
-                <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center mx-auto mb-2">
+                <div className="h-12 w-12 rounded-lg bg-emerald-50 flex items-center justify-center mx-auto mb-2">
                   <Package className="h-6 w-6 text-emerald-500" />
                 </div>
                 <p className="text-xs font-medium text-zinc-900">Estoque saudável</p>
@@ -701,7 +701,7 @@ function AdminDashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-100">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
@@ -746,7 +746,7 @@ function AdminDashboard() {
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">

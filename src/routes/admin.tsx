@@ -98,7 +98,7 @@ function AdminLayout() {
 
   useEffect(() => {
     if (!isLoggedIn || !isAdmin) {
-      navigate({ to: "/entrar" });
+      navigate({ to: "/entrar", search: { tab: "login", redirect: "/" } });
     }
   }, [isLoggedIn, isAdmin, navigate]);
 
@@ -137,7 +137,7 @@ function AdminLayout() {
               <Logo />
               <button
                 onClick={() => setMobileOpen(false)}
-                className="lg:hidden h-7 w-7 flex items-center justify-center rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                className="lg:hidden h-7 w-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -196,7 +196,7 @@ function AdminLayout() {
                             {!collapsed && <span className="text-sm truncate">{item.label}</span>}
                           </Link>
                           {collapsed && (
-                            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-md bg-zinc-800 text-white text-xs shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                            <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded-lg bg-zinc-800 text-white text-xs shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
                               {item.label}
                             </div>
                           )}
@@ -213,7 +213,7 @@ function AdminLayout() {
         {/* Collapse toggle */}
         <button
           onClick={toggleCollapsed}
-          className="hidden lg:flex items-center justify-center h-7 mx-2 mb-1 rounded-md text-white/20 hover:text-white hover:bg-white/5 transition-colors shrink-0"
+          className="hidden lg:flex items-center justify-center h-7 mx-2 mb-1 rounded-lg text-white/20 hover:text-white hover:bg-white/5 transition-colors shrink-0"
         >
           {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
         </button>
@@ -227,7 +227,7 @@ function AdminLayout() {
               </div>
               <button
                 onClick={() => { logout(); navigate({ to: "/" }); }}
-                className="h-7 w-7 flex items-center justify-center rounded-md text-white/30 hover:text-red-400 hover:bg-white/5 transition-colors"
+                className="h-7 w-7 flex items-center justify-center rounded-lg text-white/30 hover:text-red-400 hover:bg-white/5 transition-colors"
                 title="Sair"
               >
                 <LogOut className="h-3.5 w-3.5" />
@@ -254,7 +254,7 @@ function AdminLayout() {
         <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-4 sm:px-6 gap-4">
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden h-8 w-8 flex items-center justify-center rounded-md hover:bg-zinc-100 transition-colors"
+            className="lg:hidden h-8 w-8 flex items-center justify-center rounded-lg hover:bg-zinc-100 transition-colors"
           >
             <Menu className="h-4 w-4 text-zinc-600" />
           </button>

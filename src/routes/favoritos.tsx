@@ -30,14 +30,14 @@ function FavoritosPage() {
 
       {favProducts.length === 0 ? (
         <div className="text-center py-24">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-rose-50 to-rose-100/50 mb-8">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-rose-50 to-rose-100/50 mb-8">
             <Heart className="h-12 w-12 text-rose-300" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Sua lista está vazia</h2>
           <p className="text-muted-foreground mb-8 max-w-sm mx-auto">Adicione produtos favoritos para encontrá-los facilmente quando precisar.</p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-8 py-3.5 font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-8 py-3.5 font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             Explorar produtos
             <ArrowRight className="h-4 w-4" />
@@ -46,13 +46,13 @@ function FavoritosPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {favProducts.map((p) => (
-            <div key={p!.id} className="group rounded-2xl border border-border/40 bg-card p-5 hover:shadow-md transition-all">
+            <div key={p!.id} className="group rounded-lg border border-border/40 bg-card p-5 hover:shadow-md transition-all">
               <div className="flex gap-4">
                 <Link to="/produto/$slug" params={{ slug: p!.slug }} className="shrink-0">
                   <img
                     src={p!.image}
                     alt={p!.name}
-                    className="h-28 w-28 rounded-xl object-cover bg-muted group-hover:scale-105 transition-transform duration-300"
+                    className="h-28 w-28 rounded-lg object-cover bg-muted group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
                 <div className="flex-1 min-w-0">
@@ -73,7 +73,7 @@ function FavoritosPage() {
                     addItem(p!.id);
                     toast.success(`${p!.name} adicionado ao carrinho`);
                   }}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-4 py-2.5 text-xs font-semibold hover:bg-primary-hover transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-xs font-semibold hover:bg-primary-hover transition-colors"
                 >
                   <ShoppingCart className="h-3.5 w-3.5" />
                   Adicionar ao carrinho
@@ -83,7 +83,7 @@ function FavoritosPage() {
                     toggleFavorite(p!.id);
                     toast.success("Removido dos favoritos");
                   }}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/40 px-3 py-2.5 text-xs font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border/40 px-3 py-2.5 text-xs font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>

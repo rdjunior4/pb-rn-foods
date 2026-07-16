@@ -148,7 +148,7 @@ export function BenefitsSection() {
           return (
             <div
               key={b.id}
-              className={`bg-white rounded-xl border border-zinc-200 p-4 hover:shadow-md transition-all ${!b.active ? "opacity-50" : ""}`}
+              className={`bg-white rounded-lg border border-zinc-200 p-4 hover:shadow-md transition-all ${!b.active ? "opacity-50" : ""}`}
             >
               <div className="flex items-start gap-3">
                 {/* Move controls */}
@@ -177,14 +177,14 @@ export function BenefitsSection() {
                     <div className="relative">
                       <button
                         onClick={() => setOpenPicker(isPickerOpen ? null : b.id)}
-                        className="h-12 w-12 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/15 transition-colors"
+                        className="h-12 w-12 shrink-0 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/15 transition-colors"
                       >
                         <IconComp className="h-5 w-5 text-primary" />
                       </button>
 
                       {/* Icon Picker Dropdown */}
                       {isPickerOpen && (
-                        <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl border border-zinc-200 shadow-xl z-50 p-3 space-y-2">
+                        <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-lg border border-zinc-200 shadow-xl z-50 p-3 space-y-2">
                           <div className="flex items-center justify-between">
                             <p className="text-xs font-semibold text-zinc-700">Selecionar ícone</p>
                             <button
@@ -252,7 +252,7 @@ export function BenefitsSection() {
                                     setIconSearch("");
                                     setSelectedGroup("Todos");
                                   }}
-                                  className={`h-8 w-full flex items-center justify-center rounded-md border transition-all ${
+                                  className={`h-8 w-full flex items-center justify-center rounded-lg border transition-all ${
                                     isSelected
                                       ? "border-primary bg-primary text-white"
                                       : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700 bg-zinc-50"
@@ -316,7 +316,7 @@ export function BenefitsSection() {
       </div>
 
       {config.benefits.length === 0 && (
-        <div className="bg-white rounded-xl border border-zinc-200 p-12 text-center">
+        <div className="bg-white rounded-lg border border-zinc-200 p-12 text-center">
           <Sparkles className="h-8 w-8 text-zinc-300 mx-auto mb-3" />
           <p className="text-sm font-medium text-zinc-900">Nenhum benefício cadastrado</p>
           <p className="text-xs text-zinc-400 mt-1">Adicione benefícios para destacar os pontos fortes da sua loja</p>

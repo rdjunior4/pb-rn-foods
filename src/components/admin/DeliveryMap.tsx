@@ -292,7 +292,7 @@ export function DeliveryMap({ orders }: DeliveryMapProps) {
   const deliveredCount = filteredPoints.filter((p) => p.status === "delivered").length;
 
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+    <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden">
       <div className="px-5 py-4 border-b border-zinc-100">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -328,7 +328,7 @@ export function DeliveryMap({ orders }: DeliveryMapProps) {
         <div className="flex items-center gap-1 bg-zinc-100 rounded-lg p-0.5">
           <button
             onClick={() => setActiveTab("todas")}
-            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               activeTab === "todas"
                 ? "bg-white text-zinc-900 shadow-sm"
                 : "text-zinc-500 hover:text-zinc-700"
@@ -340,7 +340,7 @@ export function DeliveryMap({ orders }: DeliveryMapProps) {
             <button
               key={d.id}
               onClick={() => setActiveTab(d.id)}
-              className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                 activeTab === d.id
                   ? "bg-white text-zinc-900 shadow-sm"
                   : "text-zinc-500 hover:text-zinc-700"
@@ -355,7 +355,7 @@ export function DeliveryMap({ orders }: DeliveryMapProps) {
       <div className="h-[420px] relative">
         {filteredPoints.length === 0 && distributors.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full bg-zinc-50">
-            <div className="h-16 w-16 rounded-2xl bg-zinc-100 flex items-center justify-center mb-3">
+            <div className="h-16 w-16 rounded-lg bg-zinc-100 flex items-center justify-center mb-3">
               <svg
                 className="h-8 w-8 text-zinc-300"
                 fill="none"

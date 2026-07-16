@@ -22,12 +22,12 @@ export function BenefitsBar() {
           return (
             <div
               key={b.id || i}
-              className="group relative flex flex-col items-center text-center rounded-2xl bg-gradient-to-b from-primary to-primary-hover p-5 sm:p-7 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 overflow-hidden"
+              className="group relative flex flex-col items-center text-center rounded-lg bg-gradient-to-b from-primary to-primary-hover p-5 sm:p-7 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 overflow-hidden"
             >
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent_60%)] pointer-events-none" />
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-white/20 to-white/5 text-white backdrop-blur-sm mb-4 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-white/20 transition-all duration-300 ring-1 ring-white/15">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-b from-white/20 to-white/5 text-white backdrop-blur-sm mb-4 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-white/20 transition-all duration-300 ring-1 ring-white/15">
                 <IconComp className="h-6 w-6" />
               </div>
               <div className="font-semibold text-sm text-white relative">{b.title}</div>

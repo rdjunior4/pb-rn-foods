@@ -48,7 +48,7 @@ function AdminLoja() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 inline-flex items-center justify-center gap-2 text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+            className={`flex-1 inline-flex items-center justify-center gap-2 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
               tab === t.id
                 ? "bg-white text-zinc-900 shadow-sm"
                 : "text-zinc-500 hover:text-zinc-700"
