@@ -156,7 +156,7 @@ export function TopBar() {
     : "Escolha sua região";
 
   return (
-    <div ref={ref} className={`relative z-[60] bg-gradient-to-r from-primary to-primary-hover text-primary-foreground text-[11px] sm:text-xs transition-opacity duration-300 ${authModalOpen ? "opacity-40 pointer-events-none" : ""}`}>
+    <div ref={ref} className={`relative bg-gradient-to-r from-primary to-primary-hover text-primary-foreground text-[11px] sm:text-xs transition-all duration-300 ${authModalOpen ? "opacity-40 pointer-events-none z-0" : "z-[60]"}`}>
       <div className="mx-auto flex max-w-[1400px] items-center justify-center px-4 sm:px-6 lg:px-[30px] h-9">
         <div className="relative z-50">
           <button

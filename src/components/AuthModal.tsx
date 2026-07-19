@@ -202,7 +202,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[900px] max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-[900px] max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - desktop branding */}
@@ -215,11 +215,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         </div>
 
         {/* Top banner - mobile branding */}
-        <div className="relative lg:hidden shrink-0 h-[100px] sm:h-[140px] overflow-hidden">
+        <div className="relative lg:hidden shrink-0 h-[90px] sm:h-[130px] overflow-hidden">
           <img
             src={heroMobileImg}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover object-center scale-105"
           />
         </div>
 
