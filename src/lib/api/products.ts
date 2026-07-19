@@ -2,18 +2,39 @@ import { getSupabase, isSupabaseConfigured } from "../supabase";
 import type { Product, Category, Brand } from "../types";
 import { getProducts, getCategories, getBrands } from "../data";
 
+// Build categoryIds map from product_categories junction table
+async function fetchCategoryIdsMap(): Promise<Map<string, string[]>> {
+  const supabase = getSupabase();
+  if (!supabase) return new Map();
+  const { data } = await supabase.from("product_categories").select("product_id, category_id");
+  const map = new Map<string, string[]>();
+  if (data && data.length > 0) {
+    for (const row of data as Record<string, unknown>[]) {
+      const pid = row.product_id as string;
+      const cid = row.category_id as string;
+      if (!map.has(pid)) map.set(pid, []);
+      map.get(pid)!.push(cid);
+    }
+  }
+  return map;
+}
+
 export async function apiGetProducts(): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
     return getProducts();
   }
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, product_variants(*)")
-    .eq("active", true)
-    .order("created_at", { ascending: false });
+  const [prodsResult, categoryIdsMap] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("active", true)
+      .order("created_at", { ascending: false }),
+    fetchCategoryIdsMap(),
+  ]);
+  const { data, error } = prodsResult;
   if (error || !data) return getProducts();
-  return data.map(mapDbProduct);
+  return data.map((row) => mapDbProduct(row, categoryIdsMap));
 }
 
 export async function apiGetProductBySlug(slug: string): Promise<Product | null> {
@@ -21,13 +42,17 @@ export async function apiGetProductBySlug(slug: string): Promise<Product | null>
   if (!supabase || !isSupabaseConfigured()) {
     return getProducts().find((p) => p.slug === slug) || null;
   }
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, product_variants(*)")
-    .eq("slug", slug)
-    .single();
+  const [prodResult, categoryIdsMap] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("slug", slug)
+      .single(),
+    fetchCategoryIdsMap(),
+  ]);
+  const { data, error } = prodResult;
   if (error || !data) return null;
-  return mapDbProduct(data);
+  return mapDbProduct(data, categoryIdsMap);
 }
 
 export async function apiGetProductById(id: string): Promise<Product | null> {
@@ -35,27 +60,51 @@ export async function apiGetProductById(id: string): Promise<Product | null> {
   if (!supabase || !isSupabaseConfigured()) {
     return getProducts().find((p) => p.id === id) || null;
   }
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, product_variants(*)")
-    .eq("id", id)
-    .single();
+  const [prodResult, categoryIdsMap] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("id", id)
+      .single(),
+    fetchCategoryIdsMap(),
+  ]);
+  const { data, error } = prodResult;
   if (error || !data) return null;
-  return mapDbProduct(data);
+  return mapDbProduct(data, categoryIdsMap);
 }
 
 export async function apiGetProductsByCategory(categoryId: string): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getProducts().filter((p) => p.categoryId === categoryId);
+    return getProducts().filter((p) => p.categoryIds.includes(categoryId));
   }
+  // Find product_ids via junction table first, plus legacy category_id fallback
+  const [junctionResult, categoryIdsMap] = await Promise.all([
+    supabase
+      .from("product_categories")
+      .select("product_id")
+      .eq("category_id", categoryId),
+    fetchCategoryIdsMap(),
+  ]);
+  const junctionIds = (junctionResult.data || []).map((r) => r.product_id as string);
+
+  // Also get products with legacy category_id (backward compat)
+  const { data: legacyData } = await supabase
+    .from("products")
+    .select("id")
+    .eq("category_id", categoryId)
+    .eq("active", true);
+
+  const allIds = [...new Set([...junctionIds, ...(legacyData || []).map((r) => r.id)])];
+  if (allIds.length === 0) return [];
+
   const { data, error } = await supabase
     .from("products")
     .select("*, product_variants(*)")
-    .eq("category_id", categoryId)
+    .in("id", allIds)
     .eq("active", true);
   if (error || !data) return [];
-  return data.map(mapDbProduct);
+  return data.map((row) => mapDbProduct(row, categoryIdsMap));
 }
 
 export async function apiGetFeaturedProducts(): Promise<Product[]> {
@@ -63,13 +112,17 @@ export async function apiGetFeaturedProducts(): Promise<Product[]> {
   if (!supabase || !isSupabaseConfigured()) {
     return getProducts().filter((p) => p.featured);
   }
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, product_variants(*)")
-    .eq("featured", true)
-    .eq("active", true);
+  const [prodsResult, categoryIdsMap] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, product_variants(*)")
+      .eq("featured", true)
+      .eq("active", true),
+    fetchCategoryIdsMap(),
+  ]);
+  const { data, error } = prodsResult;
   if (error || !data) return [];
-  return data.map(mapDbProduct);
+  return data.map((row) => mapDbProduct(row, categoryIdsMap));
 }
 
 export async function apiSearchProducts(query: string): Promise<Product[]> {
@@ -80,13 +133,17 @@ export async function apiSearchProducts(query: string): Promise<Product[]> {
       (p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
     );
   }
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, product_variants(*)")
-    .or(`name.ilike.%${query}%,brand_name.ilike.%${query}%`)
-    .eq("active", true);
+  const [prodsResult, categoryIdsMap] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, product_variants(*)")
+      .or(`name.ilike.%${query}%,brand_name.ilike.%${query}%`)
+      .eq("active", true),
+    fetchCategoryIdsMap(),
+  ]);
+  const { data, error } = prodsResult;
   if (error || !data) return [];
-  return data.map(mapDbProduct);
+  return data.map((row) => mapDbProduct(row, categoryIdsMap));
 }
 
 export async function apiGetCategories(): Promise<Category[]> {
@@ -130,7 +187,11 @@ export async function apiGetBrands(): Promise<Brand[]> {
   }));
 }
 
-function mapDbProduct(db: Record<string, unknown>): Product {
+function mapDbProduct(db: Record<string, unknown>, categoryIdsMap?: Map<string, string[]>): Product {
+  const primaryCategoryId = (db.category_id as string) || "";
+  const junctionIds = categoryIdsMap?.get(db.id as string) || [];
+  const allCategoryIds = [...new Set([primaryCategoryId, ...junctionIds].filter(Boolean))];
+
   return {
     id: db.id as string,
     slug: db.slug as string,
@@ -138,7 +199,8 @@ function mapDbProduct(db: Record<string, unknown>): Product {
     description: (db.description as string) || "",
     details: (db.details as string[]) || [],
     specs: (db.specs as { label: string; value: string }[]) || [],
-    categoryId: (db.category_id as string) || "",
+    categoryId: primaryCategoryId,
+    categoryIds: allCategoryIds,
     brand: (db.brand_name as string) || "",
     price: Number(db.price) || 0,
     oldPrice: db.old_price ? Number(db.old_price) : null,

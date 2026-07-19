@@ -14,6 +14,7 @@ export interface ProductFormData {
   name: string;
   description: string;
   categoryId: string;
+  categoryIds: string[];
   brand: string;
   price: string;
   oldPrice: string;
@@ -108,6 +109,7 @@ export function ProductForm({
   const watchedDetails = watch("details");
   const watchedSpecs = watch("specs");
   const watchedCategoryId = watch("categoryId");
+  const watchedCategoryIds = watch("categoryIds");
   const watchedPricingTiers = watch("pricingTiers");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,15 +252,45 @@ export function ProductForm({
 
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-              Categoria
+              Categorias <span className="text-zinc-400 font-normal">(selecione uma ou mais)</span>
             </label>
-            <select {...register("categoryId")} className={selectClass}>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-wrap gap-2 rounded-lg border border-zinc-200 bg-white p-3 max-h-40 overflow-y-auto">
+              {categories.length === 0 && (
+                <span className="text-xs text-zinc-400">Nenhuma categoria cadastrada</span>
+              )}
+              {categories.map((c) => {
+                const checked = watchedCategoryIds.includes(c.id);
+                return (
+                  <label
+                    key={c.id}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+                      checked
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      checked={checked}
+                      onChange={() => {
+                        const next = checked
+                          ? watchedCategoryIds.filter((id) => id !== c.id)
+                          : [...watchedCategoryIds, c.id];
+                        setValue("categoryIds", next);
+                        if (next.length === 1) setValue("categoryId", next[0]);
+                        else if (next.length > 0) setValue("categoryId", next[0]);
+                        else setValue("categoryId", "");
+                      }}
+                    />
+                    {c.name}
+                  </label>
+                );
+              })}
+            </div>
+            {watchedCategoryIds.length === 0 && (
+              <p className="text-xs text-amber-600 mt-1">Selecione ao menos uma categoria</p>
+            )}
           </div>
 
           <div>

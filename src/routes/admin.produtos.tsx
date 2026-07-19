@@ -81,7 +81,7 @@ function AdminProducts() {
       );
     }
     if (categoryFilter !== "all") {
-      result = result.filter((p) => p.categoryId === categoryFilter);
+      result = result.filter((p) => p.categoryIds.includes(categoryFilter));
     }
     if (brandFilter !== "all") {
       result = result.filter((p) => p.brand === brandFilter);
@@ -292,7 +292,6 @@ function AdminProducts() {
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
                   {paginated.map((p) => {
-                    const cat = catMap.get(p.categoryId);
                     return (
                       <tr
                         key={p.id}
@@ -326,10 +325,20 @@ function AdminProducts() {
                         </td>
                         <td className="px-4 py-3 text-zinc-600 hidden sm:table-cell">{p.brand}</td>
                         <td className="px-4 py-3 hidden md:table-cell">
-                          {cat ? (
-                            <span className="inline-flex items-center gap-1.5 bg-zinc-100 text-zinc-700 rounded-full px-2.5 py-1 text-xs font-medium">
-                              {cat.name}
-                            </span>
+                          {p.categoryIds.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {p.categoryIds.map((cid) => {
+                                const cat = catMap.get(cid);
+                                return cat ? (
+                                  <span
+                                    key={cid}
+                                    className="inline-flex items-center gap-1 bg-zinc-100 text-zinc-700 rounded-full px-2.5 py-1 text-xs font-medium"
+                                  >
+                                    {cat.name}
+                                  </span>
+                                ) : null;
+                              })}
+                            </div>
                           ) : (
                             <span className="text-zinc-400">-</span>
                           )}

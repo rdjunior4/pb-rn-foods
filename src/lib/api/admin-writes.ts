@@ -33,7 +33,15 @@ export async function apiSaveProduct(product: Product): Promise<void> {
 
   if (error) throw error;
 
-  // Sync variants
+  // Sync product_categories junction (many-to-many)
+  await supabase.from("product_categories").delete().eq("product_id", product.id);
+  if (product.categoryIds && product.categoryIds.length > 0) {
+    const rows = product.categoryIds.map((catId) => ({
+      product_id: product.id,
+      category_id: catId,
+    }));
+    await supabase.from("product_categories").insert(rows);
+  }
   await supabase.from("product_variants").delete().eq("product_id", product.id);
   if (product.variants.length > 0) {
     const variants = product.variants.map((v) => ({

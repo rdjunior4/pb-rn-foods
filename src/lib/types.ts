@@ -26,6 +26,7 @@ export interface Product {
   details: string[];
   specs: { label: string; value: string }[];
   categoryId: string;
+  categoryIds: string[];
   brand: string;
   price: number;
   oldPrice: number | null;

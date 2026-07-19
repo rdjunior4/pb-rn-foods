@@ -436,7 +436,7 @@ export function syncFromSupabase(): Promise<void> {
     if (!supabase) return;
 
     try {
-      const [cats, brs, prods, dists, combs, bans, cpns, revs, movs, ords, custs, credHist] = await Promise.all([
+      const [cats, brs, prods, dists, combs, bans, cpns, revs, movs, ords, custs, credHist, prodCats] = await Promise.all([
         supabase.from("categories").select("*").order("sort_order"),
         supabase.from("brands").select("*").order("name"),
         supabase.from("products").select("*, product_variants(*)").order("created_at", { ascending: false }),
@@ -449,10 +449,22 @@ export function syncFromSupabase(): Promise<void> {
         supabase.from("orders").select("*, order_items(*)").order("created_at", { ascending: false }),
         supabase.from("customers").select("*").order("created_at"),
         supabase.from("credit_history").select("*").order("created_at", { ascending: false }),
+        supabase.from("product_categories").select("product_id, category_id"),
       ]);
 
+      // Build categoryIds map from junction table
+      const categoryIdsMap = new Map<string, string[]>();
+      if (prodCats.data && prodCats.data.length > 0) {
+        for (const row of prodCats.data as Record<string, unknown>[]) {
+          const pid = row.product_id as string;
+          const cid = row.category_id as string;
+          if (!categoryIdsMap.has(pid)) categoryIdsMap.set(pid, []);
+          categoryIdsMap.get(pid)!.push(cid);
+        }
+      }
+
       _store = {
-        products: (prods.data && prods.data.length > 0) ? prods.data.map(mapDbProduct) : _store.products,
+        products: (prods.data && prods.data.length > 0) ? prods.data.map((p) => mapDbProduct(p, categoryIdsMap)) : _store.products,
         banners: (bans.data && bans.data.length > 0) ? bans.data.map(mapDbBanner) : _store.banners,
         categories: (cats.data && cats.data.length > 0) ? cats.data.map((c: Record<string, unknown>) => ({
           id: c.id as string,
@@ -519,7 +531,12 @@ export function syncFromSupabase(): Promise<void> {
 // MAPPERS (DB row → app type)
 // ============================================================
 
-function mapDbProduct(db: Record<string, unknown>): Product {
+function mapDbProduct(db: Record<string, unknown>, categoryIdsMap?: Map<string, string[]>): Product {
+  const primaryCategoryId = (db.category_id as string) || "";
+  const junctionIds = categoryIdsMap?.get(db.id as string) || [];
+  // categoryIds = union of junction + legacy category_id (deduplicated)
+  const allCategoryIds = [...new Set([primaryCategoryId, ...junctionIds].filter(Boolean))];
+
   return {
     id: db.id as string,
     slug: db.slug as string,
@@ -527,7 +544,8 @@ function mapDbProduct(db: Record<string, unknown>): Product {
     description: (db.description as string) || "",
     details: (db.details as string[]) || [],
     specs: (db.specs as { label: string; value: string }[]) || [],
-    categoryId: (db.category_id as string) || "",
+    categoryId: primaryCategoryId,
+    categoryIds: allCategoryIds,
     brand: (db.brand_name as string) || "",
     price: Number(db.price) || 0,
     oldPrice: db.old_price ? Number(db.old_price) : null,
