@@ -2,6 +2,7 @@ import { MapPin, ChevronDown, Check, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { detectLocation } from "@/lib/location";
 import { useAdminDistributors } from "@/lib/hooks";
+import { onAuthModalToggle } from "@/lib/events";
 import type { Distributor } from "@/lib/types";
 
 const REGION_KEY = "@pbrn-region";
@@ -92,7 +93,15 @@ export function TopBar() {
   const [selected, setSelected] = useState<Region | null>(loadSavedRegion());
   const [open, setOpen] = useState(false);
   const [detected, setDetected] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    return onAuthModalToggle((open) => {
+      setAuthModalOpen(open);
+      if (open) setOpen(false);
+    });
+  }, []);
 
   const handleSelect = useCallback((region: Region) => {
     setSelected(region);
@@ -147,7 +156,7 @@ export function TopBar() {
     : "Escolha sua região";
 
   return (
-    <div ref={ref} className="relative z-[60] bg-gradient-to-r from-primary to-primary-hover text-primary-foreground text-[11px] sm:text-xs">
+    <div ref={ref} className={`relative z-[60] bg-gradient-to-r from-primary to-primary-hover text-primary-foreground text-[11px] sm:text-xs transition-opacity duration-300 ${authModalOpen ? "opacity-40 pointer-events-none" : ""}`}>
       <div className="mx-auto flex max-w-[1400px] items-center justify-center px-4 sm:px-6 lg:px-[30px] h-9">
         <div className="relative z-50">
           <button

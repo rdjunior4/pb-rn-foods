@@ -2,6 +2,7 @@ import { Search, User, ShoppingCart, Menu, LogIn, UserPlus, Package, Heart, Sett
 import { Logo } from "./Logo";
 import { CartDrawer } from "./CartDrawer";
 import { AuthModal } from "./AuthModal";
+import { dispatchAuthModalEvent } from "@/lib/events";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -44,6 +45,10 @@ export function Header() {
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
+
+  useEffect(() => {
+    dispatchAuthModalEvent(authOpen);
+  }, [authOpen]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

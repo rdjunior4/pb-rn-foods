@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Package, Heart, MapPin, Settings, LogOut, User, ShoppingCart,
-  Clock, FileText, Phone, Mail, CreditCard, Building2, UserCircle,
-  ChevronRight, Award, TrendingUp, DollarSign,
+  FileText, ChevronRight, TrendingUp, DollarSign, CreditCard,
   HelpCircle, Bell, Pencil, Camera,
 } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
@@ -60,7 +59,7 @@ const sections: { title: string; items: SectionItem[] }[] = [
 ];
 
 function AccountPage() {
-  const { user, isLoggedIn, logout, formatDocument } = useAuth();
+  const { user, isLoggedIn, logout } = useAuth();
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
@@ -120,31 +119,59 @@ function AccountPage() {
     .toUpperCase()
     .slice(0, 2);
 
-  const DocIcon = user!.documentType === "cnpj" ? Building2 : UserCircle;
-  const formattedDoc = formatDocument(user!.document, user!.documentType);
-
   return (
     <CustomerLayout maxWidth="1400" noPadding fullWidth>
-      {/* ─── Full Red Block ─── */}
-      <div className="bg-red-600 -mt-8 pt-12 sm:pt-14 pb-10 sm:pb-12 mb-0">
-        <div className="max-w-[1400px] mx-auto">
-          {/* Title row + Buttons */}
-          <div className="px-4 sm:px-6 lg:px-[30px] mb-6 sm:mb-8 flex flex-wrap items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">Minha conta</h1>
-              <p className="text-white/50 text-sm mt-1">Gerencie seus dados e acompanhe seus pedidos</p>
+      {/* ─── Header ─── */}
+      <div className="bg-gradient-to-b from-red-600 to-red-700 -mt-8 pt-10 sm:pt-12 pb-8 sm:pb-10 mb-0">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-[30px]">
+          {/* Top: Title + Buttons */}
+          <div className="flex items-start justify-between gap-4 mb-5">
+            <div className="flex items-center gap-4 min-w-0">
+              {/* Avatar */}
+              <div className="relative shrink-0 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="h-14 w-14 sm:h-16 sm:w-16 rounded object-cover ring-2 ring-white/25 shadow-lg" />
+                ) : (
+                  <div className="inline-flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded bg-white/15 backdrop-blur-sm ring-2 ring-white/25 text-white text-xl font-black shadow-lg">
+                    {initials}
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Camera className="h-4 w-4 text-white" />
+                </div>
+                <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded bg-emerald-400 border-2 border-red-600 shadow-sm" />
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              </div>
+
+              {/* Name + Meta */}
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">{user!.name}</h1>
+                <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5">
+                  <span className="inline-flex items-center rounded bg-white/15 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shrink-0">
+                    {user!.documentType === "cnpj" ? "CNPJ" : "CPF"}
+                  </span>
+                  <span className="w-px h-3 bg-white/20 shrink-0" />
+                  <span className="text-white/60 text-[11px] font-medium truncate">
+                    {new Date(user!.createdAt).getFullYear()}
+                  </span>
+                  <span className="w-px h-3 bg-white/20 shrink-0 hidden sm:block" />
+                  <span className="text-white/60 text-[11px] font-medium truncate hidden sm:block">{user!.email}</span>
+                </div>
+              </div>
             </div>
+
+            {/* Buttons */}
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setEditOpen(true)}
-                className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-white/40 text-white bg-transparent text-xs font-bold px-4 sm:px-5 hover:bg-white/10 transition-all"
+                className="inline-flex items-center gap-1.5 h-9 rounded bg-white/10 backdrop-blur-sm text-white text-xs font-semibold px-4 hover:bg-white/20 transition-all ring-1 ring-white/10"
               >
                 <Pencil className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Editar</span>
               </button>
               <button
                 onClick={logout}
-                className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-black/30 text-white text-xs font-bold px-4 sm:px-5 hover:bg-black/50 transition-all"
+                className="inline-flex items-center gap-1.5 h-9 rounded bg-white/10 backdrop-blur-sm text-white/70 text-xs font-semibold px-4 hover:bg-white/20 hover:text-white transition-all ring-1 ring-white/10"
               >
                 <LogOut className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Sair</span>
@@ -152,84 +179,35 @@ function AccountPage() {
             </div>
           </div>
 
-          {/* User info */}
-          <div className="px-4 sm:px-6 lg:px-[30px] space-y-5 border-t border-white/10 pt-5">
-            {/* Avatar + Name + Contact */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="relative shrink-0 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="h-16 w-16 rounded-lg object-cover shadow-lg ring-2 ring-white/20" />
-                ) : (
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-lg bg-white text-red-700 text-xl font-black shadow-lg">
-                    {initials}
+          {/* Divider */}
+          <div className="border-t border-white/10 mb-4" />
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 sm:flex sm:items-center sm:gap-4 gap-3">
+            {[
+              { icon: Package, label: "Pedidos", value: String(myOrders.length) },
+              { icon: TrendingUp, label: "Ativos", value: String(activeOrders.length) },
+              { icon: DollarSign, label: "Gasto total", value: formatCurrency(myOrders.reduce((s, o) => s + o.total, 0)) },
+              { icon: Heart, label: "Favoritos", value: String(wishlistItems.length) },
+            ].map((stat, i) => (
+              <div key={stat.label} className="flex items-center gap-2.5">
+                {i > 0 && i % 2 !== 0 && <span className="hidden sm:block w-px h-8 bg-white/10 mr-1" />}
+                <div className="flex items-center gap-2.5">
+                  <div className="inline-flex h-7 w-7 items-center justify-center rounded bg-white/10">
+                    <stat.icon className="h-3.5 w-3.5 text-white/70" />
                   </div>
-                )}
-                <div className="absolute inset-0 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Camera className="h-5 w-5 text-white" />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-400 border-2 border-red-600" />
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarUpload}
-                />
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-white tracking-tight">{user!.name}</h2>
-                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white text-red-700 px-2.5 py-0.5 text-[11px] font-bold">
-                    <Award className="h-3 w-3" />
-                    {user!.documentType === "cnpj" ? "CNPJ" : "CPF"}
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/15 text-white/80 px-2.5 py-0.5 text-[11px] font-semibold">
-                    <Clock className="h-3 w-3" />
-                    Desde {new Date(user!.createdAt).getFullYear()}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-6 text-sm border-t border-white/10 pt-3 mt-3">
-                  <span className="flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5 text-white/50" />
-                    <span className="text-white/80">{user!.email}</span>
-                  </span>
-                  <span className="hidden sm:flex items-center gap-2">
-                    <DocIcon className="h-3.5 w-3.5 text-white/50" />
-                    <span className="text-white/80">{formattedDoc}</span>
-                  </span>
-                  {user!.phone && (
-                    <span className="flex items-center gap-2">
-                      <Phone className="h-3.5 w-3.5 text-white/50" />
-                      <span className="text-white/80">{user!.phone}</span>
-                    </span>
-                  )}
+                  <div>
+                    <div className="text-[10px] text-white/40 font-medium uppercase tracking-wide leading-none">{stat.label}</div>
+                    <div className="text-sm font-bold text-white leading-tight mt-0.5">{stat.value}</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="px-4 sm:px-6 lg:px-[30px] pt-8 pb-8 max-w-[1400px] mx-auto">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: "Pedidos ativos", value: String(activeOrders.length), icon: Package, color: "text-blue-600 bg-blue-50" },
-          { label: "Favoritos", value: String(wishlistItems.length), icon: Heart, color: "text-rose-600 bg-rose-50" },
-          { label: "Total gasto", value: formatCurrency(myOrders.reduce((s, o) => s + o.total, 0)), icon: DollarSign, color: "text-emerald-600 bg-emerald-50" },
-          { label: "Total de pedidos", value: String(myOrders.length), icon: FileText, color: "text-violet-600 bg-violet-50" },
-        ].map((s) => (
-          <div key={s.label} className="rounded border border-border/40 bg-card p-5 hover:shadow-card-hover transition-shadow">
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`inline-flex h-9 w-9 items-center justify-center rounded ${s.color}`}>
-                <s.icon className="h-4 w-4" />
-              </div>
-              <span className="text-xs text-muted-foreground font-medium">{s.label}</span>
-            </div>
-            <div className="text-2xl font-bold tracking-tight">{s.value}</div>
-          </div>
-        ))}
-      </div>
-
       {myOrders.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -238,11 +216,11 @@ function AccountPage() {
           </div>
           <div className="space-y-3">
             {myOrders.slice(0, 3).map((order) => (
-              <div key={order.id} className="group rounded border border-border/40 bg-card p-5 hover:shadow-card-hover hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate({ to: `/pedido/${order.id}` })}>
+              <div key={order.id} className="group rounded border border-border/40 bg-card p-4 sm:p-5 hover:shadow-card-hover hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate({ to: `/pedido/${order.id}` })}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-bold">{order.id}</span>
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+                    <span className={`inline-flex items-center gap-1.5 rounded px-2.5 py-0.5 text-[10px] font-semibold ${
                       order.status === "pending" ? "bg-amber-50 text-amber-700" :
                       order.status === "confirmed" ? "bg-blue-50 text-blue-700" :
                       order.status === "shipped" ? "bg-purple-50 text-purple-700" :
@@ -275,9 +253,12 @@ function AccountPage() {
         </div>
       )}
 
-      <div className="space-y-8">
-        {sections.map((section) => (
+      <div className="border-t border-border/20 mb-6" />
+
+      <div className="space-y-6">
+        {sections.map((section, sIdx) => (
           <div key={section.title}>
+            {sIdx > 0 && <div className="border-t border-border/20 mb-6" />}
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               {section.title}
             </h3>
@@ -294,16 +275,16 @@ function AccountPage() {
                       handleSoon(item.label);
                     }
                   }}
-                  className="group flex items-center gap-4 rounded border border-border/40 bg-card p-5 hover:border-primary/30 hover:shadow-card-hover transition-all text-left w-full"
+                  className="group flex items-center gap-3 sm:gap-4 rounded border border-border/40 bg-card p-4 sm:p-5 hover:border-primary/30 hover:shadow-card-hover transition-all text-left w-full"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
+                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
                     <item.icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold">{item.label}</span>
                       {item.badge && (
-                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary px-1.5">
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded bg-primary/10 text-[10px] font-bold text-primary px-1.5">
                           {item.badge}
                         </span>
                       )}
