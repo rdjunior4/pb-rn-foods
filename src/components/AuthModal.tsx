@@ -232,9 +232,9 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const DocIcon = docLabels[documentType].icon;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[900px] h-dvh sm:h-auto sm:max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-none sm:rounded-xl animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-[900px] max-h-[85vh] sm:max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-xl animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - desktop branding */}
