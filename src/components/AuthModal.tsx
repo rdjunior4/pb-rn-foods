@@ -215,11 +215,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         </div>
 
         {/* Top banner - mobile branding */}
-        <div className="relative lg:hidden shrink-0 h-[90px] sm:h-[130px] overflow-hidden">
+        <div className="relative lg:hidden shrink-0 h-[160px] sm:h-[200px] overflow-hidden bg-white">
           <img
             src={heroMobileImg}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-center scale-105"
+            className="absolute inset-0 w-full h-full object-contain p-2"
           />
         </div>
 
@@ -231,7 +231,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
           >
             <X className="h-4 w-4" />
           </button>
-          <div className="px-6 sm:px-8 lg:px-10 py-8 lg:py-10">
+          <div className="px-6 sm:px-8 lg:px-10 py-8 pb-12 lg:py-10 lg:pb-14">
             <div className="w-full max-w-sm mx-auto">
             <div className="mb-8 text-left">
               <div className="flex items-center gap-4 mb-3">
