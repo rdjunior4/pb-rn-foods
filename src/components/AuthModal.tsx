@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   LogIn,
   UserPlus,
@@ -56,6 +56,10 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const [resetCode, setResetCode] = useState("");
   const [resetNewPassword, setResetNewPassword] = useState("");
   const [resetStep, setResetStep] = useState<"email" | "code" | "done">("email");
+  const [artHeight, setArtHeight] = useState<number>(0);
+  const [mobileBannerHeight, setMobileBannerHeight] = useState<number>(0);
+  const artRef = useRef<HTMLImageElement>(null);
+  const mobileBannerRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     setTab(initialTab);
@@ -83,6 +87,34 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         doc.body.style.overflow = prev;
       };
     }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !artRef.current) return;
+    const img = artRef.current;
+    const recalc = () => {
+      if (img.naturalWidth) {
+        setArtHeight(img.naturalHeight * (img.clientWidth / img.naturalWidth));
+      }
+    };
+    recalc();
+    const ro = new ResizeObserver(recalc);
+    ro.observe(img.parentElement!);
+    return () => ro.disconnect();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !mobileBannerRef.current) return;
+    const img = mobileBannerRef.current;
+    const recalc = () => {
+      if (img.naturalWidth) {
+        setMobileBannerHeight(img.naturalHeight * (img.clientWidth / img.naturalWidth));
+      }
+    };
+    recalc();
+    const ro = new ResizeObserver(recalc);
+    ro.observe(img.parentElement!);
+    return () => ro.disconnect();
   }, [open]);
 
   const reset = useCallback(() => {
@@ -200,90 +232,105 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const DocIcon = docLabels[documentType].icon;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[900px] max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-[900px] max-h-screen lg:max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-xl animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - desktop branding */}
-        <div className="relative hidden lg:block lg:w-[40%] bg-white shrink-0 overflow-hidden">
+        <div className="hidden lg:block lg:w-[40%] shrink-0">
           <img
+            ref={artRef}
             src={heroDesktopImg}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover scale-[1.03]"
+            className="w-full block"
+            onLoad={() => {
+              if (artRef.current) {
+                setArtHeight(artRef.current.naturalHeight * (artRef.current.clientWidth / artRef.current.naturalWidth));
+              }
+            }}
           />
         </div>
 
         {/* Top banner - mobile branding */}
-        <div className="relative lg:hidden shrink-0 h-[160px] sm:h-[200px] overflow-hidden bg-white">
+        <div className="lg:hidden shrink-0">
           <img
+            ref={mobileBannerRef}
             src={heroMobileImg}
             alt=""
-            className="absolute inset-0 w-full h-full object-contain p-2"
+            className="w-full block"
+            onLoad={() => {
+              if (mobileBannerRef.current) {
+                setMobileBannerHeight(mobileBannerRef.current.naturalHeight * (mobileBannerRef.current.clientWidth / mobileBannerRef.current.naturalWidth));
+              }
+            }}
           />
         </div>
 
         {/* Right panel - form */}
-        <div className="flex-1 relative overflow-y-auto overflow-x-hidden">
+        <div
+          className="flex-1 relative overflow-y-auto overflow-x-hidden min-h-0 flex flex-col"
+          style={{ maxHeight: artHeight ? `${artHeight}px` : mobileBannerHeight ? `${mobileBannerHeight}px` : undefined }}
+        >
           <button
             onClick={onClose}
             className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
-          <div className="px-6 sm:px-8 lg:px-10 py-8 pb-12 lg:py-10 lg:pb-14">
+          <div className={`px-4 sm:px-6 md:px-8 lg:px-10 py-5 lg:py-6 flex-1 flex flex-col items-start ${tab === "login" ? "justify-center" : ""}`}>
             <div className="w-full max-w-sm mx-auto">
-            <div className="mb-8 text-left">
-              <div className="flex items-center gap-4 mb-3">
-                <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <div className="mb-5 text-left">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                   {tab === "register" ? (
-                    <UserPlus className="h-6 w-6" />
+                    <UserPlus className="h-5 w-5" />
                   ) : (
-                    <LogIn className="h-6 w-6" />
+                    <LogIn className="h-5 w-5" />
                   )}
                 </div>
                 <div>
-                  <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+                  <h1 className="text-xl font-extrabold tracking-tight text-foreground">
                     {tab === "register" ? "Criar conta" : "Entrar"}
                   </h1>
-                  <p className="text-sm text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {tab === "register" ? "Preencha seus dados para começar" : "Acesse sua conta para continuar"}
                   </p>
                 </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {tab === "register" && (
                 <>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome completo</label>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Nome completo</label>
                     <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                        className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground text-foreground pl-9 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder="Seu nome completo"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">CPF / CNPJ</label>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">CPF / CNPJ</label>
                     <div className="relative">
-                      <DocIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                      <DocIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                       <input
                         type="text"
                         value={document}
                         onChange={(e) => handleDocChange(e.target.value)}
-                        className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                        className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground pl-9 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                         placeholder={docLabels[documentType].placeholder}
                       />
                     </div>
                     {document.replace(/\D/g, "").length >= 11 && (
-                      <div className="flex items-center gap-1.5 mt-0.5">
+                      <div className="flex items-center gap-1.5">
                         {validateDocument(document.replace(/\D/g, ""), documentType) ? (
                           <span className="flex items-center gap-1 text-xs text-emerald-600">
                             <CheckCircle className="h-3 w-3" />
@@ -301,35 +348,35 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 </>
               )}
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">E-mail</label>
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">E-mail</label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground pl-9 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="seu@email.com"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Senha</label>
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Senha</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground pl-9 pr-10 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                     placeholder="********"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -337,21 +384,21 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               </div>
 
               {tab === "register" && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Confirmar senha</label>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Confirmar senha</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground pl-10 pr-12 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                      className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground pl-9 pr-10 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                       placeholder="********"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -360,15 +407,15 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               )}
 
               {error && (
-                <div className="flex items-center gap-2.5 text-sm text-destructive bg-destructive/5 border border-destructive/15 rounded-lg px-4 py-3">
+                <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/5 border border-destructive/15 rounded-lg px-3 py-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />
                   {error}
                 </div>
               )}
 
               {successMessage && (
-                <div className="flex items-start gap-2.5 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3">
-                  <CheckCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  <CheckCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                   <span>{successMessage}</span>
                 </div>
               )}
@@ -376,7 +423,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-10 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
@@ -392,7 +439,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 <button
                   type="button"
                   onClick={() => setShowReset(true)}
-                  className="w-full text-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors mt-2"
+                  className="w-full text-center text-xs font-medium text-muted-foreground hover:text-primary transition-colors mt-1"
                 >
                   Esqueci minha senha
                 </button>
@@ -402,7 +449,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 <button
                   type="button"
                   onClick={() => switchTab("register")}
-                  className="w-full h-11 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
+                  className="w-full h-9 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-2"
                 >
                   Criar conta
                 </button>
@@ -412,7 +459,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                 <button
                   type="button"
                   onClick={() => switchTab("login")}
-                  className="w-full h-11 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-3"
+                  className="w-full h-9 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all inline-flex items-center justify-center gap-2 mt-2"
                 >
                   Entrar na conta
                 </button>
@@ -430,20 +477,20 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
           onClick={() => setShowReset(false)}
         >
           <div
-            className="w-full max-w-sm bg-card border border-border/40 shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-200"
+            className="w-full max-w-sm bg-card border border-border/40 shadow-2xl p-5 animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                 <KeyRound className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-extrabold tracking-tight">
+                <h3 className="text-base font-extrabold tracking-tight">
                   {resetStep === "email" && "Recuperar senha"}
                   {resetStep === "code" && "Redefinir senha"}
                   {resetStep === "done" && "Pronto!"}
                 </h3>
-                <p className="text-sm text-muted-foreground mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {resetStep === "email" && "Digite seu e-mail cadastrado"}
                   {resetStep === "code" && "Insira o código e a nova senha"}
                   {resetStep === "done" && "Senha redefinida"}
@@ -452,27 +499,27 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
             </div>
 
             {resetStep === "email" && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">E-mail</label>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">E-mail</label>
                   <input
                     type="email"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     placeholder="seu@email.com"
-                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                   />
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowReset(false)}
-                    className="flex-1 h-12 rounded-lg bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
+                    className="flex-1 h-9 rounded-lg bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleRequestReset}
-                    className="flex-1 h-12 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
+                    className="flex-1 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
                   >
                     Enviar código
                   </button>
@@ -481,38 +528,38 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
             )}
 
             {resetStep === "code" && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Código</label>
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Código</label>
                   <input
                     type="text"
                     value={resetCode}
                     onChange={(e) => setResetCode(e.target.value)}
                     placeholder="000000"
                     maxLength={6}
-                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40 text-center text-lg tracking-[0.3em] font-mono"
+                    className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40 text-center text-lg tracking-[0.3em] font-mono"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nova senha</label>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Nova senha</label>
                   <input
                     type="password"
                     value={resetNewPassword}
                     onChange={(e) => setResetNewPassword(e.target.value)}
                     placeholder="********"
-                    className="w-full h-12 rounded-lg border border-border/60 bg-background text-foreground px-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
+                    className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/40"
                   />
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setResetStep("email")}
-                    className="flex-1 h-12 rounded-lg bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
+                    className="flex-1 h-9 rounded-lg bg-muted text-sm font-semibold text-foreground hover:bg-muted/80 transition-all"
                   >
                     Voltar
                   </button>
                   <button
                     onClick={handleConfirmReset}
-                    className="flex-1 h-12 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
+                    className="flex-1 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all"
                   >
                     Redefinir
                   </button>
@@ -521,9 +568,9 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
             )}
 
             {resetStep === "done" && (
-              <div className="text-center py-6">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 mb-4">
-                  <CheckCircle className="h-8 w-8 text-emerald-500" />
+              <div className="text-center py-4">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 mb-3">
+                  <CheckCircle className="h-6 w-6 text-emerald-500" />
                 </div>
                 <p className="text-sm font-semibold">Senha redefinida com sucesso!</p>
                 <p className="text-xs text-muted-foreground mt-1">Redirecionando para o login...</p>
