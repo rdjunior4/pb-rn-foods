@@ -234,7 +234,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={onClose}>
       <div
-        className="w-full max-w-[900px] max-h-[calc(100vh-1rem)] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-xl animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-[900px] h-dvh sm:h-auto sm:max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-none sm:rounded-xl animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left panel - desktop branding */}
@@ -270,7 +270,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         {/* Right panel - form */}
         <div
           className={`flex-1 relative min-h-0 flex flex-col ${tab === "register" ? "overflow-y-auto overflow-x-hidden" : "overflow-hidden"}`}
-          style={{ maxHeight: artHeight ? `${artHeight}px` : mobileBannerHeight ? `${mobileBannerHeight}px` : undefined }}
+          style={{ maxHeight: artHeight ? `${artHeight}px` : undefined }}
         >
           <button
             onClick={onClose}
