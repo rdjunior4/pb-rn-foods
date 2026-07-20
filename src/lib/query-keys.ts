@@ -51,6 +51,14 @@ export const queryKeys = {
     all: ["pages"] as const,
     bySlug: (slug: string) => [...queryKeys.pages.all, "slug", slug] as const,
   },
+  customerAddresses: {
+    all: ["customer-addresses"] as const,
+    byCustomer: (customerId: string) => [...queryKeys.customerAddresses.all, customerId] as const,
+  },
+  customerPayments: {
+    all: ["customer-payment-methods"] as const,
+    byCustomer: (customerId: string) => [...queryKeys.customerPayments.all, customerId] as const,
+  },
   admin: {
     all: ["admin"] as const,
     store: () => [...queryKeys.admin.all, "store"] as const,

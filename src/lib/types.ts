@@ -258,3 +258,37 @@ export interface Customer {
   tags: string[];
   notes: string;
 }
+
+export interface CustomerAddress {
+  id: string;
+  customerId: string;
+  label: string;
+  recipientName: string;
+  street: string;
+  number: string;
+  complement: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  cep: string;
+  latitude: number | null;
+  longitude: number | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PaymentType = "credit" | "debit" | "pix" | "boleto";
+
+export interface SavedPaymentMethod {
+  id: string;
+  customerId: string;
+  label: string;
+  cardBrand: string;
+  cardLast4: string;
+  cardHolder: string;
+  paymentType: PaymentType;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -13,11 +13,11 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
-import { useProducts, useAdminDistributors } from "@/lib/hooks";
+import { useProducts, useAdminDistributors, useCustomerAddresses, useCustomerPayments } from "@/lib/hooks";
 import { saveOrders, loadOrders, generateOrderId, validateCoupon, incrementCouponUsage, decrementStockForOrder, syncFromSupabase } from "@/lib/admin-store";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { apiSaveOrder, apiDecrementStock, apiValidateCoupon, apiIncrementCouponUsage, apiCreateOrderAtomic } from "@/lib/api";
-import type { Order, Coupon } from "@/lib/types";
+import type { Order, Coupon, CustomerAddress, SavedPaymentMethod } from "@/lib/types";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency, formatDoc, formatPhone } from "@/lib/format";
 import type { DocumentType } from "@/lib/format";
@@ -30,7 +30,7 @@ import {
 } from "@/lib/location";
 import { findDistributorForPoint, findDistributorForCity } from "@/lib/distributor-utils";
 import { carriers, ZERO_FEE_CARRIERS } from "@/lib/constants";
-import { Store } from "lucide-react";
+import { Store, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
@@ -43,6 +43,8 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { data: allProducts = [] } = useProducts();
   const { data: allDistributors = [] } = useAdminDistributors();
+  const { data: savedAddresses = [] } = useCustomerAddresses(user?.id);
+  const { data: savedPayments = [] } = useCustomerPayments(user?.id);
   const productMap = new Map(allProducts.map((p) => [p.id, p]));
 
   const [cep, setCep] = useState("");
@@ -65,6 +67,10 @@ function CheckoutPage() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCarrier, setSelectedCarrier] = useState("");
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+  const [showSavedAddress, setShowSavedAddress] = useState(true);
+  const [showSavedPayment, setShowSavedPayment] = useState(true);
 
   const cartProducts = items
     .map((item) => {
@@ -132,6 +138,48 @@ function CheckoutPage() {
       }
     }
   }, [user]);
+
+  // Auto-select default address
+  useEffect(() => {
+    if (savedAddresses.length > 0 && !selectedAddressId) {
+      const def = savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
+      if (def) {
+        setSelectedAddressId(def.id);
+        setCep(def.cep);
+        setAddress(def.street);
+        setNumber(def.number);
+        setNeighborhood(def.neighborhood);
+        setCity(def.city);
+        setState(def.state);
+      }
+    }
+  }, [savedAddresses, selectedAddressId]);
+
+  // Auto-select default payment
+  useEffect(() => {
+    if (savedPayments.length > 0 && !selectedPaymentId) {
+      const def = savedPayments.find((p) => p.isDefault) || savedPayments[0];
+      if (def) {
+        setSelectedPaymentId(def.id);
+        setPayment(def.paymentType === "credit" ? "credit" : def.paymentType === "debit" ? "credit" : def.paymentType === "pix" ? "pix" : "boleto");
+      }
+    }
+  }, [savedPayments, selectedPaymentId]);
+
+  const handleSelectSavedAddress = (addr: CustomerAddress) => {
+    setSelectedAddressId(addr.id);
+    setCep(addr.cep);
+    setAddress(addr.street);
+    setNumber(addr.number);
+    setNeighborhood(addr.neighborhood);
+    setCity(addr.city);
+    setState(addr.state);
+  };
+
+  const handleSelectSavedPayment = (m: SavedPaymentMethod) => {
+    setSelectedPaymentId(m.id);
+    setPayment(m.paymentType === "credit" ? "credit" : m.paymentType === "debit" ? "credit" : m.paymentType === "pix" ? "pix" : "boleto");
+  };
 
   const handleCepLookup = useCallback(async (cepValue: string) => {
     const digits = cepValue.replace(/\D/g, "");
@@ -429,6 +477,35 @@ function CheckoutPage() {
                 )}
               </div>
 
+              {/* Saved addresses */}
+              {savedAddresses.length > 0 && (
+                <div className="mb-5">
+                  <button onClick={() => setShowSavedAddress(!showSavedAddress)} className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 hover:text-foreground transition-colors">
+                    Endereços salvos
+                    {showSavedAddress ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </button>
+                  {showSavedAddress && (
+                    <div className="space-y-2">
+                      {savedAddresses.map((addr) => (
+                        <label key={addr.id} className={`flex items-start gap-3 rounded-lg border p-3.5 cursor-pointer transition-all ${selectedAddressId === addr.id ? "border-primary bg-primary/5" : "border-border/40 hover:border-border"}`}>
+                          <input type="radio" name="savedAddress" checked={selectedAddressId === addr.id} onChange={() => handleSelectSavedAddress(addr)} className="mt-0.5 accent-primary" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-sm font-semibold">{addr.label}</span>
+                              {addr.isDefault && <span className="text-[10px] font-semibold uppercase text-primary bg-primary/10 px-1.5 py-0.5 rounded">Padrao</span>}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{addr.street}{addr.number ? `, ${addr.number}` : ""}{addr.neighborhood ? ` - ${addr.neighborhood}` : ""}{addr.city ? `, ${addr.city}` : ""}{addr.state ? ` - ${addr.state}` : ""} | CEP: {addr.cep}</p>
+                          </div>
+                        </label>
+                      ))}
+                      <button onClick={() => { setSelectedAddressId(null); setShowSavedAddress(false); }} className="text-xs text-primary font-semibold hover:underline mt-1">
+                        Usar novo endereco
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {deliveryState && (
                 <div
                   className={`mb-5 flex items-center gap-2.5 rounded-lg px-4 py-3 text-sm font-medium ${
@@ -640,6 +717,40 @@ function CheckoutPage() {
               </span>
               <h2 className="font-semibold text-base sm:text-lg">Pagamento</h2>
             </div>
+
+            {/* Saved payment methods */}
+            {savedPayments.length > 0 && (
+              <div className="mb-5">
+                <button onClick={() => setShowSavedPayment(!showSavedPayment)} className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 hover:text-foreground transition-colors">
+                  Formas salvas
+                  {showSavedPayment ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </button>
+                {showSavedPayment && (
+                  <div className="space-y-2">
+                    {savedPayments.map((m) => (
+                      <label key={m.id} className={`flex items-center gap-3 rounded-lg border p-3.5 cursor-pointer transition-all ${selectedPaymentId === m.id ? "border-primary bg-primary/5" : "border-border/40 hover:border-border"}`}>
+                        <input type="radio" name="savedPayment" checked={selectedPaymentId === m.id} onChange={() => handleSelectSavedPayment(m)} className="accent-primary" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-sm font-semibold">{m.label}</span>
+                            {m.isDefault && <span className="text-[10px] font-semibold uppercase text-primary bg-primary/10 px-1.5 py-0.5 rounded">Padrao</span>}
+                          </div>
+                          {m.cardLast4 ? (
+                            <p className="text-xs text-muted-foreground">{m.cardBrand ? `${m.cardBrand} ` : ""}**** {m.cardLast4}</p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">{m.paymentType === "pix" ? "PIX" : m.paymentType === "boleto" ? "Boleto" : "Cartao"}</p>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                    <button onClick={() => { setSelectedPaymentId(null); setShowSavedPayment(false); }} className="text-xs text-primary font-semibold hover:underline mt-1">
+                      Escolher outra forma
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="space-y-3">
               {[
                 { value: "credit", label: "Cartão de crédito", icon: "💳" },

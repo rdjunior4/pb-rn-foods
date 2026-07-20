@@ -44,8 +44,8 @@ const sections: { title: string; items: SectionItem[] }[] = [
     title: "Dados da conta",
     items: [
       { icon: User, label: "Dados pessoais", desc: "Nome, e-mail e telefone" },
-      { icon: MapPin, label: "Endereços", desc: "Gerencie endereços de entrega" },
-      { icon: CreditCard, label: "Pagamentos", desc: "Formas de pagamento salvas" },
+      { icon: MapPin, label: "Endereços", desc: "Gerencie endereços de entrega", route: "/minha-conta/enderecos" },
+      { icon: CreditCard, label: "Pagamentos", desc: "Formas de pagamento salvas", route: "/minha-conta/pagamentos" },
     ],
   },
   {

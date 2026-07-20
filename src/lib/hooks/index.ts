@@ -2,6 +2,8 @@ export { useProducts, useProductBySlug, useProductById, useProductsByCategory, u
 export { useOrders, useOrderById, useOrdersByCustomer, useSaveOrder, useUpdateOrderStatus } from "./use-orders";
 export { useCombos, useReviewsByProduct, useAddReview, useDeleteReview, useValidateCoupon } from "./use-combos-reviews-coupons";
 export { useOrderRealtime, useOrdersRealtime } from "./use-order-realtime";
+export { useCustomerAddresses, useSaveAddress, useDeleteAddress, useSetDefaultAddress } from "./use-addresses";
+export { useCustomerPayments, useSavePaymentMethod, useDeletePaymentMethod, useSetDefaultPayment } from "./use-payment-methods";
 export {
   useAdminStore,
   useStoreConfig,
