@@ -3,7 +3,6 @@ import { MapPin, Plus, Pencil, Trash2, Star, ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useCustomerAddresses, useSaveAddress, useDeleteAddress, useSetDefaultAddress } from "@/lib/hooks";
-import { CustomerLayout } from "@/components/CustomerLayout";
 import { fetchViaCEP } from "@/lib/location";
 import type { CustomerAddress } from "@/lib/types";
 import { toast } from "sonner";
@@ -140,24 +139,21 @@ function AddressesPage() {
 
   if (!user) {
     return (
-      <CustomerLayout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h2 className="text-lg font-bold mb-2">Acesse sua conta</h2>
-            <p className="text-sm text-muted-foreground mb-4">Faca login para gerenciar seus enderecos.</p>
-            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
-              <ChevronLeft className="h-4 w-4" /> Voltar
-            </Link>
-          </div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <MapPin className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+          <h2 className="text-lg font-bold mb-2">Acesse sua conta</h2>
+          <p className="text-sm text-muted-foreground mb-4">Faca login para gerenciar seus enderecos.</p>
+          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+            <ChevronLeft className="h-4 w-4" /> Voltar
+          </Link>
         </div>
-      </CustomerLayout>
+      </div>
     );
   }
 
   return (
-    <CustomerLayout>
-      <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link to="/minha-conta" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2">
@@ -307,6 +303,5 @@ function AddressesPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </CustomerLayout>
   );
 }

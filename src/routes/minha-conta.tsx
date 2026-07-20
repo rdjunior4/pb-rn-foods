@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, Outlet, useLocation } from "@tanstack/react-router";
 import {
   Package, Heart, MapPin, Settings, LogOut, User, ShoppingCart,
   FileText, ChevronRight, TrendingUp, DollarSign, CreditCard,
@@ -62,6 +62,7 @@ function AccountPage() {
   const { user, isLoggedIn, logout } = useAuth();
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
+  const location = useLocation();
   const [editOpen, setEditOpen] = useState(false);
   const { data: allOrders = [] } = useOrdersByCustomer(isLoggedIn ? user!.id : "");
 
@@ -118,6 +119,16 @@ function AccountPage() {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  const isBasePath = location.pathname === "/minha-conta";
+
+  if (!isBasePath) {
+    return (
+      <CustomerLayout maxWidth="1400" noPadding fullWidth>
+        <Outlet />
+      </CustomerLayout>
+    );
+  }
 
   return (
     <CustomerLayout maxWidth="1400" noPadding fullWidth>

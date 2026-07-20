@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useCustomerPayments, useSavePaymentMethod, useDeletePaymentMethod, useSetDefaultPayment } from "@/lib/hooks";
 import { detectCardBrand } from "@/lib/api/payment-methods";
-import { CustomerLayout } from "@/components/CustomerLayout";
 import type { SavedPaymentMethod, PaymentType } from "@/lib/types";
 import { toast } from "sonner";
 import {
@@ -131,24 +130,21 @@ function PaymentsPage() {
 
   if (!user) {
     return (
-      <CustomerLayout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-center">
-            <CreditCard className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h2 className="text-lg font-bold mb-2">Acesse sua conta</h2>
-            <p className="text-sm text-muted-foreground mb-4">Faca login para gerenciar suas formas de pagamento.</p>
-            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
-              <ChevronLeft className="h-4 w-4" /> Voltar
-            </Link>
-          </div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <CreditCard className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+          <h2 className="text-lg font-bold mb-2">Acesse sua conta</h2>
+          <p className="text-sm text-muted-foreground mb-4">Faca login para gerenciar suas formas de pagamento.</p>
+          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+            <ChevronLeft className="h-4 w-4" /> Voltar
+          </Link>
         </div>
-      </CustomerLayout>
+      </div>
     );
   }
 
   return (
-    <CustomerLayout>
-      <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link to="/minha-conta" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2">
@@ -292,6 +288,5 @@ function PaymentsPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </CustomerLayout>
   );
 }
