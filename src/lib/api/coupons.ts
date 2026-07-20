@@ -37,7 +37,8 @@ export async function apiValidateCoupon(
 export async function apiIncrementCouponUsage(couponId: string): Promise<void> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) return;
-  await supabase.rpc("increment_coupon_usage", { p_coupon_id: couponId });
+  const { error } = await supabase.rpc("increment_coupon_usage", { p_coupon_id: couponId });
+  if (error) throw error;
 }
 
 export async function apiLoadCoupons(): Promise<Coupon[]> {

@@ -2,6 +2,7 @@ import { Search, User, ShoppingCart, Menu, LogIn, UserPlus, Package, Heart, Sett
 import { Logo } from "./Logo";
 import { CartDrawer } from "./CartDrawer";
 import { AuthModal } from "./AuthModal";
+import { NotificationBell } from "./NotificationBell";
 import { dispatchAuthModalEvent } from "@/lib/events";
 import {
   DropdownMenu,
@@ -190,7 +191,7 @@ export function Header() {
                       <div className="text-[11px] text-white/70">Minha conta</div>
                     </div>
                   ) : (
-                    <div className="text-left leading-tight">
+                    <div className="text-left leading-tight hidden sm:block">
                       <div className="text-sm font-bold text-white whitespace-nowrap">Cadastre-se</div>
                       <div className="text-[11px] text-white/70 whitespace-nowrap">Ou faça login</div>
                     </div>
@@ -252,6 +253,8 @@ export function Header() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {isLoggedIn && <NotificationBell />}
 
             <button
               onClick={() => setCartOpen(true)}

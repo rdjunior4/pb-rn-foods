@@ -14,6 +14,12 @@ import { EditProfileSheet } from "@/components/EditProfileSheet";
 import { formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/minha-conta")({
+  head: () => ({
+    meta: [
+      { title: "Minha Conta | PB&RN Foods" },
+      { name: "description", content: "Gerencie seus dados, pedidos e preferencias na PB&RN Foods." },
+    ],
+  }),
   component: AccountPage,
 });
 
@@ -51,8 +57,8 @@ const sections: { title: string; items: SectionItem[] }[] = [
     title: "Suporte",
     items: [
       { icon: HelpCircle, label: "Central de ajuda", desc: "Tire suas dúvidas", route: "/pagina/faq" },
-      { icon: Bell, label: "Notificações", desc: "Alertas de pedidos e ofertas" },
-      { icon: Settings, label: "Configurações", desc: "Preferências da conta" },
+      { icon: Bell, label: "Notificações", desc: "Alertas de pedidos e ofertas", route: "/minha-conta/notificacoes" },
+      { icon: Settings, label: "Configurações", desc: "Preferências da conta", route: "/minha-conta/configuracoes" },
     ],
   },
 ];
@@ -94,7 +100,7 @@ function AccountPage() {
     return (
     <CustomerLayout maxWidth="1400" noPadding fullWidth>
         <div className="text-center py-24">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 mb-8 ring-1 ring-primary/10">
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 mb-8 ring-1 ring-primary/10">
             <User className="h-12 w-12 text-primary/40" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Faça login para continuar</h1>
@@ -102,7 +108,7 @@ function AccountPage() {
           <Link
             to="/entrar"
             search={{ tab: "login", redirect: "/minha-conta" }}
-            className="inline-flex items-center gap-2 h-12 rounded-lg bg-primary text-primary-foreground font-semibold px-8 text-sm hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+            className="inline-flex items-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground font-semibold px-8 text-sm hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             Entrar agora
             <ChevronRight className="h-4 w-4" />
@@ -140,16 +146,16 @@ function AccountPage() {
               {/* Avatar */}
               <div className="relative shrink-0 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="h-14 w-14 sm:h-16 sm:w-16 rounded object-cover ring-2 ring-white/25 shadow-lg" />
+                  <img src={avatarUrl} alt="Avatar" className="h-14 w-14 sm:h-16 sm:w-16 rounded-lg object-cover ring-2 ring-white/25 shadow-lg" />
                 ) : (
-                  <div className="inline-flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded bg-white/15 backdrop-blur-sm ring-2 ring-white/25 text-white text-xl font-black shadow-lg">
+                  <div className="inline-flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm ring-2 ring-white/25 text-white text-xl font-black shadow-lg">
                     {initials}
                   </div>
                 )}
-                <div className="absolute inset-0 rounded bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Camera className="h-4 w-4 text-white" />
                 </div>
-                <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded bg-emerald-400 border-2 border-red-600 shadow-sm" />
+                <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-red-600 shadow-sm" />
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
               </div>
 
@@ -157,7 +163,7 @@ function AccountPage() {
               <div className="min-w-0">
                 <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">{user!.name}</h1>
                 <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5">
-                  <span className="inline-flex items-center rounded bg-white/15 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shrink-0">
+                  <span className="inline-flex items-center rounded-lg bg-white/15 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shrink-0">
                     {user!.documentType === "cnpj" ? "CNPJ" : "CPF"}
                   </span>
                   <span className="w-px h-3 bg-white/20 shrink-0" />
@@ -174,14 +180,14 @@ function AccountPage() {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setEditOpen(true)}
-                className="inline-flex items-center gap-1.5 h-9 rounded bg-white/10 backdrop-blur-sm text-white text-xs font-semibold px-4 hover:bg-white/20 transition-all ring-1 ring-white/10"
+                className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-white/10 backdrop-blur-sm text-white text-xs font-semibold px-4 hover:bg-white/20 transition-all ring-1 ring-white/10"
               >
                 <Pencil className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Editar</span>
               </button>
               <button
                 onClick={logout}
-                className="inline-flex items-center gap-1.5 h-9 rounded bg-white/10 backdrop-blur-sm text-white/70 text-xs font-semibold px-4 hover:bg-white/20 hover:text-white transition-all ring-1 ring-white/10"
+                className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-white/10 backdrop-blur-sm text-white/70 text-xs font-semibold px-4 hover:bg-white/20 hover:text-white transition-all ring-1 ring-white/10"
               >
                 <LogOut className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Sair</span>
@@ -200,15 +206,15 @@ function AccountPage() {
               { icon: DollarSign, label: "Gasto total", value: formatCurrency(myOrders.reduce((s, o) => s + o.total, 0)) },
               { icon: Heart, label: "Favoritos", value: String(wishlistItems.length) },
             ].map((stat, i) => (
-              <div key={stat.label} className="flex items-center gap-2.5">
+              <div key={stat.label} className="flex items-center gap-2.5 min-w-0">
                 {i > 0 && i % 2 !== 0 && <span className="hidden sm:block w-px h-8 bg-white/10 mr-1" />}
-                <div className="flex items-center gap-2.5">
-                  <div className="inline-flex h-7 w-7 items-center justify-center rounded bg-white/10">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 shrink-0">
                     <stat.icon className="h-3.5 w-3.5 text-white/70" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-[10px] text-white/40 font-medium uppercase tracking-wide leading-none">{stat.label}</div>
-                    <div className="text-sm font-bold text-white leading-tight mt-0.5">{stat.value}</div>
+                    <div className="text-sm font-bold text-white leading-tight mt-0.5 truncate">{stat.value}</div>
                   </div>
                 </div>
               </div>
@@ -226,11 +232,11 @@ function AccountPage() {
           </div>
           <div className="space-y-3">
             {myOrders.slice(0, 3).map((order) => (
-              <div key={order.id} className="group rounded border border-border/40 bg-card p-4 sm:p-5 hover:shadow-card-hover hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate({ to: `/pedido/${order.id}` })}>
+              <div key={order.id} className="group rounded-xl border border-border/40 bg-card p-4 sm:p-5 hover:shadow-card-hover hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate({ to: `/pedido/${order.id}` })}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-bold">{order.id}</span>
-                    <span className={`inline-flex items-center gap-1.5 rounded px-2.5 py-0.5 text-[10px] font-semibold ${
+                    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-0.5 text-[10px] font-semibold ${
                       order.status === "pending" ? "bg-amber-50 text-amber-700" :
                       order.status === "confirmed" ? "bg-blue-50 text-blue-700" :
                       order.status === "shipped" ? "bg-purple-50 text-purple-700" :
@@ -285,16 +291,16 @@ function AccountPage() {
                       handleSoon(item.label);
                     }
                   }}
-                  className="group flex items-center gap-3 sm:gap-4 rounded border border-border/40 bg-card p-4 sm:p-5 hover:border-primary/30 hover:shadow-card-hover transition-all text-left w-full"
+                  className="group flex items-center gap-3 sm:gap-4 rounded-xl border border-border/40 bg-card p-4 sm:p-5 hover:border-primary/30 hover:shadow-card-hover transition-all text-left w-full"
                 >
-                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
+                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
                     <item.icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold">{item.label}</span>
                       {item.badge && (
-                        <span className="flex h-5 min-w-5 items-center justify-center rounded bg-primary/10 text-[10px] font-bold text-primary px-1.5">
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-lg bg-primary/10 text-[10px] font-bold text-primary px-1.5">
                           {item.badge}
                         </span>
                       )}

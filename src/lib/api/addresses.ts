@@ -88,10 +88,11 @@ export async function apiDeleteAddress(id: string): Promise<void> {
 
 export async function apiSetDefaultAddress(customerId: string, addressId: string): Promise<void> {
   const sb = supabase!;
-  await sb
+  const { error: resetError } = await sb
     .from("customer_addresses")
     .update({ is_default: false })
     .eq("customer_id", customerId);
+  if (resetError) throw resetError;
   const { error } = await sb
     .from("customer_addresses")
     .update({ is_default: true })

@@ -24,6 +24,7 @@ import {
 import { loadStoreConfig } from "../store-config";
 import type { StoreConfig } from "../store-config";
 import type { Product, Category, Brand, Order, Coupon, ProductReview, StockMovement, Distributor, Combo, Customer } from "../types";
+import { apiDeleteReview } from "../api/reviews";
 import {
   apiSaveProduct,
   apiDeleteProduct,
@@ -332,6 +333,7 @@ export function useAdminDeleteReview() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      await apiDeleteReview(id);
       deleteReview(id);
     },
     onSuccess: () => {

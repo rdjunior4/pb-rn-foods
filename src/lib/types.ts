@@ -221,6 +221,8 @@ export interface StockMovement {
   previousStock: number;
   newStock: number;
   reason: string;
+  orderId?: string;
+  createdBy?: string;
   createdAt: string;
 }
 
@@ -289,6 +291,39 @@ export interface SavedPaymentMethod {
   cardHolder: string;
   paymentType: PaymentType;
   isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+export type NotificationType = "order_update" | "promo" | "system" | "stock_alert";
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+// ============================================================
+// USER PREFERENCES
+// ============================================================
+export interface UserPreferences {
+  userId: string;
+  emailOrderUpdates: boolean;
+  emailPromotions: boolean;
+  emailStockAlerts: boolean;
+  pushOrderUpdates: boolean;
+  pushPromotions: boolean;
+  pushStockAlerts: boolean;
+  language: string;
   createdAt: string;
   updatedAt: string;
 }

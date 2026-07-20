@@ -4,6 +4,8 @@ export { useCombos, useReviewsByProduct, useAddReview, useDeleteReview, useValid
 export { useOrderRealtime, useOrdersRealtime } from "./use-order-realtime";
 export { useCustomerAddresses, useSaveAddress, useDeleteAddress, useSetDefaultAddress } from "./use-addresses";
 export { useCustomerPayments, useSavePaymentMethod, useDeletePaymentMethod, useSetDefaultPayment } from "./use-payment-methods";
+export { useNotifications, useUnreadNotificationCount, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from "./use-notifications";
+export { useUserPreferences, useSaveUserPreferences } from "./use-user-preferences";
 export {
   useAdminStore,
   useStoreConfig,

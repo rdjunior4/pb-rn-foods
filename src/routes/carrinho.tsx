@@ -1,17 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trash2, ShoppingBag, ArrowLeft, Minus, Plus, Package, ArrowRight } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowLeft, Minus, Plus, Package, ArrowRight, Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useProducts } from "@/lib/hooks";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/carrinho")({
+  head: () => ({
+    meta: [
+      { title: "Carrinho | PB&RN Foods" },
+      { name: "description", content: "Gerencie seus itens no carrinho de compras da PB&RN Foods." },
+    ],
+  }),
   component: CartPage,
 });
 
 function CartPage() {
   const { items, totalItems, addItem, removeItem, updateQuantity, clearCart } = useCart();
-  const { data: products = [] } = useProducts();
+  const { data: products = [], isLoading } = useProducts();
   const productMap = new Map(products.map((p) => [p.id, p]));
 
   const cartProducts = items
@@ -30,6 +36,16 @@ function CartPage() {
     .filter(Boolean);
 
   const total = cartProducts.reduce((sum, p) => sum + p!.unitPrice * p!.quantity, 0);
+
+  if (isLoading) {
+    return (
+      <CustomerLayout>
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      </CustomerLayout>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -89,7 +105,7 @@ function CartPage() {
                   <img
                     src={p!.image}
                     alt={p!.name}
-                    className="h-28 w-28 rounded-lg object-cover bg-muted group-hover:scale-105 transition-transform duration-300"
+                    className="h-20 w-20 sm:h-28 sm:w-28 rounded-lg object-cover bg-muted group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
                 <div className="flex-1 min-w-0">
@@ -119,14 +135,14 @@ function CartPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => updateQuantity(p!.id, p!.quantity - 1, p!.variantId)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 hover:bg-muted transition-colors"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border/40 hover:bg-muted transition-colors"
                       >
                         <Minus className="h-3.5 w-3.5" />
                       </button>
                       <span className="w-12 text-center text-sm font-bold">{p!.quantity}</span>
                       <button
                         onClick={() => addItem(p!.id, 1, p!.variantId, p!.unitPrice)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 hover:bg-muted transition-colors"
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border/40 hover:bg-muted transition-colors"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </button>

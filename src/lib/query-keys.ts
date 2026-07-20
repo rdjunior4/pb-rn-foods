@@ -59,6 +59,15 @@ export const queryKeys = {
     all: ["customer-payment-methods"] as const,
     byCustomer: (customerId: string) => [...queryKeys.customerPayments.all, customerId] as const,
   },
+  notifications: {
+    all: ["notifications"] as const,
+    byUser: (userId: string) => [...queryKeys.notifications.all, userId] as const,
+    unreadCount: (userId: string) => [...queryKeys.notifications.all, userId, "unread-count"] as const,
+  },
+  userPreferences: {
+    all: ["user-preferences"] as const,
+    byUser: (userId: string) => [...queryKeys.userPreferences.all, userId] as const,
+  },
   admin: {
     all: ["admin"] as const,
     store: () => [...queryKeys.admin.all, "store"] as const,

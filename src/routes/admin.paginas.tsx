@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { FileText, Plus, Pencil, Trash2, X, Save } from "lucide-react";
-import { loadPages, savePage, deletePage } from "@/lib/pages-store";
+import { loadPages, apiSavePage, apiDeletePage } from "@/lib/pages-store";
 import type { StaticPage } from "@/lib/pages-store";
 import { toast } from "sonner";
 
@@ -13,6 +13,7 @@ function PagesAdminPage() {
   const [pages, setPages] = useState<StaticPage[]>([]);
   const [editing, setEditing] = useState<StaticPage | null>(null);
   const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setPages(loadPages());
@@ -20,19 +21,30 @@ function PagesAdminPage() {
 
   const refresh = () => setPages(loadPages());
 
-  const handleSave = (page: StaticPage) => {
-    savePage(page);
-    refresh();
-    setEditing(null);
-    toast.success("Página salva!");
+  const handleSave = async (page: StaticPage) => {
+    setSaving(true);
+    try {
+      await apiSavePage(page);
+      refresh();
+      setEditing(null);
+      toast.success("Página salva!");
+    } catch {
+      toast.error("Erro ao salvar página.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteSlug) return;
-    deletePage(deleteSlug);
-    refresh();
-    setDeleteSlug(null);
-    toast.success("Página excluída!");
+    try {
+      await apiDeletePage(deleteSlug);
+      refresh();
+      setDeleteSlug(null);
+      toast.success("Página excluída!");
+    } catch {
+      toast.error("Erro ao excluir página.");
+    }
   };
 
   return (
@@ -80,7 +92,7 @@ function PagesAdminPage() {
       </div>
 
       {editing && (
-        <PageEditor page={editing} onClose={() => setEditing(null)} onSave={handleSave} />
+        <PageEditor page={editing} onClose={() => setEditing(null)} onSave={handleSave} saving={saving} />
       )}
 
       {deleteSlug && (
@@ -108,7 +120,7 @@ function PagesAdminPage() {
   );
 }
 
-function PageEditor({ page, onClose, onSave }: { page: StaticPage; onClose: () => void; onSave: (p: StaticPage) => void }) {
+function PageEditor({ page, onClose, onSave, saving }: { page: StaticPage; onClose: () => void; onSave: (p: StaticPage) => void; saving: boolean }) {
   const [slug, setSlug] = useState(page.slug);
   const [title, setTitle] = useState(page.title);
   const [content, setContent] = useState(page.content);
@@ -173,9 +185,9 @@ function PageEditor({ page, onClose, onSave }: { page: StaticPage; onClose: () =
             <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium hover:bg-zinc-50">
               Cancelar
             </button>
-            <button type="submit" className="flex-1 rounded-lg bg-zinc-900 text-white px-4 py-2.5 text-sm font-medium hover:bg-zinc-800 inline-flex items-center justify-center gap-2">
+            <button type="submit" disabled={saving} className="flex-1 rounded-lg bg-zinc-900 text-white px-4 py-2.5 text-sm font-medium hover:bg-zinc-800 inline-flex items-center justify-center gap-2 disabled:opacity-50">
               <Save className="h-4 w-4" />
-              Salvar página
+              {saving ? "Salvando..." : "Salvar página"}
             </button>
           </div>
         </form>

@@ -29,7 +29,7 @@ export function Footer() {
   return (
     <footer className="mt-20 bg-brand-black">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 py-14 lg:py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-10 py-10 lg:py-20">
           <div className="lg:col-span-3">
             <Link to="/">
               <Logo className="h-14" />
@@ -61,7 +61,7 @@ export function Footer() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
                   <Clock className="h-4 w-4 text-primary" />
                 </span>
-                Seg a Sex: 6h - 18h | Sáb: 6h - 12h
+                <span className="text-xs sm:text-sm">Seg a Sex: 6h - 18h<br className="sm:hidden" /> <span className="hidden sm:inline">|</span> Sáb: 6h - 12h</span>
               </span>
             </div>
             <div className="flex items-center gap-2 mt-8">

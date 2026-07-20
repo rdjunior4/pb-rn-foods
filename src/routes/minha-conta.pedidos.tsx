@@ -5,6 +5,12 @@ import { useOrdersByCustomer } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/minha-conta/pedidos")({
+  head: () => ({
+    meta: [
+      { title: "Meus Pedidos | PB&RN Foods" },
+      { name: "description", content: "Acompanhe seus pedidos realizados na PB&RN Foods." },
+    ],
+  }),
   component: OrdersPage,
 });
 
@@ -79,10 +85,10 @@ function OrdersPage() {
                 className="group rounded-xl border border-border/40 bg-card p-4 sm:p-5 hover:shadow-card-hover hover:border-primary/30 transition-all cursor-pointer"
                 onClick={() => navigate({ to: `/pedido/${order.id}` })}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold">{order.id}</span>
-                    <span className={`inline-flex items-center gap-1.5 rounded px-2.5 py-0.5 text-[10px] font-semibold ${status.color}`}>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <span className="text-sm font-bold truncate">{order.id}</span>
+                    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[10px] font-semibold shrink-0 ${status.color}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
                       {status.label}
                     </span>

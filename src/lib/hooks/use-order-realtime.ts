@@ -26,7 +26,6 @@ export function useOrderRealtime(orderId?: string) {
             filter: `id=eq.${orderId}`,
           },
           (payload) => {
-            console.log("[Realtime] Order updated:", payload.new);
             queryClient.invalidateQueries({
               queryKey: queryKeys.orders.detail(orderId),
             });
@@ -47,7 +46,6 @@ export function useOrderRealtime(orderId?: string) {
             table: "orders",
           },
           (payload) => {
-            console.log("[Realtime] Orders change:", payload.eventType);
             queryClient.invalidateQueries({
               queryKey: queryKeys.orders.all,
             });

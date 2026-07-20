@@ -50,5 +50,6 @@ export async function apiAddReview(review: Omit<ProductReview, "id" | "createdAt
 export async function apiDeleteReview(id: string): Promise<void> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) return;
-  await supabase.from("product_reviews").delete().eq("id", id);
+  const { error } = await supabase.from("product_reviews").delete().eq("id", id);
+  if (error) throw error;
 }

@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CreditCard, Plus, Pencil, Trash2, Star, ChevronLeft, Landmark, Smartphone, FileText } from "lucide-react";
+import { CreditCard, Plus, Pencil, Trash2, Star, ChevronLeft, Landmark, Smartphone, FileText, X, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useCustomerPayments, useSavePaymentMethod, useDeletePaymentMethod, useSetDefaultPayment } from "@/lib/hooks";
 import { detectCardBrand } from "@/lib/api/payment-methods";
 import type { SavedPaymentMethod, PaymentType } from "@/lib/types";
 import { toast } from "sonner";
-import { LogIn } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,8 +16,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/minha-conta/pagamentos")({
+  head: () => ({
+    meta: [
+      { title: "Pagamentos | PB&RN Foods" },
+      { name: "description", content: "Gerencie suas formas de pagamento na PB&RN Foods." },
+    ],
+  }),
   component: PaymentsPage,
 });
 
@@ -65,6 +71,7 @@ function PaymentsPage() {
   const deleteMethod = useDeletePaymentMethod();
   const setDefault = useSetDefaultPayment();
 
+  const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<SavedPaymentMethod | null>(null);
   const [form, setForm] = useState<PaymentForm>(EMPTY_FORM);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -74,6 +81,7 @@ function PaymentsPage() {
   const openNew = () => {
     setEditing(null);
     setForm(EMPTY_FORM);
+    setShowForm(true);
   };
 
   const openEdit = (m: SavedPaymentMethod) => {
@@ -87,6 +95,12 @@ function PaymentsPage() {
       paymentType: m.paymentType,
       isDefault: m.isDefault,
     });
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
   };
 
   const handleCardNumber = (val: string) => {
@@ -115,7 +129,7 @@ function PaymentsPage() {
       paymentType: form.paymentType,
       isDefault: form.isDefault,
     });
-    setEditing(null);
+    closeForm();
   };
 
   const handleDelete = async () => {
@@ -167,7 +181,7 @@ function PaymentsPage() {
               <div key={i} className="h-24 rounded-xl bg-muted/30 animate-pulse" />
             ))}
           </div>
-        ) : methods.length === 0 && !editing ? (
+        ) : methods.length === 0 && !showForm ? (
           <div className="text-center py-16 rounded-xl border border-dashed border-border/60">
             <CreditCard className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-sm font-semibold mb-1">Nenhuma forma de pagamento</p>
@@ -188,7 +202,7 @@ function PaymentsPage() {
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="text-sm font-bold">{m.label}</span>
                       {m.isDefault && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded-lg">
                           <Star className="h-2.5 w-2.5 fill-current" /> Padrao
                         </span>
                       )}
@@ -221,56 +235,99 @@ function PaymentsPage() {
           </div>
         )}
 
-        {editing !== null && (
-          <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setEditing(null)}>
-            <div className="w-full sm:max-w-lg bg-card rounded-t-xl sm:rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="px-5 pt-5 pb-4 border-b border-border/40">
-                <h3 className="text-base font-extrabold">{editing.id ? "Editar pagamento" : "Novo pagamento"}</h3>
-              </div>
-              <div className="px-5 py-4 space-y-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Tipo de pagamento</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {PAYMENT_TYPES.map((t) => (
-                      <button key={t.value} onClick={() => setForm({ ...form, paymentType: t.value })} className={`h-10 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-0.5 border transition-all ${form.paymentType === t.value ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground hover:bg-muted/30"}`}>
-                        <t.icon className="h-4 w-4" />
-                        {t.label}
-                      </button>
-                    ))}
+        {showForm && (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={closeForm}>
+            <div className="w-full max-w-[900px] max-h-[85vh] sm:max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-xl animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+              {/* Sidebar branding - desktop */}
+              <div className="hidden lg:flex lg:w-[35%] shrink-0 flex-col items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-primary p-8 text-primary-foreground">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="h-16 w-16 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                    <CreditCard className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-extrabold">{editing ? "Editar pagamento" : "Novo pagamento"}</h3>
+                    <p className="text-sm text-white/70 mt-1">{editing ? "Atualize sua forma de pagamento" : "Adicione cartao ou outra forma de pagamento"}</p>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-white/20 w-full">
+                    <div className="flex items-center justify-center gap-2 text-xs text-white/60">
+                      <div className="h-2 w-2 rounded-full bg-white/40" />
+                      <span>Cartao, PIX, Boleto</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-xs text-white/60 mt-1">
+                      <div className="h-2 w-2 rounded-full bg-green-300" />
+                      <span>Deteccao automatica de bandeira</span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Apelido</label>
-                  <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Ex: Cartao pessoal" />
+                <div className="mt-6 opacity-40">
+                  <Logo className="h-8 w-auto" />
                 </div>
-
-                {isCard && (
-                  <>
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Nome no cartao</label>
-                      <input value={form.cardHolder} onChange={(e) => setForm({ ...form, cardHolder: e.target.value.toUpperCase() })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="NOME COMO NO CARTAO" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Numero do cartao</label>
-                      <input value={form.cardNumber} onChange={(e) => handleCardNumber(e.target.value)} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-mono tracking-wider" placeholder="0000 0000 0000 0000" maxLength={16} />
-                      {form.cardBrand && <p className="text-xs text-muted-foreground">Bandeira: <span className="font-semibold capitalize">{form.cardBrand}</span></p>}
-                    </div>
-                  </>
-                )}
-
-                <label className="flex items-center gap-2 cursor-pointer py-1">
-                  <input type="checkbox" checked={form.isDefault} onChange={(e) => setForm({ ...form, isDefault: e.target.checked })} className="h-4 w-4 rounded border-border/60 text-primary focus:ring-primary/20" />
-                  <span className="text-sm font-medium">Definir como padrao</span>
-                </label>
               </div>
-              <div className="px-5 pb-5 flex gap-3">
-                <button onClick={() => setEditing(null)} className="flex-1 h-10 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all">
-                  Cancelar
+
+              {/* Top banner - mobile */}
+              <div className="lg:hidden shrink-0 bg-gradient-to-r from-primary via-primary-hover to-primary p-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
+                  <CreditCard className="h-5 w-5 text-primary-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-extrabold text-primary-foreground">{editing ? "Editar pagamento" : "Novo pagamento"}</h3>
+                  <p className="text-xs text-white/70">{editing ? "Atualize sua forma" : "Adicione uma forma de pagamento"}</p>
+                </div>
+                <button onClick={closeForm} className="h-8 w-8 rounded-full bg-white/15 flex items-center justify-center text-primary-foreground hover:bg-white/25 transition-colors shrink-0">
+                  <X className="h-4 w-4" />
                 </button>
-                <button onClick={handleSave} disabled={saveMethod.isPending} className="flex-1 h-10 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover transition-all disabled:opacity-50">
-                  {saveMethod.isPending ? "Salvando..." : "Salvar"}
+              </div>
+
+              {/* Form panel */}
+              <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+                <button onClick={closeForm} className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors hidden lg:flex">
+                  <X className="h-4 w-4" />
                 </button>
+                <div className="p-5 sm:p-6 space-y-3 flex-1">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Tipo de pagamento</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {PAYMENT_TYPES.map((t) => (
+                        <button key={t.value} onClick={() => setForm({ ...form, paymentType: t.value })} className={`h-10 rounded-lg text-xs font-semibold flex flex-col items-center justify-center gap-0.5 border transition-all ${form.paymentType === t.value ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground hover:bg-muted/30"}`}>
+                          <t.icon className="h-4 w-4" />
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Apelido</label>
+                    <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Ex: Cartao pessoal" />
+                  </div>
+
+                  {isCard && (
+                    <>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Nome no cartao</label>
+                        <input value={form.cardHolder} onChange={(e) => setForm({ ...form, cardHolder: e.target.value.toUpperCase() })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="NOME COMO NO CARTAO" />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Numero do cartao</label>
+                        <input value={form.cardNumber} onChange={(e) => handleCardNumber(e.target.value)} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-mono tracking-wider" placeholder="0000 0000 0000 0000" maxLength={16} />
+                        {form.cardBrand && <p className="text-xs text-muted-foreground">Bandeira: <span className="font-semibold capitalize">{form.cardBrand}</span></p>}
+                      </div>
+                    </>
+                  )}
+
+                  <label className="flex items-center gap-2 cursor-pointer py-1">
+                    <input type="checkbox" checked={form.isDefault} onChange={(e) => setForm({ ...form, isDefault: e.target.checked })} className="h-4 w-4 rounded border-border/60 text-primary focus:ring-primary/20" />
+                    <span className="text-sm font-medium">Definir como padrao</span>
+                  </label>
+                </div>
+                <div className="px-5 sm:px-6 pb-5 sm:pb-6 flex gap-3 border-t border-border/40 pt-4">
+                  <button onClick={closeForm} className="flex-1 h-10 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all">
+                    Cancelar
+                  </button>
+                  <button onClick={handleSave} disabled={saveMethod.isPending} className="flex-1 h-10 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover transition-all disabled:opacity-50 shadow-lg shadow-primary/20">
+                    {saveMethod.isPending ? "Salvando..." : "Salvar"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MapPin, Plus, Pencil, Trash2, Star, ChevronLeft } from "lucide-react";
+import { MapPin, Plus, Pencil, Trash2, Star, ChevronLeft, X, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useCustomerAddresses, useSaveAddress, useDeleteAddress, useSetDefaultAddress } from "@/lib/hooks";
 import { fetchViaCEP } from "@/lib/location";
 import type { CustomerAddress } from "@/lib/types";
 import { toast } from "sonner";
-import { LogIn } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,8 +16,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/minha-conta/enderecos")({
+  head: () => ({
+    meta: [
+      { title: "Endereços | PB&RN Foods" },
+      { name: "description", content: "Gerencie seus endereços de entrega na PB&RN Foods." },
+    ],
+  }),
   component: AddressesPage,
 });
 
@@ -61,6 +67,7 @@ function AddressesPage() {
   const deleteAddress = useDeleteAddress();
   const setDefault = useSetDefaultAddress();
 
+  const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<CustomerAddress | null>(null);
   const [form, setForm] = useState<AddressForm>(EMPTY_FORM);
   const [loadingCep, setLoadingCep] = useState(false);
@@ -69,6 +76,7 @@ function AddressesPage() {
   const openNew = () => {
     setEditing(null);
     setForm(EMPTY_FORM);
+    setShowForm(true);
   };
 
   const openEdit = (addr: CustomerAddress) => {
@@ -85,6 +93,12 @@ function AddressesPage() {
       state: addr.state,
       isDefault: addr.isDefault,
     });
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditing(null);
   };
 
   const handleCep = async (cep: string) => {
@@ -124,7 +138,7 @@ function AddressesPage() {
       state: form.state,
       isDefault: form.isDefault,
     });
-    setEditing(null);
+    closeForm();
   };
 
   const handleDelete = async () => {
@@ -176,7 +190,7 @@ function AddressesPage() {
               <div key={i} className="h-32 rounded-xl bg-muted/30 animate-pulse" />
             ))}
           </div>
-        ) : addresses.length === 0 && !editing ? (
+        ) : addresses.length === 0 && !showForm ? (
           <div className="text-center py-16 rounded-xl border border-dashed border-border/60">
             <MapPin className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-sm font-semibold mb-1">Nenhum endereco cadastrado</p>
@@ -194,7 +208,7 @@ function AddressesPage() {
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-bold">{addr.label}</span>
                       {addr.isDefault && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded-lg">
                           <Star className="h-2.5 w-2.5 fill-current" /> Padrao
                         </span>
                       )}
@@ -221,71 +235,114 @@ function AddressesPage() {
           </div>
         )}
 
-        {editing !== null && (
-          <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setEditing(null)}>
-            <div className="w-full sm:max-w-lg bg-card rounded-t-xl sm:rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="px-5 pt-5 pb-4 border-b border-border/40">
-                <h3 className="text-base font-extrabold">{editing ? "Editar endereco" : "Novo endereco"}</h3>
+        {showForm && (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={closeForm}>
+            <div className="w-full max-w-[900px] max-h-[85vh] sm:max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-xl animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+              {/* Sidebar branding - desktop */}
+              <div className="hidden lg:flex lg:w-[35%] shrink-0 flex-col items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-primary p-8 text-primary-foreground">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="h-16 w-16 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                    <MapPin className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-extrabold">{editing ? "Editar endereco" : "Novo endereco"}</h3>
+                    <p className="text-sm text-white/70 mt-1">{editing ? "Atualize as informacoes do endereco" : "Adicione um novo endereco de entrega"}</p>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-white/20 w-full">
+                    <div className="flex items-center justify-center gap-2 text-xs text-white/60">
+                      <div className="h-2 w-2 rounded-full bg-white/40" />
+                      <span>Campos obrigatorios</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-xs text-white/60 mt-1">
+                      <div className="h-2 w-2 rounded-full bg-green-300" />
+                      <span>CEP auto-complete</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 opacity-40">
+                  <Logo className="h-8 w-auto" />
+                </div>
               </div>
-              <div className="px-5 py-4 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Apelido</label>
-                    <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Casa, Trabalho..." />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Nome destinatario</label>
-                    <input value={form.recipientName} onChange={(e) => setForm({ ...form, recipientName: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Quem vai receber?" />
-                  </div>
+
+              {/* Top banner - mobile */}
+              <div className="lg:hidden shrink-0 bg-gradient-to-r from-primary via-primary-hover to-primary p-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
+                  <MapPin className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">CEP</label>
-                  <input value={form.cep} onChange={(e) => { setForm({ ...form, cep: e.target.value }); if (e.target.value.replace(/\D/g, "").length === 8) handleCep(e.target.value); }} onBlur={(e) => handleCep(e.target.value)} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="00000-000" maxLength={9} />
-                  {loadingCep && <p className="text-xs text-muted-foreground">Buscando endereco...</p>}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-extrabold text-primary-foreground">{editing ? "Editar endereco" : "Novo endereco"}</h3>
+                  <p className="text-xs text-white/70">{editing ? "Atualize as informacoes" : "Adicione um endereco de entrega"}</p>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Rua</label>
-                  <input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Rua, Avenida..." />
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Numero</label>
-                    <input value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="123" />
-                  </div>
-                  <div className="col-span-2 space-y-1">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Complemento</label>
-                    <input value={form.complement} onChange={(e) => setForm({ ...form, complement: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Apto 101, Bloco B..." />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Bairro</label>
-                  <input value={form.neighborhood} onChange={(e) => setForm({ ...form, neighborhood: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Bairro" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Cidade</label>
-                    <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Cidade" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">UF</label>
-                    <select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" style={{ colorScheme: "light" }}>
-                      <option value="">UF</option>
-                      {UF_LIST.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <label className="flex items-center gap-2 cursor-pointer py-1">
-                  <input type="checkbox" checked={form.isDefault} onChange={(e) => setForm({ ...form, isDefault: e.target.checked })} className="h-4 w-4 rounded border-border/60 text-primary focus:ring-primary/20" />
-                  <span className="text-sm font-medium">Definir como endereco padrao</span>
-                </label>
+                <button onClick={closeForm} className="h-8 w-8 rounded-full bg-white/15 flex items-center justify-center text-primary-foreground hover:bg-white/25 transition-colors shrink-0">
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <div className="px-5 pb-5 flex gap-3">
-                <button onClick={() => setEditing(null)} className="flex-1 h-10 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all">
-                  Cancelar
+
+              {/* Form panel */}
+              <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+                <button onClick={closeForm} className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors hidden max-lg:hidden lg:flex">
+                  <X className="h-4 w-4" />
                 </button>
-                <button onClick={handleSave} disabled={saveAddress.isPending} className="flex-1 h-10 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover transition-all disabled:opacity-50">
-                  {saveAddress.isPending ? "Salvando..." : "Salvar"}
-                </button>
+                <div className="p-5 sm:p-6 space-y-3 flex-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Apelido</label>
+                      <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Casa, Trabalho..." />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Nome destinatario</label>
+                      <input value={form.recipientName} onChange={(e) => setForm({ ...form, recipientName: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Quem vai receber?" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">CEP</label>
+                    <input value={form.cep} onChange={(e) => { setForm({ ...form, cep: e.target.value }); if (e.target.value.replace(/\D/g, "").length === 8) handleCep(e.target.value); }} onBlur={(e) => handleCep(e.target.value)} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="00000-000" maxLength={9} />
+                    {loadingCep && <p className="text-xs text-muted-foreground">Buscando endereco...</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Rua</label>
+                    <input value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Rua, Avenida..." />
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Numero</label>
+                      <input value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="123" />
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Complemento</label>
+                      <input value={form.complement} onChange={(e) => setForm({ ...form, complement: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Apto 101, Bloco B..." />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Bairro</label>
+                    <input value={form.neighborhood} onChange={(e) => setForm({ ...form, neighborhood: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Bairro" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Cidade</label>
+                      <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" placeholder="Cidade" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">UF</label>
+                      <select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="w-full h-10 rounded-lg border border-border/60 bg-background text-foreground px-3 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" style={{ colorScheme: "light" }}>
+                        <option value="">UF</option>
+                        {UF_LIST.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer py-1">
+                    <input type="checkbox" checked={form.isDefault} onChange={(e) => setForm({ ...form, isDefault: e.target.checked })} className="h-4 w-4 rounded border-border/60 text-primary focus:ring-primary/20" />
+                    <span className="text-sm font-medium">Definir como endereco padrao</span>
+                  </label>
+                </div>
+                <div className="px-5 sm:px-6 pb-5 sm:pb-6 flex gap-3 border-t border-border/40 pt-4">
+                  <button onClick={closeForm} className="flex-1 h-10 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all">
+                    Cancelar
+                  </button>
+                  <button onClick={handleSave} disabled={saveAddress.isPending} className="flex-1 h-10 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover transition-all disabled:opacity-50 shadow-lg shadow-primary/20">
+                    {saveAddress.isPending ? "Salvando..." : "Salvar"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

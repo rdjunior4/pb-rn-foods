@@ -58,6 +58,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
   const [resetStep, setResetStep] = useState<"email" | "code" | "done">("email");
   const [artHeight, setArtHeight] = useState<number>(0);
   const [mobileBannerHeight, setMobileBannerHeight] = useState<number>(0);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const artRef = useRef<HTMLImageElement>(null);
   const mobileBannerRef = useRef<HTMLImageElement>(null);
 
@@ -117,6 +118,17 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
     return () => ro.disconnect();
   }, [open]);
 
+  const getPasswordStrength = (pw: string) => {
+    const hasLength = pw.length >= 8;
+    const hasUpper = /[A-Z]/.test(pw);
+    const hasNumber = /[0-9]/.test(pw);
+    if (hasLength && hasUpper && hasNumber) return "strong";
+    if (hasLength) return "medium";
+    return "weak";
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+
   const reset = useCallback(() => {
     setName("");
     setEmail("");
@@ -131,6 +143,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
     setResetEmail("");
     setResetCode("");
     setResetNewPassword("");
+    setAcceptTerms(false);
   }, []);
 
   const handleDocChange = useCallback((value: string) => {
@@ -152,8 +165,11 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         if (!name.trim()) { setError("Informe seu nome"); return; }
         if (!email.trim()) { setError("Informe seu e-mail"); return; }
         if (!password) { setError("Informe uma senha"); return; }
-        if (password.length < 4) { setError("A senha deve ter pelo menos 4 caracteres"); return; }
+        if (password.length < 8) { setError("A senha deve ter pelo menos 8 caracteres"); return; }
+        if (!/[A-Z]/.test(password)) { setError("A senha deve conter pelo menos 1 letra maiuscula"); return; }
+        if (!/[0-9]/.test(password)) { setError("A senha deve conter pelo menos 1 numero"); return; }
         if (password !== confirmPassword) { setError("As senhas não conferem"); return; }
+        if (!acceptTerms) { setError("Voce deve aceitar os Termos de Uso e a Politica de Privacidade"); return; }
         if (!raw) { setError("Informe seu CPF ou CNPJ"); return; }
         if (!validateDocument(raw, documentType)) {
           setError(documentType === "cnpj" ? "CNPJ inválido. Verifique os dígitos." : "CPF inválido. Verifique os dígitos.");
@@ -274,6 +290,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
         >
           <button
             onClick={onClose}
+            aria-label="Fechar"
             className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X className="h-4 w-4" />
@@ -376,6 +393,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -398,12 +416,43 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? "Ocultar confirmacao de senha" : "Mostrar confirmacao de senha"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
+              )}
+
+              {tab === "register" && password.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="flex gap-1">
+                    <div className={`h-1 flex-1 rounded-full transition-colors ${passwordStrength === "weak" ? "bg-red-500" : "bg-zinc-200"}`} />
+                    <div className={`h-1 flex-1 rounded-full transition-colors ${passwordStrength === "medium" ? "bg-amber-400" : passwordStrength === "strong" ? "bg-emerald-500" : "bg-zinc-200"}`} />
+                    <div className={`h-1 flex-1 rounded-full transition-colors ${passwordStrength === "strong" ? "bg-emerald-500" : "bg-zinc-200"}`} />
+                  </div>
+                  <p className={`text-[11px] font-medium ${passwordStrength === "weak" ? "text-red-500" : passwordStrength === "medium" ? "text-amber-600" : "text-emerald-600"}`}>
+                    {passwordStrength === "weak" ? "Fraca" : passwordStrength === "medium" ? "Media" : "Forte"}
+                  </p>
+                </div>
+              )}
+
+              {tab === "register" && (
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-border/60 text-primary focus:ring-primary/20"
+                  />
+                  <span className="text-xs text-muted-foreground leading-relaxed">
+                    Li e aceito os{" "}
+                    <a href="/pagina/termos" className="font-semibold text-foreground hover:underline">Termos de Uso</a>
+                    {" "}e a{" "}
+                    <a href="/pagina/privacidade" className="font-semibold text-foreground hover:underline">Politica de Privacidade</a>
+                  </span>
+                </label>
               )}
 
               {error && (
@@ -422,7 +471,7 @@ export function AuthModal({ open, onClose, initialTab = "login" }: AuthModalProp
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (tab === "register" && (!acceptTerms || passwordStrength !== "strong"))}
                 className="w-full h-10 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary-hover hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

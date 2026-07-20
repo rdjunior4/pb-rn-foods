@@ -7,6 +7,12 @@ import { CustomerLayout } from "@/components/CustomerLayout";
 import { ITEMS_PER_PAGE, SELECT_CLASSES } from "@/lib/constants";
 
 export const Route = createFileRoute("/buscar")({
+  head: () => ({
+    meta: [
+      { title: "Buscar | PB&RN Foods" },
+      { name: "description", content: "Busque produtos, marcas e categorias na PB&RN Foods." },
+    ],
+  }),
   component: SearchPage,
   validateSearch: (search: Record<string, unknown>) => ({
     q: (search.q as string) || "",
@@ -131,7 +137,7 @@ function SearchPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
+            <div className="flex items-center justify-center gap-2 mt-8 overflow-x-auto no-scrollbar pb-1">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}

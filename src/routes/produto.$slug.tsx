@@ -15,6 +15,12 @@ import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/produto/$slug")({
+  head: () => ({
+    meta: [
+      { title: "Produto | PB&RN Foods" },
+      { name: "description", content: "Veja detalhes do produto na PB&RN Foods." },
+    ],
+  }),
   component: ProductPage,
 });
 
@@ -129,13 +135,15 @@ function ProductPage() {
               <>
                 <button
                   onClick={() => setSelectedImage((p) => (p > 0 ? p - 1 : images.length - 1))}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-background/80 hover:bg-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                  aria-label="Imagem anterior"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-background/80 hover:bg-background flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setSelectedImage((p) => (p < images.length - 1 ? p + 1 : 0))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-background/80 hover:bg-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                  aria-label="Proxima imagem"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-background/80 hover:bg-background flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -143,7 +151,7 @@ function ProductPage() {
             )}
           </div>
           {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
               {images.map((img, i) => (
                 <button
                   key={i}
@@ -363,6 +371,7 @@ function ProductPage() {
                 navigator.clipboard?.writeText(window.location.href);
                 toast.success("Link copiado!");
               }}
+              aria-label="Compartilhar produto"
               className="inline-flex h-[52px] w-[52px] items-center justify-center rounded border border-border/40 hover:bg-muted transition-colors"
             >
               <Share2 className="h-5 w-5 text-muted-foreground" />
@@ -439,7 +448,7 @@ function ProductPage() {
 
       <ReviewsSection productId={product.id} />
 
-      <div className="h-20 md:hidden" aria-hidden="true" />
+      <div className="h-24 md:hidden" aria-hidden="true" />
 
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background p-3 md:hidden">
         <button

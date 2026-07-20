@@ -28,6 +28,7 @@ CREATE TRIGGER customer_payment_methods_updated_at
 
 ALTER TABLE customer_payment_methods ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "cust_pay_select_own_or_admin" ON customer_payment_methods;
 CREATE POLICY "cust_pay_select_own_or_admin" ON customer_payment_methods
   FOR SELECT USING (
     EXISTS (
@@ -37,6 +38,7 @@ CREATE POLICY "cust_pay_select_own_or_admin" ON customer_payment_methods
     )
   );
 
+DROP POLICY IF EXISTS "cust_pay_insert_own_or_admin" ON customer_payment_methods;
 CREATE POLICY "cust_pay_insert_own_or_admin" ON customer_payment_methods
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -46,6 +48,7 @@ CREATE POLICY "cust_pay_insert_own_or_admin" ON customer_payment_methods
     )
   );
 
+DROP POLICY IF EXISTS "cust_pay_update_own_or_admin" ON customer_payment_methods;
 CREATE POLICY "cust_pay_update_own_or_admin" ON customer_payment_methods
   FOR UPDATE USING (
     EXISTS (
@@ -55,6 +58,7 @@ CREATE POLICY "cust_pay_update_own_or_admin" ON customer_payment_methods
     )
   );
 
+DROP POLICY IF EXISTS "cust_pay_delete_own_or_admin" ON customer_payment_methods;
 CREATE POLICY "cust_pay_delete_own_or_admin" ON customer_payment_methods
   FOR DELETE USING (
     EXISTS (
@@ -73,6 +77,7 @@ DROP POLICY IF EXISTS "cust_addr_insert_admin" ON customer_addresses;
 DROP POLICY IF EXISTS "cust_addr_update_admin" ON customer_addresses;
 DROP POLICY IF EXISTS "cust_addr_delete_admin" ON customer_addresses;
 
+DROP POLICY IF EXISTS "cust_addr_insert_own_or_admin" ON customer_addresses;
 CREATE POLICY "cust_addr_insert_own_or_admin" ON customer_addresses
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -82,6 +87,7 @@ CREATE POLICY "cust_addr_insert_own_or_admin" ON customer_addresses
     )
   );
 
+DROP POLICY IF EXISTS "cust_addr_update_own_or_admin" ON customer_addresses;
 CREATE POLICY "cust_addr_update_own_or_admin" ON customer_addresses
   FOR UPDATE USING (
     EXISTS (
@@ -91,6 +97,7 @@ CREATE POLICY "cust_addr_update_own_or_admin" ON customer_addresses
     )
   );
 
+DROP POLICY IF EXISTS "cust_addr_delete_own_or_admin" ON customer_addresses;
 CREATE POLICY "cust_addr_delete_own_or_admin" ON customer_addresses
   FOR DELETE USING (
     EXISTS (

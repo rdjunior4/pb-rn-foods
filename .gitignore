@@ -32,8 +32,10 @@ opencode.json
 supabase/.temp/
 
 # Build logs / temp
+build_output.txt
 build_*.txt
 run_build.bat
+vite-debug.log
 
 # Knowledge graph
 graphify-out/
@@ -50,4 +52,3 @@ graphify-out/
 *.sln
 *.sw?
 .vercel
-.env*

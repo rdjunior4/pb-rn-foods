@@ -34,6 +34,12 @@ import { Store, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
+  head: () => ({
+    meta: [
+      { title: "Checkout | PB&RN Foods" },
+      { name: "description", content: "Finalize sua compra na PB&RN Foods. Checkout seguro e rápido para CNPJ." },
+    ],
+  }),
   component: CheckoutPage,
 });
 
@@ -41,10 +47,11 @@ function CheckoutPage() {
   const { items, clearCart, totalItems } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: allProducts = [] } = useProducts();
-  const { data: allDistributors = [] } = useAdminDistributors();
-  const { data: savedAddresses = [] } = useCustomerAddresses(user?.id);
-  const { data: savedPayments = [] } = useCustomerPayments(user?.id);
+  const { data: allProducts = [], isLoading: loadingProducts } = useProducts();
+  const { data: allDistributors = [], isLoading: loadingDistributors } = useAdminDistributors();
+  const { data: savedAddresses = [], isLoading: loadingAddresses } = useCustomerAddresses(user?.id);
+  const { data: savedPayments = [], isLoading: loadingPayments } = useCustomerPayments(user?.id);
+  const isLoading = loadingProducts || loadingDistributors || loadingAddresses || loadingPayments;
   const productMap = new Map(allProducts.map((p) => [p.id, p]));
 
   const [cep, setCep] = useState("");
@@ -236,6 +243,16 @@ function CheckoutPage() {
     setCouponError("");
   };
 
+  if (isLoading) {
+    return (
+      <CustomerLayout>
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      </CustomerLayout>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <CustomerLayout>
@@ -374,7 +391,7 @@ function CheckoutPage() {
   return (
     <CustomerLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Checkout</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Checkout</h1>
         <p className="text-muted-foreground text-sm mt-1">Finalize sua compra em poucos passos</p>
       </div>
 
@@ -529,7 +546,7 @@ function CheckoutPage() {
               )}
 
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">CEP</label>
                     <div className="relative">
@@ -677,8 +694,8 @@ function CheckoutPage() {
                   />
                 </div>
               )}
-              <div className="grid grid-cols-[auto_1fr] gap-4">
-                <div className="w-24">
+              <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-3 sm:gap-4">
+                <div className="sm:w-24">
                   <label className="text-xs font-semibold mb-1.5 block text-muted-foreground">Tipo</label>
                   <select
                     value={docType}

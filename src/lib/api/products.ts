@@ -1,6 +1,5 @@
 import { getSupabase, isSupabaseConfigured } from "../supabase";
 import type { Product, Category, Brand } from "../types";
-import { getProducts, getCategories, getBrands } from "../data";
 
 // Build categoryIds map from product_categories junction table
 async function fetchCategoryIdsMap(): Promise<Map<string, string[]>> {
@@ -22,7 +21,7 @@ async function fetchCategoryIdsMap(): Promise<Map<string, string[]>> {
 export async function apiGetProducts(): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getProducts();
+    return [];
   }
   const [prodsResult, categoryIdsMap] = await Promise.all([
     supabase
@@ -33,14 +32,14 @@ export async function apiGetProducts(): Promise<Product[]> {
     fetchCategoryIdsMap(),
   ]);
   const { data, error } = prodsResult;
-  if (error || !data) return getProducts();
+  if (error || !data) return [];
   return data.map((row) => mapDbProduct(row, categoryIdsMap));
 }
 
 export async function apiGetProductBySlug(slug: string): Promise<Product | null> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getProducts().find((p) => p.slug === slug) || null;
+    return null;
   }
   const [prodResult, categoryIdsMap] = await Promise.all([
     supabase
@@ -58,7 +57,7 @@ export async function apiGetProductBySlug(slug: string): Promise<Product | null>
 export async function apiGetProductById(id: string): Promise<Product | null> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getProducts().find((p) => p.id === id) || null;
+    return null;
   }
   const [prodResult, categoryIdsMap] = await Promise.all([
     supabase
@@ -76,7 +75,7 @@ export async function apiGetProductById(id: string): Promise<Product | null> {
 export async function apiGetProductsByCategory(categoryId: string): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getProducts().filter((p) => p.categoryIds.includes(categoryId));
+    return [];
   }
   // Find product_ids via junction table first, plus legacy category_id fallback
   const [junctionResult, categoryIdsMap] = await Promise.all([
@@ -110,7 +109,7 @@ export async function apiGetProductsByCategory(categoryId: string): Promise<Prod
 export async function apiGetFeaturedProducts(): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getProducts().filter((p) => p.featured);
+    return [];
   }
   const [prodsResult, categoryIdsMap] = await Promise.all([
     supabase
@@ -128,10 +127,7 @@ export async function apiGetFeaturedProducts(): Promise<Product[]> {
 export async function apiSearchProducts(query: string): Promise<Product[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    const q = query.toLowerCase();
-    return getProducts().filter(
-      (p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
-    );
+    return [];
   }
   const [prodsResult, categoryIdsMap] = await Promise.all([
     supabase
@@ -149,13 +145,13 @@ export async function apiSearchProducts(query: string): Promise<Product[]> {
 export async function apiGetCategories(): Promise<Category[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getCategories();
+    return [];
   }
   const { data, error } = await supabase
     .from("categories")
     .select("*")
     .order("sort_order", { ascending: true });
-  if (error || !data) return getCategories();
+  if (error || !data) return [];
   return data.map((c: Record<string, unknown>) => ({
     id: c.id as string,
     slug: c.slug as string,
@@ -169,14 +165,14 @@ export async function apiGetCategories(): Promise<Category[]> {
 export async function apiGetBrands(): Promise<Brand[]> {
   const supabase = getSupabase();
   if (!supabase || !isSupabaseConfigured()) {
-    return getBrands();
+    return [];
   }
   const { data, error } = await supabase
     .from("brands")
     .select("*")
     .eq("active", true)
     .order("name");
-  if (error || !data) return getBrands();
+  if (error || !data) return [];
   return data.map((b: Record<string, unknown>) => ({
     id: b.id as string,
     name: b.name as string,

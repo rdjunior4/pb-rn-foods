@@ -94,7 +94,7 @@ export function ReviewsSection({ productId }: ReviewsSectionProps) {
           )}
         </div>
       ) : (
-        <div className="grid md:grid-cols-[260px_1fr] gap-8">
+        <div className="grid md:grid-cols-[260px_1fr] gap-6 md:gap-8">
           <div>
             <div className="rounded-lg border border-border/40 bg-card p-6 text-center">
               <div className="text-4xl font-extrabold">{avgRating.toFixed(1)}</div>

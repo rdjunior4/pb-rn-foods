@@ -34,6 +34,12 @@ import {
 
 export const Route = createFileRoute("/admin/produtos")({
   component: AdminProducts,
+  errorComponent: () => (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <p className="text-sm font-semibold text-red-600 mb-2">Erro ao carregar</p>
+      <p className="text-xs text-muted-foreground">Tente novamente ou volte para o painel.</p>
+    </div>
+  ),
 });
 
 type SortField = "name" | "price" | "stock" | "brand";

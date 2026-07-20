@@ -39,9 +39,9 @@ export function ProductCard({ product }: { product: Product }) {
         <button
           onClick={(e) => { e.stopPropagation(); toggleFavorite(product.id); }}
           aria-label={favorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-          className="absolute top-2 right-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all shadow-sm active:scale-90 md:opacity-0 md:group-hover:opacity-100"
+          className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all shadow-sm active:scale-90 md:opacity-0 md:group-hover:opacity-100"
         >
-          <Heart className={`h-3.5 w-3.5 ${favorite ? "fill-red-500 text-red-500" : "text-zinc-500"}`} />
+          <Heart className={`h-4 w-4 ${favorite ? "fill-red-500 text-red-500" : "text-zinc-500"}`} />
         </button>
 
         {/* Hover eye */}
@@ -94,7 +94,7 @@ export function ProductCard({ product }: { product: Product }) {
             <button
               onClick={(e) => { e.stopPropagation(); addItem(product.id); }}
               aria-label="Adicionar ao carrinho"
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover active:scale-90 transition-all shadow-sm hover:shadow-md hover:shadow-primary/20"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover active:scale-90 transition-all shadow-sm hover:shadow-md hover:shadow-primary/20"
             >
               <ShoppingCart className="h-4 w-4" />
             </button>

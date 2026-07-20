@@ -73,7 +73,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleClear}
-                  className="text-[11px] text-muted-foreground/50 hover:text-primary font-medium transition-colors"
+                  className="text-xs text-muted-foreground/50 hover:text-primary font-medium transition-colors py-1 px-1"
                 >
                   Limpar
                 </button>
@@ -107,7 +107,7 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                             removeItem(item.productId);
                             toast.success(`${product.name} removido`);
                           }}
-                          className="p-0.5 text-muted-foreground/20 hover:text-primary transition-colors opacity-0 group-hover:opacity-100 shrink-0 mt-0.5"
+                          className="p-0.5 text-muted-foreground/20 hover:text-primary transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shrink-0 mt-0.5"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>

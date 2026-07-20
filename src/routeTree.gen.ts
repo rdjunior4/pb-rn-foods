@@ -24,7 +24,9 @@ import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as PaginaSlugRouteImport } from './routes/pagina.$slug'
 import { Route as MinhaContaPedidosRouteImport } from './routes/minha-conta.pedidos'
 import { Route as MinhaContaPagamentosRouteImport } from './routes/minha-conta.pagamentos'
+import { Route as MinhaContaNotificacoesRouteImport } from './routes/minha-conta.notificacoes'
 import { Route as MinhaContaEnderecosRouteImport } from './routes/minha-conta.enderecos'
+import { Route as MinhaContaConfiguracoesRouteImport } from './routes/minha-conta.configuracoes'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 import { Route as AdminRelatoriosRouteImport } from './routes/admin.relatorios'
 import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
@@ -118,9 +120,19 @@ const MinhaContaPagamentosRoute = MinhaContaPagamentosRouteImport.update({
   path: '/pagamentos',
   getParentRoute: () => MinhaContaRoute,
 } as any)
+const MinhaContaNotificacoesRoute = MinhaContaNotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
 const MinhaContaEnderecosRoute = MinhaContaEnderecosRouteImport.update({
   id: '/enderecos',
   path: '/enderecos',
+  getParentRoute: () => MinhaContaRoute,
+} as any)
+const MinhaContaConfiguracoesRoute = MinhaContaConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
   getParentRoute: () => MinhaContaRoute,
 } as any)
 const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
@@ -234,7 +246,9 @@ export interface FileRoutesByFullPath {
   '/admin/produtos': typeof AdminProdutosRouteWithChildren
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
+  '/minha-conta/configuracoes': typeof MinhaContaConfiguracoesRoute
   '/minha-conta/enderecos': typeof MinhaContaEnderecosRoute
+  '/minha-conta/notificacoes': typeof MinhaContaNotificacoesRoute
   '/minha-conta/pagamentos': typeof MinhaContaPagamentosRoute
   '/minha-conta/pedidos': typeof MinhaContaPedidosRoute
   '/pagina/$slug': typeof PaginaSlugRoute
@@ -268,7 +282,9 @@ export interface FileRoutesByTo {
   '/admin/produtos': typeof AdminProdutosRouteWithChildren
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
+  '/minha-conta/configuracoes': typeof MinhaContaConfiguracoesRoute
   '/minha-conta/enderecos': typeof MinhaContaEnderecosRoute
+  '/minha-conta/notificacoes': typeof MinhaContaNotificacoesRoute
   '/minha-conta/pagamentos': typeof MinhaContaPagamentosRoute
   '/minha-conta/pedidos': typeof MinhaContaPedidosRoute
   '/pagina/$slug': typeof PaginaSlugRoute
@@ -304,7 +320,9 @@ export interface FileRoutesById {
   '/admin/produtos': typeof AdminProdutosRouteWithChildren
   '/admin/relatorios': typeof AdminRelatoriosRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
+  '/minha-conta/configuracoes': typeof MinhaContaConfiguracoesRoute
   '/minha-conta/enderecos': typeof MinhaContaEnderecosRoute
+  '/minha-conta/notificacoes': typeof MinhaContaNotificacoesRoute
   '/minha-conta/pagamentos': typeof MinhaContaPagamentosRoute
   '/minha-conta/pedidos': typeof MinhaContaPedidosRoute
   '/pagina/$slug': typeof PaginaSlugRoute
@@ -341,7 +359,9 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/admin/relatorios'
     | '/categoria/$slug'
+    | '/minha-conta/configuracoes'
     | '/minha-conta/enderecos'
+    | '/minha-conta/notificacoes'
     | '/minha-conta/pagamentos'
     | '/minha-conta/pedidos'
     | '/pagina/$slug'
@@ -375,7 +395,9 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/admin/relatorios'
     | '/categoria/$slug'
+    | '/minha-conta/configuracoes'
     | '/minha-conta/enderecos'
+    | '/minha-conta/notificacoes'
     | '/minha-conta/pagamentos'
     | '/minha-conta/pedidos'
     | '/pagina/$slug'
@@ -410,7 +432,9 @@ export interface FileRouteTypes {
     | '/admin/produtos'
     | '/admin/relatorios'
     | '/categoria/$slug'
+    | '/minha-conta/configuracoes'
     | '/minha-conta/enderecos'
+    | '/minha-conta/notificacoes'
     | '/minha-conta/pagamentos'
     | '/minha-conta/pedidos'
     | '/pagina/$slug'
@@ -544,11 +568,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MinhaContaPagamentosRouteImport
       parentRoute: typeof MinhaContaRoute
     }
+    '/minha-conta/notificacoes': {
+      id: '/minha-conta/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/minha-conta/notificacoes'
+      preLoaderRoute: typeof MinhaContaNotificacoesRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
     '/minha-conta/enderecos': {
       id: '/minha-conta/enderecos'
       path: '/enderecos'
       fullPath: '/minha-conta/enderecos'
       preLoaderRoute: typeof MinhaContaEnderecosRouteImport
+      parentRoute: typeof MinhaContaRoute
+    }
+    '/minha-conta/configuracoes': {
+      id: '/minha-conta/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/minha-conta/configuracoes'
+      preLoaderRoute: typeof MinhaContaConfiguracoesRouteImport
       parentRoute: typeof MinhaContaRoute
     }
     '/categoria/$slug': {
@@ -726,13 +764,17 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface MinhaContaRouteChildren {
+  MinhaContaConfiguracoesRoute: typeof MinhaContaConfiguracoesRoute
   MinhaContaEnderecosRoute: typeof MinhaContaEnderecosRoute
+  MinhaContaNotificacoesRoute: typeof MinhaContaNotificacoesRoute
   MinhaContaPagamentosRoute: typeof MinhaContaPagamentosRoute
   MinhaContaPedidosRoute: typeof MinhaContaPedidosRoute
 }
 
 const MinhaContaRouteChildren: MinhaContaRouteChildren = {
+  MinhaContaConfiguracoesRoute: MinhaContaConfiguracoesRoute,
   MinhaContaEnderecosRoute: MinhaContaEnderecosRoute,
+  MinhaContaNotificacoesRoute: MinhaContaNotificacoesRoute,
   MinhaContaPagamentosRoute: MinhaContaPagamentosRoute,
   MinhaContaPedidosRoute: MinhaContaPedidosRoute,
 }

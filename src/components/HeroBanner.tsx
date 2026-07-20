@@ -66,7 +66,7 @@ export function HeroBanner() {
         interval={carouselInterval}
         onNext={nextSlide}
       />
-      <div className="group relative overflow-hidden bg-brand-black min-h-[260px] sm:min-h-[350px] lg:h-[450px] max-h-[420px] sm:max-h-none flex items-center rounded-lg">
+      <div className="group relative overflow-hidden bg-brand-black min-h-[260px] sm:min-h-[350px] lg:h-[450px] sm:max-h-none flex items-center rounded-lg">
         <img
           src={(isMobile && displayBanner?.mobileImage) ? displayBanner.mobileImage : (displayBanner?.image || defaultHeroImg)}
           alt={displayBanner?.title || ""}

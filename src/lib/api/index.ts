@@ -5,3 +5,5 @@ export * from "./reviews";
 export * from "./combos";
 export * from "./addresses";
 export * from "./payment-methods";
+export * from "./notifications";
+export * from "./user-preferences";

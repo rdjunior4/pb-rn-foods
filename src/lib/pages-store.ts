@@ -198,8 +198,29 @@ export function savePage(page: StaticPage): void {
   savePages(pages);
 }
 
+export async function apiSavePage(page: StaticPage): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) { savePage(page); return; }
+  const { error } = await sb.from("pages").upsert({
+    slug: page.slug,
+    title: page.title,
+    content: page.content,
+    updated_at: page.updatedAt,
+  }, { onConflict: "slug" });
+  if (error) throw error;
+  savePage(page);
+}
+
 export function deletePage(slug: string): void {
   savePages(loadPages().filter((p) => p.slug !== slug));
+}
+
+export async function apiDeletePage(slug: string): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) { deletePage(slug); return; }
+  const { error } = await sb.from("pages").delete().eq("slug", slug);
+  if (error) throw error;
+  deletePage(slug);
 }
 
 // ============================================================
