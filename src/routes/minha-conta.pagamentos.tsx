@@ -6,6 +6,7 @@ import { useCustomerPayments, useSavePaymentMethod, useDeletePaymentMethod, useS
 import { detectCardBrand } from "@/lib/api/payment-methods";
 import type { SavedPaymentMethod, PaymentType } from "@/lib/types";
 import { toast } from "sonner";
+import { LogIn } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -132,11 +133,13 @@ function PaymentsPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <CreditCard className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h2 className="text-lg font-bold mb-2">Acesse sua conta</h2>
-          <p className="text-sm text-muted-foreground mb-4">Faca login para gerenciar suas formas de pagamento.</p>
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
-            <ChevronLeft className="h-4 w-4" /> Voltar
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-muted/50 mb-6">
+            <CreditCard className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">Acesse sua conta</h2>
+          <p className="text-sm text-muted-foreground mb-6">Faça login para gerenciar suas formas de pagamento.</p>
+          <Link to="/minha-conta" className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-all">
+            <LogIn className="h-4 w-4" /> Ir para Minha Conta
           </Link>
         </div>
       </div>
