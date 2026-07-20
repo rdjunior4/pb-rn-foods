@@ -8,6 +8,7 @@ interface ProductSectionProps {
   subtitle?: string;
   linkLabel?: string;
   linkTo?: string;
+  linkSearch?: Record<string, string>;
   products: Product[];
   variant?: "default" | "alt" | "featured";
 }
@@ -17,6 +18,7 @@ export function ProductSection({
   subtitle,
   linkLabel = "Ver tudo",
   linkTo = "/",
+  linkSearch,
   products,
   variant = "default",
 }: ProductSectionProps) {
@@ -49,6 +51,7 @@ export function ProductSection({
           {linkLabel && (
             <Link
               to={linkTo}
+              search={linkSearch}
               className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary-hover whitespace-nowrap transition-colors shrink-0"
             >
               <span>{linkLabel}</span>

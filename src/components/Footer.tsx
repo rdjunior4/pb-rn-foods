@@ -1,26 +1,25 @@
-import { MapPin, Phone, Mail, Clock, Instagram, Facebook, Youtube, Linkedin, ChevronRight } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Instagram, Youtube, Linkedin, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { useCategories } from "@/lib/hooks";
 
 const helpers = [
-  { label: "Sobre nós", to: "/pagina/sobre" },
-  { label: "Perguntas frequentes", to: "/pagina/faq" },
-  { label: "Termos e condições", to: "/pagina/termos" },
-  { label: "Política de privacidade", to: "/pagina/privacidade" },
+  { label: "Sobre nós", slug: "sobre" },
+  { label: "Perguntas frequentes", slug: "faq" },
+  { label: "Termos e condições", slug: "termos" },
+  { label: "Política de privacidade", slug: "privacidade" },
+  { label: "Troca e devolução", slug: "troca-e-devolucao" },
 ];
 
 const business = [
   { label: "Cadastro CNPJ", to: "/entrar", search: { tab: "register" as const, redirect: "/" } },
-  { label: "Compras no atacado", to: "#" },
-  { label: "Lista de desejos", to: "#" },
-  { label: "Indique e ganhe", to: "#" },
-  { label: "Programa de fidelidade", to: "#" },
+  { label: "Compras no atacado", to: "/buscar", search: { q: "atacado" } },
+  { label: "Lista de desejos", to: "/favoritos" },
+  { label: "Minha conta", to: "/minha-conta" },
 ];
 
 const social = [
   { icon: Instagram, href: "https://www.instagram.com/pbfoodsdistribuidora/", label: "Instagram" },
-  { icon: Facebook, href: "#", label: "Facebook" },
   { icon: Youtube, href: "https://www.youtube.com/watch?v=tlER4WXP6CU", label: "Youtube" },
   { icon: Linkedin, href: "https://uk.linkedin.com/company/pb-foods", label: "LinkedIn" },
 ];
@@ -100,7 +99,7 @@ export function Footer() {
             <ul className="space-y-3">
               {helpers.map((h) => (
                 <li key={h.label}>
-                  <Link to={h.to} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
+                  <Link to="/pagina/$slug" params={{ slug: h.slug }} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
                     <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
                     {h.label}
                   </Link>

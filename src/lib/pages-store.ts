@@ -130,6 +130,52 @@ Os dados são armazenados de forma segura. Senhas são criptografadas e nunca co
 Você pode solicitar a exclusão dos seus dados a qualquer momento entrando em contato conosco.`,
     updatedAt: new Date().toISOString(),
   },
+  {
+    slug: "troca-e-devolucao",
+    title: "Troca e Devolução",
+    content: `## Política de Troca e Devolução
+
+Saiba como funciona o processo de troca e devolução de produtos na PB&RN Foods.
+
+## Prazo para solicitação
+
+O cliente tem até **7 dias corridos** após o recebimento do produto para solicitar troca ou devolução, conforme o Art. 49 do Código de Defesa do Consumidor (CDC).
+
+## Condições para devolução
+
+- O produto deve estar **sem danos** e na embalagem original
+- Produtos **perecíveis** não podem ser devolvidos após a abertura
+- É necessário apresentar a **nota fiscal** ou comprovante de compra
+- Produtos com **vício de fabricação** podem ser devolvidos em até 30 dias
+
+## Como solicitar
+
+1. **Entre em contato** conosco pelo telefone (83) 99999-9999 ou e-mail contato@pbrnfoods.com.br
+2. **Informe** o número do pedido, motivo da devolução e fotos do produto
+3. **Aguarde** a análise da nossa equipe (prazo de até 3 dias úteis)
+4. **Devolução** — caso aprovada, o produto será coletado sem custo adicional
+
+## Reembolso
+
+- **Pix ou cartão de crédito**: reembolso em até 7 dias úteis
+- **Boleto bancário**: reembolso via depósito em conta (prazo de até 15 dias úteis)
+- **Crédito na loja**: disponibilizado imediatamente após a aprovação
+
+## Troca de produto
+
+Se preferir trocar por outro produto, nossa equipe irá auxiliá-lo na escolha de um item equivalente com valor igual ou superior (com complemento de diferença, se aplicável).
+
+## Produtos com defeito
+
+Produtos com defeito de fabricação são cobertos pela garantia do fabricante. Entre em contato conosco para iniciar o processo de substituição.
+
+## Contato
+
+- **Telefone**: (83) 99999-9999
+- **E-mail**: contato@pbrnfoods.com.br
+- **Horário**: Seg a Sex: 6h - 18h | Sáb: 6h - 12h`,
+    updatedAt: new Date().toISOString(),
+  },
 ];
 
 export function loadPages(): StaticPage[] {

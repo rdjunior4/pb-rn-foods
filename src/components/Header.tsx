@@ -360,7 +360,7 @@ export function Header() {
                   </a>
                 </SheetClose>
                 <SheetClose asChild>
-                  <Link to="/buscar" search={{ q: "oferta" }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                  <Link to="/pagina/$slug" params={{ slug: "troca-e-devolucao" }} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors">
                     <ShieldCheck className="h-4 w-4" />
                     Troca e devolução
                   </Link>

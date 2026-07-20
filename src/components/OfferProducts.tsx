@@ -9,7 +9,8 @@ export function OfferProducts() {
       title="Ofertas para o seu negócio"
       subtitle="Condições exclusivas válidas por tempo limitado"
       linkLabel="Ver todas as ofertas"
-      linkTo="/buscar?q=oferta"
+      linkTo="/buscar"
+      linkSearch={{ q: "oferta" }}
       products={offerProducts}
       variant="featured"
     />

@@ -67,7 +67,8 @@ function renderSection(
           title={section.title || "Ofertas para o seu negócio"}
           subtitle={section.subtitle || "Condições exclusivas válidas por tempo limitado"}
           linkLabel="Ver todas as ofertas"
-          linkTo="/buscar?q=oferta"
+          linkTo="/buscar"
+          linkSearch={{ q: "oferta" }}
           products={offerProducts}
           variant={section.variant === "featured" ? "featured" : (section.variant as "default" | "alt") || "featured"}
         />

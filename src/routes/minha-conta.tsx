@@ -29,7 +29,7 @@ const sections: { title: string; items: SectionItem[] }[] = [
   {
     title: "Pedidos",
     items: [
-      { icon: Package, label: "Meus pedidos", desc: "Acompanhe suas compras" },
+      { icon: Package, label: "Meus pedidos", desc: "Acompanhe suas compras", route: "/minha-conta/pedidos" },
       { icon: ShoppingCart, label: "Carrinhos salvos", desc: "Retome compras pendentes", route: "/carrinho" },
     ],
   },
@@ -37,7 +37,6 @@ const sections: { title: string; items: SectionItem[] }[] = [
     title: "Favoritos",
     items: [
       { icon: Heart, label: "Lista de desejos", desc: "Produtos favoritados", route: "/favoritos" },
-      { icon: TrendingUp, label: "Produtos vistos", desc: "Últimas visualizações" },
     ],
   },
   {
@@ -51,7 +50,7 @@ const sections: { title: string; items: SectionItem[] }[] = [
   {
     title: "Suporte",
     items: [
-      { icon: HelpCircle, label: "Central de ajuda", desc: "Tire suas dúvidas" },
+      { icon: HelpCircle, label: "Central de ajuda", desc: "Tire suas dúvidas", route: "/pagina/faq" },
       { icon: Bell, label: "Notificações", desc: "Alertas de pedidos e ofertas" },
       { icon: Settings, label: "Configurações", desc: "Preferências da conta" },
     ],
@@ -223,7 +222,7 @@ function AccountPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Pedidos recentes</h3>
-            <button onClick={() => navigate({ to: "/minha-conta" })} className="text-xs text-primary font-medium hover:underline">Ver todos</button>
+            <button onClick={() => navigate({ to: "/minha-conta/pedidos" })} className="text-xs text-primary font-medium hover:underline">Ver todos</button>
           </div>
           <div className="space-y-3">
             {myOrders.slice(0, 3).map((order) => (

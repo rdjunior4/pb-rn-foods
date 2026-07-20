@@ -24,7 +24,8 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
 
   const total = items.reduce((sum, item) => {
     const product = productMap.get(item.productId);
-    return sum + (product ? product.price * item.quantity : 0);
+    const price = item.unitPrice || product?.price || 0;
+    return sum + price * item.quantity;
   }, 0);
 
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);

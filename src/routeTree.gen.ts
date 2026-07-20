@@ -22,6 +22,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as PedidoIdRouteImport } from './routes/pedido.$id'
 import { Route as PaginaSlugRouteImport } from './routes/pagina.$slug'
+import { Route as MinhaContaPedidosRouteImport } from './routes/minha-conta.pedidos'
 import { Route as MinhaContaPagamentosRouteImport } from './routes/minha-conta.pagamentos'
 import { Route as MinhaContaEnderecosRouteImport } from './routes/minha-conta.enderecos'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
@@ -106,6 +107,11 @@ const PaginaSlugRoute = PaginaSlugRouteImport.update({
   id: '/pagina/$slug',
   path: '/pagina/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const MinhaContaPedidosRoute = MinhaContaPedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => MinhaContaRoute,
 } as any)
 const MinhaContaPagamentosRoute = MinhaContaPagamentosRouteImport.update({
   id: '/pagamentos',
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/minha-conta/enderecos': typeof MinhaContaEnderecosRoute
   '/minha-conta/pagamentos': typeof MinhaContaPagamentosRoute
+  '/minha-conta/pedidos': typeof MinhaContaPedidosRoute
   '/pagina/$slug': typeof PaginaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/minha-conta/enderecos': typeof MinhaContaEnderecosRoute
   '/minha-conta/pagamentos': typeof MinhaContaPagamentosRoute
+  '/minha-conta/pedidos': typeof MinhaContaPedidosRoute
   '/pagina/$slug': typeof PaginaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -298,6 +306,7 @@ export interface FileRoutesById {
   '/categoria/$slug': typeof CategoriaSlugRoute
   '/minha-conta/enderecos': typeof MinhaContaEnderecosRoute
   '/minha-conta/pagamentos': typeof MinhaContaPagamentosRoute
+  '/minha-conta/pedidos': typeof MinhaContaPedidosRoute
   '/pagina/$slug': typeof PaginaSlugRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produto/$slug': typeof ProdutoSlugRoute
@@ -334,6 +343,7 @@ export interface FileRouteTypes {
     | '/categoria/$slug'
     | '/minha-conta/enderecos'
     | '/minha-conta/pagamentos'
+    | '/minha-conta/pedidos'
     | '/pagina/$slug'
     | '/pedido/$id'
     | '/produto/$slug'
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/categoria/$slug'
     | '/minha-conta/enderecos'
     | '/minha-conta/pagamentos'
+    | '/minha-conta/pedidos'
     | '/pagina/$slug'
     | '/pedido/$id'
     | '/produto/$slug'
@@ -401,6 +412,7 @@ export interface FileRouteTypes {
     | '/categoria/$slug'
     | '/minha-conta/enderecos'
     | '/minha-conta/pagamentos'
+    | '/minha-conta/pedidos'
     | '/pagina/$slug'
     | '/pedido/$id'
     | '/produto/$slug'
@@ -517,6 +529,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pagina/$slug'
       preLoaderRoute: typeof PaginaSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/minha-conta/pedidos': {
+      id: '/minha-conta/pedidos'
+      path: '/pedidos'
+      fullPath: '/minha-conta/pedidos'
+      preLoaderRoute: typeof MinhaContaPedidosRouteImport
+      parentRoute: typeof MinhaContaRoute
     }
     '/minha-conta/pagamentos': {
       id: '/minha-conta/pagamentos'
@@ -709,11 +728,13 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface MinhaContaRouteChildren {
   MinhaContaEnderecosRoute: typeof MinhaContaEnderecosRoute
   MinhaContaPagamentosRoute: typeof MinhaContaPagamentosRoute
+  MinhaContaPedidosRoute: typeof MinhaContaPedidosRoute
 }
 
 const MinhaContaRouteChildren: MinhaContaRouteChildren = {
   MinhaContaEnderecosRoute: MinhaContaEnderecosRoute,
   MinhaContaPagamentosRoute: MinhaContaPagamentosRoute,
+  MinhaContaPedidosRoute: MinhaContaPedidosRoute,
 }
 
 const MinhaContaRouteWithChildren = MinhaContaRoute._addFileChildren(
