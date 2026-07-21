@@ -55,9 +55,9 @@ export function NotificationBell() {
         onMouseEnter={triggerShake}
         aria-label="Notificacoes"
         className={cn(
-          "group/bell relative h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-200",
-          "bg-gradient-to-br from-amber-400/10 to-orange-400/10 border border-amber-400/20",
-          "hover:from-amber-400/20 hover:to-orange-400/20 hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-400/10",
+          "group/bell relative h-10 w-10 rounded-lg flex items-center justify-center transition-all duration-200",
+          "border border-amber-400/20",
+          "hover:border-amber-400/40 hover:bg-amber-400/5 hover:shadow-lg hover:shadow-amber-400/10",
           "active:scale-90",
           shaking && "animate-bell-shake"
         )}
