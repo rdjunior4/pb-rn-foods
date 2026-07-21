@@ -25,7 +25,7 @@ export function ProductSection({
   const isFeatured = variant === "featured";
 
   return (
-    <section className={`${variant === "alt" ? "mt-14" : "mt-10"} px-4 sm:px-6 lg:px-[30px]`}>
+    <section className={`${variant === "alt" ? "mt-14" : "mt-10"} px-6 sm:px-10 lg:px-[48px]`}>
       <div className={`mx-auto max-w-[1400px] ${isFeatured ? "rounded-lg border-2 border-primary/20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent p-4 sm:p-6 shadow-sm" : ""}`}>
         {/* ─── Header ─── */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-5 sm:mb-6">
