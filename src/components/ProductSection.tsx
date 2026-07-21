@@ -61,10 +61,14 @@ export function ProductSection({
         </div>
 
         {/* ─── Grid ─── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3 lg:gap-4">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
+        <div className="overflow-x-auto no-scrollbar sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0">
+          <div className="flex gap-2.5 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3 lg:gap-4 w-max sm:w-auto">
+            {products.map((p) => (
+              <div key={p.id} className="w-[160px] sm:w-auto shrink-0 sm:shrink">
+                <ProductCard product={p} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
