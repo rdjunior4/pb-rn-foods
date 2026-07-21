@@ -106,6 +106,9 @@ export function useSaveProduct() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
+      qc.invalidateQueries({ queryKey: queryKeys.products.all });
+      qc.invalidateQueries({ queryKey: queryKeys.categories.all });
+      qc.invalidateQueries({ queryKey: queryKeys.brands.all });
     },
   });
 }
@@ -122,6 +125,7 @@ export function useDeleteProduct() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
+      qc.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }
@@ -138,6 +142,7 @@ export function useBulkDeleteProducts() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
+      qc.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }

@@ -57,10 +57,10 @@ export function ProductForm({
   onDuplicate,
 }: ProductFormProps) {
   const [allImages, setAllImages] = useState<string[]>(
-    existingImage
-      ? [existingImage, ...existingImages]
-      : existingImages.length > 0
-        ? existingImages
+    existingImages.length > 0
+      ? existingImages
+      : existingImage
+        ? [existingImage]
         : []
   );
   const [savedTiers, setSavedTiers] = useState<Set<string>>(new Set());

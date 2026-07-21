@@ -59,7 +59,7 @@ function renderSection(
 
     case "offer-products": {
       const offerProducts = products
-        .filter((p) => p.discount && p.discount >= 10)
+        .filter((p) => (p.discount && p.discount >= 10) || p.featured)
         .slice(0, section.maxProducts || 6);
       return (
         <ProductSection

@@ -3,7 +3,7 @@ import { useProducts } from "@/lib/hooks";
 
 export function OfferProducts() {
   const { data: products = [] } = useProducts();
-  const offerProducts = products.filter((p) => p.discount && p.discount >= 10).slice(0, 6);
+  const offerProducts = products.filter((p) => (p.discount && p.discount >= 10) || p.featured).slice(0, 6);
   return (
     <ProductSection
       title="Ofertas para o seu negócio"
