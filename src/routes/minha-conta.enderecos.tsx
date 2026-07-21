@@ -236,8 +236,8 @@ function AddressesPage() {
         )}
 
         {showForm && (
-          <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={closeForm}>
-            <div className="w-full max-w-[900px] max-h-[85vh] sm:max-h-[90vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-xl animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:p-4" onClick={closeForm}>
+            <div className="w-full sm:max-w-[900px] sm:max-h-[90vh] max-h-[92vh] bg-card shadow-2xl outline outline-border/40 outline-1 flex flex-col lg:flex-row overflow-hidden rounded-t-xl sm:rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-200" onClick={(e) => e.stopPropagation()}>
               {/* Sidebar branding - desktop */}
               <div className="hidden lg:flex lg:w-[35%] shrink-0 flex-col items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-primary p-8 text-primary-foreground">
                 <div className="flex flex-col items-center text-center gap-4">
@@ -279,11 +279,11 @@ function AddressesPage() {
               </div>
 
               {/* Form panel */}
-              <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+              <div className="flex-1 min-h-0 flex flex-col overflow-y-auto" style={{ WebkitOverflowScrolling: "touch" }}>
                 <button onClick={closeForm} className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-muted/50 items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors hidden max-lg:hidden lg:flex">
                   <X className="h-4 w-4" />
                 </button>
-                <div className="p-5 sm:p-6 space-y-3 flex-1">
+                <div className="p-5 sm:p-6 space-y-3 flex-1 pb-8 sm:pb-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Apelido</label>
@@ -335,11 +335,11 @@ function AddressesPage() {
                     <span className="text-sm font-medium">Definir como endereco padrao</span>
                   </label>
                 </div>
-                <div className="px-5 sm:px-6 pb-5 sm:pb-6 flex gap-3 border-t border-border/40 pt-4">
-                  <button onClick={closeForm} className="flex-1 h-10 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all">
+                <div className="px-5 sm:px-6 pb-6 sm:pb-6 flex gap-3 border-t border-border/40 pt-4 sticky bottom-0 bg-card">
+                  <button onClick={closeForm} className="flex-1 h-11 sm:h-10 rounded-lg border border-border/60 text-sm font-semibold text-foreground hover:bg-muted/50 transition-all">
                     Cancelar
                   </button>
-                  <button onClick={handleSave} disabled={saveAddress.isPending} className="flex-1 h-10 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover transition-all disabled:opacity-50 shadow-lg shadow-primary/20">
+                  <button onClick={handleSave} disabled={saveAddress.isPending} className="flex-1 h-11 sm:h-10 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover transition-all disabled:opacity-50 shadow-lg shadow-primary/20">
                     {saveAddress.isPending ? "Salvando..." : "Salvar"}
                   </button>
                 </div>
