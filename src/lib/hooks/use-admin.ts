@@ -222,6 +222,7 @@ export function useSaveBrand() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.brands() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
+      qc.invalidateQueries({ queryKey: queryKeys.brands.all });
     },
   });
 }
@@ -238,6 +239,7 @@ export function useDeleteBrand() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.brands() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
+      qc.invalidateQueries({ queryKey: queryKeys.brands.all });
     },
   });
 }
@@ -308,6 +310,7 @@ export function useSaveCoupon() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.coupons() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -321,6 +324,7 @@ export function useDeleteCoupon() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.coupons() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
     },
   });
 }
@@ -396,6 +400,7 @@ export function useAdjustStock() {
       qc.invalidateQueries({ queryKey: queryKeys.admin.stock() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.products() });
       qc.invalidateQueries({ queryKey: queryKeys.admin.store() });
+      qc.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }
@@ -483,6 +488,7 @@ export function useSaveCombo() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.combos() });
+      qc.invalidateQueries({ queryKey: queryKeys.combos.all });
     },
   });
 }
@@ -496,6 +502,7 @@ export function useDeleteCombo() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.admin.combos() });
+      qc.invalidateQueries({ queryKey: queryKeys.combos.all });
     },
   });
 }
