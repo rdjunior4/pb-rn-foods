@@ -79,7 +79,7 @@ function renderSection(
       if (!section.categorySlug) return null;
       const cat = categories.find((c) => c.slug === section.categorySlug);
       if (!cat) return null;
-      const catProducts = products.filter((p) => p.categoryId === cat.id).slice(0, section.maxProducts || 6);
+      const catProducts = products.filter((p) => p.categoryId === cat.id || p.categoryIds?.includes(cat.id)).slice(0, section.maxProducts || 6);
       return (
         <ProductSection
           key={section.id}

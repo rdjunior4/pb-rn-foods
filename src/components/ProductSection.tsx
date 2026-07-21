@@ -25,10 +25,10 @@ export function ProductSection({
   const isFeatured = variant === "featured";
 
   return (
-    <section className={`mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] ${variant === "alt" ? "mt-14" : "mt-10"}`}>
-      <div className={isFeatured ? "rounded-lg border-2 border-primary/20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent p-4 sm:p-6 shadow-sm" : ""}>
+    <section className={`${variant === "alt" ? "mt-14" : "mt-10"}`}>
+      <div className={`mx-auto max-w-[1400px] ${isFeatured ? "px-4 sm:px-6 lg:px-[30px] rounded-lg border-2 border-primary/20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent p-4 sm:p-6 shadow-sm" : ""}`}>
         {/* ─── Header ─── */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-5 sm:mb-6">
+        <div className={`flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-5 sm:mb-6 ${isFeatured ? "" : "px-4 sm:px-6 lg:px-[30px]"}`}>
           <div className="flex items-center gap-2.5">
             {isFeatured && (
               <span className="h-8 w-1 rounded-full bg-gradient-to-b from-primary to-primary-hover shrink-0" />
@@ -61,8 +61,8 @@ export function ProductSection({
         </div>
 
         {/* ─── Grid ─── */}
-        <div className="overflow-x-auto no-scrollbar sm:overflow-visible -mx-4 sm:mx-0 px-4 sm:px-0">
-          <div className="flex gap-2.5 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3 lg:gap-4 w-max sm:w-auto">
+        <div className="overflow-x-auto no-scrollbar sm:overflow-visible">
+          <div className={`flex gap-2.5 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3 lg:gap-4 w-max sm:w-auto ${isFeatured ? "" : "px-4 sm:px-6 lg:px-[30px]"}`}>
             {products.map((p) => (
               <div key={p.id} className="w-[160px] sm:w-auto shrink-0 sm:shrink">
                 <ProductCard product={p} />
