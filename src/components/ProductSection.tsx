@@ -26,9 +26,9 @@ export function ProductSection({
 
   return (
     <section className={`${variant === "alt" ? "mt-14" : "mt-10"}`}>
-      <div className={`mx-auto max-w-[1400px] ${isFeatured ? "px-4 sm:px-6 lg:px-[30px] rounded-lg border-2 border-primary/20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent p-4 sm:p-6 shadow-sm" : ""}`}>
+      <div className={`mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] ${isFeatured ? "rounded-lg border-2 border-primary/20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-transparent p-4 sm:p-6 shadow-sm" : ""}`}>
         {/* ─── Header ─── */}
-        <div className={`flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-5 sm:mb-6 ${isFeatured ? "" : "px-4 sm:px-6 lg:px-[30px]"}`}>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4 mb-5 sm:mb-6">
           <div className="flex items-center gap-2.5">
             {isFeatured && (
               <span className="h-8 w-1 rounded-full bg-gradient-to-b from-primary to-primary-hover shrink-0" />
@@ -62,7 +62,7 @@ export function ProductSection({
 
         {/* ─── Grid ─── */}
         <div className="overflow-x-auto no-scrollbar sm:overflow-visible">
-          <div className={`flex gap-3 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3 lg:gap-4 w-max sm:w-auto ${isFeatured ? "pl-4 pr-4 sm:pl-0 sm:pr-0" : "px-4 sm:px-6 lg:px-[30px]"}`}>
+          <div className={`flex gap-3 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3 lg:gap-4 w-max sm:w-auto`}>
             {products.map((p) => (
               <div key={p.id} className="w-[44vw] sm:w-auto shrink-0 sm:shrink">
                 <ProductCard product={p} />
