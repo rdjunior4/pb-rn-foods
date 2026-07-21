@@ -21,36 +21,66 @@ import {
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useCategories, useProducts } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/format";
 
 interface SearchInputProps {
   className?: string;
-  search: string;
-  setSearch: (v: string) => void;
+  onSearch: (q: string) => void;
   searchFocused: boolean;
   setSearchFocused: (v: boolean) => void;
-  suggestions: ReturnType<typeof useProducts>["data"] extends (infer T)[] ? T[] : never;
-  handleSearch: (e: React.FormEvent) => void;
-  handleSuggestionClick: (slug: string) => void;
+  onSuggestionClick: (slug: string) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
   searchRef: React.RefObject<HTMLDivElement | null>;
+  allProducts: Product[];
 }
 
-function SearchInput({ className = "", search, setSearch, searchFocused, suggestions, handleSearch, handleSuggestionClick, inputRef, searchRef }: SearchInputProps) {
+function SearchInput({ className = "", onSearch, searchFocused, setSearchFocused, onSuggestionClick, inputRef, searchRef, allProducts }: SearchInputProps) {
+  const [localValue, setLocalValue] = useState("");
+  const navigate = useNavigate();
+
+  const suggestions = useMemo(() => {
+    if (!localValue.trim() || localValue.trim().length < 2) return [];
+    const q = localValue.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return allProducts
+      .filter((p) => {
+        const name = p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const brand = (p.brand || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return name.includes(q) || brand.includes(q);
+      })
+      .slice(0, 6);
+  }, [localValue, allProducts]);
+
   const showSuggestions = searchFocused && suggestions.length > 0;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (localValue.trim()) {
+      onSearch(localValue.trim());
+      setSearchFocused(false);
+      inputRef.current?.blur();
+    }
+  };
+
+  const handleSuggestionClick = useCallback((slug: string) => {
+    setSearchFocused(false);
+    onSuggestionClick(slug);
+  }, [setSearchFocused, onSuggestionClick]);
+
   return (
     <div className={`relative ${className}`} ref={searchRef}>
-      <form onSubmit={handleSearch}>
+      <form onSubmit={handleSubmit}>
         <input
           ref={inputRef}
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          type="text"
+          inputMode="search"
+          autoComplete="off"
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
           onFocus={() => setSearchFocused(true)}
           placeholder="Buscar produtos, marcas..."
-          className="w-full h-10 rounded border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20 transition-all"
+          className="w-full h-10 rounded border border-white/10 bg-white/5 pl-4 pr-10 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/50 focus:bg-white/10 focus:ring-2 focus:ring-primary/20"
         />
         <button
           type="submit"
@@ -92,11 +122,11 @@ function SearchInput({ className = "", search, setSearch, searchFocused, suggest
           </div>
           <div className="border-t border-border/40 px-3 py-2">
             <button
-              onClick={handleSearch}
+              onClick={handleSubmit}
               className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-hover transition-colors"
             >
               <Search className="h-3 w-3" />
-              Ver todos os resultados para "{search}"
+              Ver todos os resultados para "{localValue}"
             </button>
           </div>
         </div>
@@ -111,7 +141,6 @@ export function Header() {
   const navigate = useNavigate();
   const { data: categories = [] } = useCategories();
   const { data: allProducts = [] } = useProducts();
-  const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -141,26 +170,9 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const suggestions = useMemo(() => {
-    if (!search.trim() || search.trim().length < 2) return [];
-    const q = search.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return allProducts
-      .filter((p) => {
-        const name = p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const brand = (p.brand || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return name.includes(q) || brand.includes(q);
-      })
-      .slice(0, 6);
-  }, [search, allProducts]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (search.trim()) {
-      navigate({ to: "/buscar", search: { q: search.trim() } });
-      setSearchFocused(false);
-      inputRef.current?.blur();
-    }
-  };
+  const handleSearch = useCallback((q: string) => {
+    navigate({ to: "/buscar", search: { q } });
+  }, [navigate]);
 
   const handleSuggestionClick = useCallback((slug: string) => {
     setSearchFocused(false);
@@ -194,15 +206,13 @@ export function Header() {
 
           <SearchInput
             className="hidden sm:block flex-1 mx-4 lg:mx-8"
-            search={search}
-            setSearch={setSearch}
+            onSearch={handleSearch}
             searchFocused={searchFocused}
             setSearchFocused={setSearchFocused}
-            suggestions={suggestions}
-            handleSearch={handleSearch}
-            handleSuggestionClick={handleSuggestionClick}
+            onSuggestionClick={handleSuggestionClick}
             inputRef={inputRef}
             searchRef={searchRef}
+            allProducts={allProducts}
           />
 
           <div className="flex items-center gap-2">
@@ -305,15 +315,13 @@ export function Header() {
 
         <SearchInput
           className="sm:hidden mt-3"
-          search={search}
-          setSearch={setSearch}
+          onSearch={handleSearch}
           searchFocused={searchFocused}
           setSearchFocused={setSearchFocused}
-          suggestions={suggestions}
-          handleSearch={handleSearch}
-          handleSuggestionClick={handleSuggestionClick}
+          onSuggestionClick={handleSuggestionClick}
           inputRef={inputRef}
           searchRef={searchRef}
+          allProducts={allProducts}
         />
       </div>
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
