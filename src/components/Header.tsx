@@ -21,7 +21,7 @@ import {
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useCategories, useProducts } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/format";
 
