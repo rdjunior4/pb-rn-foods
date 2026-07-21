@@ -62,9 +62,9 @@ export function ProductSection({
 
         {/* ─── Grid ─── */}
         <div className="overflow-x-auto no-scrollbar sm:overflow-visible">
-          <div className={`flex gap-2.5 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3 lg:gap-4 w-max sm:w-auto ${isFeatured ? "" : "px-4 sm:px-6 lg:px-[30px]"}`}>
+          <div className={`flex gap-3 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-3 lg:gap-4 w-max sm:w-auto ${isFeatured ? "" : "px-4 sm:px-6 lg:px-[30px]"}`}>
             {products.map((p) => (
-              <div key={p.id} className="w-[160px] sm:w-auto shrink-0 sm:shrink">
+              <div key={p.id} className="w-[44vw] sm:w-auto shrink-0 sm:shrink">
                 <ProductCard product={p} />
               </div>
             ))}
