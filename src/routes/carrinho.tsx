@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trash2, ShoppingBag, ArrowLeft, Minus, Plus, Package, ArrowRight, Loader2 } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowLeft, Minus, Plus, Package, ArrowRight, Loader2, ChevronLeft, LogIn } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useProducts } from "@/lib/hooks";
+import { useAuth } from "@/lib/auth-context";
 import { CustomerLayout } from "@/components/CustomerLayout";
 import { formatCurrency } from "@/lib/format";
 
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/carrinho")({
 });
 
 function CartPage() {
+  const { user } = useAuth();
   const { items, totalItems, addItem, removeItem, updateQuantity, clearCart } = useCart();
   const { data: products = [], isLoading } = useProducts();
   const productMap = new Map(products.map((p) => [p.id, p]));
@@ -37,6 +39,25 @@ function CartPage() {
 
   const total = cartProducts.reduce((sum, p) => sum + p!.unitPrice * p!.quantity, 0);
 
+  if (!user) {
+    return (
+      <CustomerLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-muted/50 mb-6">
+              <ShoppingBag className="h-8 w-8 text-muted-foreground/40" />
+            </div>
+            <h2 className="text-xl font-bold mb-2">Acesse sua conta</h2>
+            <p className="text-sm text-muted-foreground mb-6">Faça login para acessar seu carrinho.</p>
+            <Link to="/minha-conta" className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary-hover transition-all">
+              <LogIn className="h-4 w-4" /> Ir para Minha Conta
+            </Link>
+          </div>
+        </div>
+      </CustomerLayout>
+    );
+  }
+
   if (isLoading) {
     return (
       <CustomerLayout>
@@ -50,19 +71,18 @@ function CartPage() {
   if (items.length === 0) {
     return (
       <CustomerLayout>
-        <div className="text-center py-24">
-          <div className="inline-flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-muted/50 to-muted mb-8">
-            <ShoppingBag className="h-12 w-12 text-muted-foreground/40" />
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <div className="text-center py-16 rounded-xl border border-dashed border-border/60">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted/50 mb-4">
+              <ShoppingBag className="h-7 w-7 text-muted-foreground/40" />
+            </div>
+            <p className="text-sm font-semibold mb-1">Carrinho vazio</p>
+            <p className="text-xs text-muted-foreground mb-5">Adicione produtos para começar suas compras.</p>
+            <Link to="/" className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary-hover transition-all">
+              Explorar produtos
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Carrinho vazio</h1>
-          <p className="text-muted-foreground mb-8 max-w-sm mx-auto">Adicione produtos para começar suas compras</p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-8 py-3.5 font-semibold hover:bg-primary-hover transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
-          >
-            Explorar produtos
-            <ArrowRight className="h-4 w-4" />
-          </Link>
         </div>
       </CustomerLayout>
     );
@@ -70,12 +90,15 @@ function CartPage() {
 
   return (
     <CustomerLayout>
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
-        <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Carrinho</h1>
-          <p className="text-muted-foreground text-sm mt-1">{totalItems} {totalItems === 1 ? "item" : "itens"} no carrinho</p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <Link to="/minha-conta" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-2">
+              <ChevronLeft className="h-3 w-3" /> Minha conta
+            </Link>
+            <h1 className="text-2xl font-extrabold tracking-tight">Carrinho</h1>
+            <p className="text-sm text-muted-foreground mt-1">{totalItems} {totalItems === 1 ? "item" : "itens"} no carrinho</p>
+          </div>
           <button
             onClick={clearCart}
             className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-border/40 text-xs font-medium px-3 sm:px-4 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
@@ -83,15 +106,7 @@ function CartPage() {
             <Trash2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Limpar</span>
           </button>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 h-9 rounded-lg border border-border/40 text-xs font-medium px-3 sm:px-4 hover:bg-muted transition-colors"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Continuar</span>
-          </Link>
         </div>
-      </div>
 
       <div className="grid lg:grid-cols-[1fr_380px] gap-8">
         <div className="space-y-4">
@@ -191,6 +206,7 @@ function CartPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </CustomerLayout>
   );
