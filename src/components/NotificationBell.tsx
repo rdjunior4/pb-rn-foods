@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useNotifications, useUnreadNotificationCount, useMarkNotificationRead, useMarkAllNotificationsRead } from "@/lib/hooks";
 import type { NotificationType } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const TYPE_ICONS: Record<NotificationType, typeof Bell> = {
   order_update: Package,
@@ -27,6 +28,7 @@ export function NotificationBell() {
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
   const [open, setOpen] = useState(false);
+  const [shaking, setShaking] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const recent = notifications.slice(0, 5);
@@ -39,18 +41,30 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const triggerShake = () => {
+    setShaking(true);
+    setTimeout(() => setShaking(false), 600);
+  };
+
   if (!user) return null;
 
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => { setOpen(!open); triggerShake(); }}
+        onMouseEnter={triggerShake}
         aria-label="Notificacoes"
-        className="relative h-10 w-10 rounded-lg flex items-center justify-center text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10 transition-all animate-bell-shake"
+        className={cn(
+          "group/bell relative h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-200",
+          "bg-gradient-to-br from-amber-400/10 to-orange-400/10 border border-amber-400/20",
+          "hover:from-amber-400/20 hover:to-orange-400/20 hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-400/10",
+          "active:scale-90",
+          shaking && "animate-bell-shake"
+        )}
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-[18px] w-[18px] text-amber-400 group-hover/bell:text-amber-300 transition-colors" strokeWidth={2.2} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center animate-pulse">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white text-[9px] font-bold flex items-center justify-center shadow-md shadow-red-500/30 ring-2 ring-card">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
