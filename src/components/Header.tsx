@@ -25,71 +25,22 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useCategories, useProducts } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/format";
 
-export function Header() {
-  const { totalItems } = useCart();
-  const { user, isLoggedIn, logout } = useAuth();
-  const navigate = useNavigate();
-  const { data: categories = [] } = useCategories();
-  const { data: allProducts = [] } = useProducts();
-  const [search, setSearch] = useState("");
-  const [scrolled, setScrolled] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authTab, setAuthTab] = useState<"login" | "register">("login");
-  const [searchFocused, setSearchFocused] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+interface SearchInputProps {
+  className?: string;
+  search: string;
+  setSearch: (v: string) => void;
+  searchFocused: boolean;
+  setSearchFocused: (v: boolean) => void;
+  suggestions: ReturnType<typeof useProducts>["data"] extends (infer T)[] ? T[] : never;
+  handleSearch: (e: React.FormEvent) => void;
+  handleSuggestionClick: (slug: string) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  searchRef: React.RefObject<HTMLDivElement | null>;
+}
 
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
-
-  useEffect(() => {
-    dispatchAuthModalEvent(authOpen);
-  }, [authOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setSearchFocused(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const suggestions = useMemo(() => {
-    if (!search.trim() || search.trim().length < 2) return [];
-    const q = search.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return allProducts
-      .filter((p) => {
-        const name = p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const brand = (p.brand || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return name.includes(q) || brand.includes(q);
-      })
-      .slice(0, 6);
-  }, [search, allProducts]);
-
+function SearchInput({ className = "", search, setSearch, searchFocused, suggestions, handleSearch, handleSuggestionClick, inputRef, searchRef }: SearchInputProps) {
   const showSuggestions = searchFocused && suggestions.length > 0;
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (search.trim()) {
-      navigate({ to: "/buscar", search: { q: search.trim() } });
-      setSearchFocused(false);
-      inputRef.current?.blur();
-    }
-  };
-
-  const handleSuggestionClick = useCallback((slug: string) => {
-    setSearchFocused(false);
-    navigate({ to: `/produto/${slug}` });
-  }, [navigate]);
-
-  const SearchInput = ({ className = "" }: { className?: string }) => (
+  return (
     <div className={`relative ${className}`} ref={searchRef}>
       <form onSubmit={handleSearch}>
         <input
@@ -152,6 +103,69 @@ export function Header() {
       )}
     </div>
   );
+}
+
+export function Header() {
+  const { totalItems } = useCart();
+  const { user, isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+  const { data: categories = [] } = useCategories();
+  const { data: allProducts = [] } = useProducts();
+  const [search, setSearch] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<"login" | "register">("login");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  useEffect(() => {
+    dispatchAuthModalEvent(authOpen);
+  }, [authOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const suggestions = useMemo(() => {
+    if (!search.trim() || search.trim().length < 2) return [];
+    const q = search.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return allProducts
+      .filter((p) => {
+        const name = p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const brand = (p.brand || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return name.includes(q) || brand.includes(q);
+      })
+      .slice(0, 6);
+  }, [search, allProducts]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate({ to: "/buscar", search: { q: search.trim() } });
+      setSearchFocused(false);
+      inputRef.current?.blur();
+    }
+  };
+
+  const handleSuggestionClick = useCallback((slug: string) => {
+    setSearchFocused(false);
+    navigate({ to: `/produto/${slug}` });
+  }, [navigate]);
 
   return (
     <>
@@ -178,7 +192,18 @@ export function Header() {
             </Link>
           </div>
 
-          <SearchInput className="hidden sm:block flex-1 mx-4 lg:mx-8" />
+          <SearchInput
+            className="hidden sm:block flex-1 mx-4 lg:mx-8"
+            search={search}
+            setSearch={setSearch}
+            searchFocused={searchFocused}
+            setSearchFocused={setSearchFocused}
+            suggestions={suggestions}
+            handleSearch={handleSearch}
+            handleSuggestionClick={handleSuggestionClick}
+            inputRef={inputRef}
+            searchRef={searchRef}
+          />
 
           <div className="flex items-center gap-2">
             <DropdownMenu>
@@ -254,8 +279,6 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {isLoggedIn && <NotificationBell />}
-
             <button
               onClick={() => setCartOpen(true)}
               className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded border border-border/40 hover:bg-white/5 transition-colors group relative shrink-0"
@@ -275,10 +298,23 @@ export function Header() {
                 </div>
               </div>
             </button>
+
+            {isLoggedIn && <NotificationBell />}
           </div>
         </div>
 
-        <SearchInput className="sm:hidden mt-3" />
+        <SearchInput
+          className="sm:hidden mt-3"
+          search={search}
+          setSearch={setSearch}
+          searchFocused={searchFocused}
+          setSearchFocused={setSearchFocused}
+          suggestions={suggestions}
+          handleSearch={handleSearch}
+          handleSuggestionClick={handleSuggestionClick}
+          inputRef={inputRef}
+          searchRef={searchRef}
+        />
       </div>
       <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
 

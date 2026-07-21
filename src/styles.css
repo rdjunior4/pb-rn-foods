@@ -223,4 +223,19 @@ select,
   .animate-pulse-marker {
     animation: pulse-marker 2s ease-in-out infinite;
   }
+
+  @keyframes bell-shake {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(12deg); }
+    20% { transform: rotate(-10deg); }
+    30% { transform: rotate(8deg); }
+    40% { transform: rotate(-6deg); }
+    50% { transform: rotate(4deg); }
+    60% { transform: rotate(-2deg); }
+    70% { transform: rotate(1deg); }
+    80% { transform: rotate(0deg); }
+  }
+  .animate-bell-shake {
+    animation: bell-shake 2.5s ease-in-out infinite;
+  }
 }
