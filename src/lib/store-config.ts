@@ -110,6 +110,7 @@ const defaultSections: StoreSection[] = [
   { id: "s2", type: "brands", active: true },
   { id: "s3", type: "benefits", active: true },
   { id: "s4", type: "offer-products", active: true, title: "Ofertas imperdíveis", maxProducts: 6, variant: "featured", style: "highlighted" },
+  { id: "s4b", type: "combos", active: true },
   { id: "s5", type: "category-products", active: true, title: "Mais vendidos da mercearia", categorySlug: "mercearia", maxProducts: 6, variant: "default" },
   { id: "s6", type: "category-products", active: true, title: "Bebidas em alta", categorySlug: "bebidas", maxProducts: 6, variant: "alt" },
   { id: "s7", type: "category-products", active: true, title: "Frios, carnes e laticínios", categorySlug: "carnes", maxProducts: 6, variant: "default" },

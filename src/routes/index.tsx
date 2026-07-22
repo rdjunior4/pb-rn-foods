@@ -126,11 +126,15 @@ function Index() {
   const { data: config } = useStoreConfig();
 
   const sections = config?.sections ?? [];
+  const hasCombosSection = sections.some((s) => s.type === "combos" && s.active);
 
   return (
     <CustomerLayout fullWidth stickyNav={<CategoryNav />}>
       {sections.length > 0 ? (
-        sections.map((section) => renderSection(section, products, categories))
+        <>
+          {sections.map((section) => renderSection(section, products, categories))}
+          {!hasCombosSection && <CombosSection />}
+        </>
       ) : (
         <>
           <HeroBanner />
