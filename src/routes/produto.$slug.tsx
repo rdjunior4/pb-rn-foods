@@ -422,26 +422,32 @@ function ProductPage() {
       </div>
 
       {related.length > 0 && (
-        <section className="mt-14">
-          <div className="flex items-end justify-between mb-5">
-            <div>
-              <h2 className="text-xl font-bold">Produtos relacionados</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Da mesma categoria</p>
+        <section className="mt-14 px-3 sm:px-5 lg:px-[24px]">
+          <div className="mx-auto max-w-[1400px]">
+            <div className="flex items-end justify-between mb-5">
+              <div>
+                <h2 className="text-xl font-bold">Produtos relacionados</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">Da mesma categoria</p>
+              </div>
+              {category && (
+                <Link
+                  to="/categoria/$slug"
+                  params={{ slug: category.slug }}
+                  className="text-sm font-semibold text-primary hover:underline whitespace-nowrap"
+                >
+                  Ver categoria →
+                </Link>
+              )}
             </div>
-            {category && (
-              <Link
-                to="/categoria/$slug"
-                params={{ slug: category.slug }}
-                className="text-sm font-semibold text-primary hover:underline whitespace-nowrap"
-              >
-                Ver categoria →
-              </Link>
-            )}
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+            <div className="overflow-x-auto no-scrollbar sm:overflow-visible">
+              <div className="flex gap-3 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 sm:gap-3 lg:gap-4 w-max sm:w-auto">
+                {related.map((p) => (
+                  <div key={p.id} className="w-[44vw] sm:w-auto shrink-0 sm:shrink">
+                    <ProductCard product={p} />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
       )}
