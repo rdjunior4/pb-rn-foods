@@ -86,7 +86,7 @@ function renderSection(
           title={section.title || cat.name}
           linkTo={`/categoria/${cat.slug}`}
           products={catProducts}
-          variant={(section.variant as "default" | "alt") || "default"}
+          variant={(section.variant as "default" | "alt" | "featured") || "default"}
         />
       );
     }
