@@ -64,20 +64,20 @@ export function CombosSection() {
               return (
                 <div
                   key={combo.id}
-                  className="group relative bg-card rounded-xl border border-border/40 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 w-[75vw] sm:w-auto shrink-0 sm:shrink flex flex-col"
+                  className="group relative bg-card rounded-xl border-2 border-amber-200/60 overflow-hidden hover:shadow-xl hover:shadow-amber-400/10 hover:border-amber-400 transition-all duration-300 w-[75vw] sm:w-auto shrink-0 sm:shrink flex flex-col"
                 >
                   {/* Image grid */}
-                  <div className="relative bg-gradient-to-br from-muted/50 to-muted/30 p-5 pb-4">
+                  <div className="relative bg-gradient-to-br from-amber-50/80 to-orange-50/60 p-5 pb-4">
                     {/* Discount badge — top left */}
                     <div className="absolute top-3 left-3 z-10">
-                      <span className="inline-flex items-center gap-1 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-red-500/20">
+                      <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-amber-500/20">
                         -{savings}
                       </span>
                     </div>
 
                     {/* Items count — top right */}
                     <div className="absolute top-3 right-3 z-10">
-                      <span className="inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-zinc-700 text-[10px] font-semibold px-2 py-1 rounded-full border border-border/40 shadow-sm">
+                      <span className="inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-amber-700 text-[10px] font-semibold px-2 py-1 rounded-full border border-amber-200 shadow-sm">
                         <ShoppingBag className="h-3 w-3" />
                         {combo.items.length} itens
                       </span>
@@ -87,7 +87,7 @@ export function CombosSection() {
                       {combo.items.slice(0, 4).map((item, i) => (
                         <div
                           key={i}
-                          className="aspect-square bg-white rounded-xl border border-border/30 overflow-hidden flex items-center justify-center group-hover:border-primary/20 group-hover:shadow-md transition-all shadow-sm"
+                          className="aspect-square bg-white rounded-xl border border-amber-100 overflow-hidden flex items-center justify-center group-hover:border-amber-300 group-hover:shadow-md transition-all shadow-sm"
                         >
                           <img
                             src={item.image}
@@ -117,7 +117,7 @@ export function CombosSection() {
                     <div className="space-y-1 mb-4 flex-1">
                       {combo.items.map((item, i) => (
                         <div key={i} className="flex items-center gap-1.5 text-[11px]">
-                          <span className="h-1 w-1 rounded-full bg-primary/40 shrink-0" />
+                          <span className="h-1 w-1 rounded-full bg-amber-400/60 shrink-0" />
                           <span className="text-muted-foreground truncate">
                             {item.quantity}x {item.productName}
                           </span>
@@ -126,7 +126,7 @@ export function CombosSection() {
                     </div>
 
                     {/* Pricing + CTA */}
-                    <div className="border-t border-border/30 pt-3 mt-auto space-y-3">
+                    <div className="border-t border-amber-100 pt-3 mt-auto space-y-3">
                       <div className="flex items-end justify-between">
                         <div>
                           <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">De</p>
@@ -134,7 +134,7 @@ export function CombosSection() {
                         </div>
                         <div className="text-right">
                           <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">Por</p>
-                          <p className="text-xl font-bold text-primary leading-none">{formatCurrency(combo.comboPrice)}</p>
+                          <p className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent leading-none">{formatCurrency(combo.comboPrice)}</p>
                         </div>
                       </div>
 
@@ -144,7 +144,7 @@ export function CombosSection() {
                         className={`w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-2.5 rounded-lg transition-all active:scale-[0.97] ${
                           isAdded
                             ? "bg-emerald-500 text-white"
-                            : "bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm shadow-primary/20"
+                            : "bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-400/20"
                         }`}
                       >
                         {isAdded ? (
