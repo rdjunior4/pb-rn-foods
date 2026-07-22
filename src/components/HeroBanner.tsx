@@ -2,6 +2,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useAdminStore, useStoreConfig } from "@/lib/hooks";
+import { dispatchAuthModalEvent } from "@/lib/events";
 import defaultHeroImg from "@/assets/hero-warehouse.jpg";
 import type { Banner } from "@/lib/types";
 
@@ -106,13 +107,12 @@ export function HeroBanner() {
                 </Link>
               )}
               {hasSecondaryCta && (
-                <Link
-                  to="/entrar"
-                  search={{ tab: "register", redirect: "/" }}
+                <button
+                  onClick={() => dispatchAuthModalEvent(true, "register")}
                   className="inline-flex items-center gap-2 border border-white/15 text-white/80 hover:text-white hover:bg-white/10 transition-all font-medium rounded px-6 py-3 text-sm backdrop-blur-sm"
                 >
                   Cadastre-se CNPJ
-                </Link>
+                </button>
               )}
             </div>
           </div>

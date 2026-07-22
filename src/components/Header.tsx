@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 import { CartDrawer } from "./CartDrawer";
 import { AuthModal } from "./AuthModal";
 import { NotificationBell } from "./NotificationBell";
-import { dispatchAuthModalEvent } from "@/lib/events";
+import { dispatchAuthModalEvent, onAuthModalToggle } from "@/lib/events";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -159,6 +159,17 @@ export function Header() {
   useEffect(() => {
     dispatchAuthModalEvent(authOpen);
   }, [authOpen]);
+
+  useEffect(() => {
+    return onAuthModalToggle((open, tab) => {
+      if (open) {
+        if (tab) setAuthTab(tab);
+        setAuthOpen(true);
+      } else {
+        setAuthOpen(false);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

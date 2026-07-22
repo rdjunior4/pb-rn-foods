@@ -2,6 +2,7 @@ import { MapPin, Phone, Mail, Clock, Instagram, Youtube, Linkedin, ChevronRight,
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { useCategories, useStoreConfig } from "@/lib/hooks";
+import { dispatchAuthModalEvent } from "@/lib/events";
 
 const helpers = [
   { label: "Sobre nós", slug: "sobre" },
@@ -12,7 +13,7 @@ const helpers = [
 ];
 
 const business = [
-  { label: "Cadastro CNPJ", to: "/entrar", search: { tab: "register" as const, redirect: "/" } },
+  { label: "Cadastro CNPJ", action: () => dispatchAuthModalEvent(true, "register") },
   { label: "Compras no atacado", to: "/buscar", search: { q: "atacado" } },
   { label: "Lista de desejos", to: "/favoritos" },
   { label: "Minha conta", to: "/minha-conta" },
@@ -132,10 +133,17 @@ export function Footer() {
             <ul className="space-y-3">
               {business.map((b) => (
                 <li key={b.label}>
-                  <Link to={b.to} search={"search" in b ? b.search : undefined} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
-                    <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
-                    {b.label}
-                  </Link>
+                  {"action" in b ? (
+                    <button onClick={b.action} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
+                      <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
+                      {b.label}
+                    </button>
+                  ) : (
+                    <Link to={b.to!} search={"search" in b ? b.search : undefined} className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white transition-colors">
+                      <ChevronRight className="h-3 w-3 text-primary/0 group-hover:text-primary transition-all" />
+                      {b.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
