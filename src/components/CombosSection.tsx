@@ -67,7 +67,7 @@ export function CombosSection() {
                   className="group relative bg-card rounded-xl border border-border/40 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20 transition-all duration-300 w-[75vw] sm:w-auto shrink-0 sm:shrink flex flex-col"
                 >
                   {/* Image grid */}
-                  <div className="relative bg-gradient-to-br from-muted/50 to-muted/30 p-4 pb-3">
+                  <div className="relative bg-gradient-to-br from-muted/50 to-muted/30 p-5 pb-4">
                     {/* Badge */}
                     {combo.badge && (
                       <div className="absolute top-3 left-3 z-10">
@@ -80,21 +80,21 @@ export function CombosSection() {
 
                     {/* Discount circle */}
                     <div className="absolute top-3 right-3 z-10">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center shadow-lg shadow-red-500/20">
-                        <span className="text-[10px] font-bold text-white leading-none text-center">-{combo.discountPercent}%</span>
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center shadow-lg shadow-red-500/20">
+                        <span className="text-[11px] font-bold text-white leading-none text-center">-{combo.discountPercent}%</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-1.5 w-full max-w-[160px] mx-auto">
+                    <div className="grid grid-cols-2 gap-2 w-full max-w-[220px] mx-auto">
                       {combo.items.slice(0, 4).map((item, i) => (
                         <div
                           key={i}
-                          className="aspect-square bg-white rounded-lg border border-border/30 overflow-hidden flex items-center justify-center group-hover:border-primary/20 transition-colors shadow-sm"
+                          className="aspect-square bg-white rounded-xl border border-border/30 overflow-hidden flex items-center justify-center group-hover:border-primary/20 group-hover:shadow-md transition-all shadow-sm"
                         >
                           <img
                             src={item.image}
                             alt={item.productName}
-                            className="w-full h-full object-contain p-1.5"
+                            className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Crect width='18' height='18' x='3' y='3' rx='2'/%3E%3Ccircle cx='9' cy='9' r='2'/%3E%3Cpath d='m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'/%3E%3C/svg%3E";
                             }}
