@@ -244,7 +244,7 @@ export function LayoutBuilder({ config, onChange }: LayoutBuilderProps) {
       id: generateSectionId(),
       type,
       active: true,
-      title: type === "category-products" ? "Produtos" : type === "offer-products" ? "Ofertas" : undefined,
+      title: type === "category-products" ? "Produtos" : type === "offer-products" ? "Ofertas" : type === "combos" ? "Combos" : undefined,
       maxProducts: type.includes("products") ? 6 : undefined,
       variant: type.includes("products") ? "default" : undefined,
       style: "default",
@@ -550,7 +550,7 @@ function SectionSettings({
       </div>
 
       {/* Title */}
-      {["offer-products", "category-products", "custom-html"].includes(section.type) && (
+      {["offer-products", "category-products", "custom-html", "combos"].includes(section.type) && (
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1.5">Título da seção</label>
           <input
