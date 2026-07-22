@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Tag, ShoppingBag, ArrowRight, Percent, Plus, Check, Sparkles } from "lucide-react";
+import { ShoppingBag, ArrowRight, Percent, Plus, Check } from "lucide-react";
 import { useCombos } from "@/lib/hooks";
 import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
@@ -68,24 +68,22 @@ export function CombosSection() {
                 >
                   {/* Image grid */}
                   <div className="relative bg-gradient-to-br from-muted/50 to-muted/30 p-5 pb-4">
-                    {/* Badge */}
-                    {combo.badge && (
-                      <div className="absolute top-3 left-3 z-10">
-                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-orange-500/20">
-                          <Sparkles className="h-3 w-3" />
-                          {combo.badge}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Discount circle */}
-                    <div className="absolute top-3 right-3 z-10">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center shadow-lg shadow-red-500/20">
-                        <span className="text-[11px] font-bold text-white leading-none text-center">-{combo.discountPercent}%</span>
-                      </div>
+                    {/* Discount badge — top left */}
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className="inline-flex items-center gap-1 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-red-500/20">
+                        -{savings}
+                      </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 w-full max-w-[220px] mx-auto">
+                    {/* Items count — top right */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <span className="inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm text-zinc-700 text-[10px] font-semibold px-2 py-1 rounded-full border border-border/40 shadow-sm">
+                        <ShoppingBag className="h-3 w-3" />
+                        {combo.items.length} itens
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 w-full max-w-[220px] mx-auto mt-1">
                       {combo.items.slice(0, 4).map((item, i) => (
                         <div
                           key={i}
@@ -127,46 +125,40 @@ export function CombosSection() {
                       ))}
                     </div>
 
-                    {/* Pricing */}
-                    <div className="border-t border-border/30 pt-3 mt-auto">
-                      <div className="flex items-center justify-between mb-2.5">
+                    {/* Pricing + CTA */}
+                    <div className="border-t border-border/30 pt-3 mt-auto space-y-3">
+                      <div className="flex items-end justify-between">
                         <div>
                           <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">De</p>
                           <p className="text-xs text-zinc-400 line-through">{formatCurrency(combo.originalTotal)}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none mb-0.5">Por</p>
-                          <p className="text-lg font-bold text-primary leading-none">{formatCurrency(combo.comboPrice)}</p>
+                          <p className="text-xl font-bold text-primary leading-none">{formatCurrency(combo.comboPrice)}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0">
-                          <Tag className="h-3 w-3" />
-                          -{savings}
-                        </span>
-                        <button
-                          onClick={() => handleAddCombo(combo)}
-                          disabled={isAdded}
-                          className={`flex-1 inline-flex items-center justify-center gap-1.5 text-[11px] font-semibold py-2 rounded-lg transition-all active:scale-[0.97] ${
-                            isAdded
-                              ? "bg-emerald-500 text-white"
-                              : "bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm shadow-primary/20"
-                          }`}
-                        >
-                          {isAdded ? (
-                            <>
-                              <Check className="h-3.5 w-3.5" />
-                              Adicionado
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="h-3.5 w-3.5" />
-                              Adicionar
-                            </>
-                          )}
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleAddCombo(combo)}
+                        disabled={isAdded}
+                        className={`w-full inline-flex items-center justify-center gap-1.5 text-xs font-semibold py-2.5 rounded-lg transition-all active:scale-[0.97] ${
+                          isAdded
+                            ? "bg-emerald-500 text-white"
+                            : "bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm shadow-primary/20"
+                        }`}
+                      >
+                        {isAdded ? (
+                          <>
+                            <Check className="h-4 w-4" />
+                            Adicionado ao carrinho
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4" />
+                            Adicionar combo
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
