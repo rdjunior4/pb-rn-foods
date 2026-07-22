@@ -164,6 +164,103 @@ export function ConfigSection() {
         </div>
       </div>
 
+      {/* Footer Config */}
+      <div className="bg-white rounded-lg border border-zinc-200 p-6 space-y-5">
+        <h2 className="text-sm font-semibold text-zinc-900">Rodapé</h2>
+        <p className="text-xs text-zinc-400 -mt-3">Informações exibidas no rodapé do site.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">Descrição</label>
+            <textarea
+              value={config.footerDescription}
+              onChange={(e) => setConfig({ ...config, footerDescription: e.target.value })}
+              rows={2}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors resize-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">Telefone</label>
+            <input
+              value={config.footerPhone}
+              onChange={(e) => setConfig({ ...config, footerPhone: e.target.value })}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">WhatsApp (código do país + DDD + número)</label>
+            <input
+              value={config.footerWhatsApp}
+              onChange={(e) => setConfig({ ...config, footerWhatsApp: e.target.value })}
+              placeholder="5583999999999"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">E-mail</label>
+            <input
+              value={config.footerEmail}
+              onChange={(e) => setConfig({ ...config, footerEmail: e.target.value })}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">Endereço</label>
+            <input
+              value={config.footerAddress}
+              onChange={(e) => setConfig({ ...config, footerAddress: e.target.value })}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">Horário de funcionamento</label>
+            <input
+              value={config.footerHours}
+              onChange={(e) => setConfig({ ...config, footerHours: e.target.value })}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">CNPJ</label>
+            <input
+              value={config.footerCnpj}
+              onChange={(e) => setConfig({ ...config, footerCnpj: e.target.value })}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+        </div>
+
+        <h3 className="text-sm font-semibold text-zinc-900 pt-2">Redes sociais</h3>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">Instagram</label>
+            <input
+              value={config.footerSocialInstagram}
+              onChange={(e) => setConfig({ ...config, footerSocialInstagram: e.target.value })}
+              placeholder="https://instagram.com/..."
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">YouTube</label>
+            <input
+              value={config.footerSocialYoutube}
+              onChange={(e) => setConfig({ ...config, footerSocialYoutube: e.target.value })}
+              placeholder="https://youtube.com/..."
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-1.5">LinkedIn</label>
+            <input
+              value={config.footerSocialLinkedin}
+              onChange={(e) => setConfig({ ...config, footerSocialLinkedin: e.target.value })}
+              placeholder="https://linkedin.com/company/..."
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center gap-3">
         <button
           onClick={handleSave}

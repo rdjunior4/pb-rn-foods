@@ -51,6 +51,16 @@ export interface StoreConfig {
   benefits: BenefitItem[];
   featuredBrandIds: string[];
   sections: StoreSection[];
+  footerDescription: string;
+  footerPhone: string;
+  footerWhatsApp: string;
+  footerEmail: string;
+  footerAddress: string;
+  footerHours: string;
+  footerSocialInstagram: string;
+  footerSocialYoutube: string;
+  footerSocialLinkedin: string;
+  footerCnpj: string;
 }
 
 const iconNames = [
@@ -130,6 +140,16 @@ export const defaultConfig: StoreConfig = {
   ],
   featuredBrandIds: [],
   sections: defaultSections,
+  footerDescription: "Distribuidora de alimentos com foco em atender empresas com variedade, qualidade e condições especiais para seu negócio crescer.",
+  footerPhone: "(83) 99999-9999",
+  footerWhatsApp: "5583999999999",
+  footerEmail: "contato@pbrnfoods.com.br",
+  footerAddress: "João Pessoa - PB",
+  footerHours: "Seg a Sex: 6h - 18h | Sáb: 6h - 12h",
+  footerSocialInstagram: "https://www.instagram.com/pbfoodsdistribuidora/",
+  footerSocialYoutube: "https://www.youtube.com/watch?v=tlER4WXP6CU",
+  footerSocialLinkedin: "https://uk.linkedin.com/company/pb-foods",
+  footerCnpj: "00.000.000/0001-00",
 };
 
 // ============================================================
