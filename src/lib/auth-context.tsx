@@ -259,13 +259,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, error: `Muitas tentativas. Aguarde ${formatRemainingTime(remainingMs)}.` };
     }
 
-    const supabase = getSupabase();
-    if (!supabase) return { ok: false, error: "Erro de conexão." };
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/request-reset`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
 
-    const { error } = await supabase.rpc("request_password_reset", { p_email: cleanEmail });
-    if (error) return { ok: false, error: error.message };
-    recordAttempt("reset", cleanEmail);
-    return { ok: true };
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, error: data.error || "Erro ao solicitar redefinição." };
+      }
+
+      recordAttempt("reset", cleanEmail);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Erro de conexão ao solicitar redefinição." };
+    }
   }, []);
 
   const resetPassword = useCallback(async (email: string, code: string, newPassword: string): Promise<{ ok: boolean; error?: string }> => {
