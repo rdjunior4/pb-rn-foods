@@ -96,7 +96,7 @@ async function loadCartFromSupabase(userId: string): Promise<CartItem[]> {
     unitPrice: Number(row.unit_price) || 0,
     comboId: (row.combo_id as string) || undefined,
     comboName: (row.combo_name as string) || undefined,
-    comboDiscountPrice: row.combo_discount_price != null ? Number(row.combo_discount_price) : undefined,
+    comboDiscountPrice: row.combo_discount_price ? Number(row.combo_discount_price) : undefined,
   }));
 }
 
