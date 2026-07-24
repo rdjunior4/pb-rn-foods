@@ -16,7 +16,7 @@ export function CombosSection() {
 
   const handleAddCombo = (combo: typeof activeCombos[0]) => {
     for (const item of combo.items) {
-      addItem(item.productId, item.quantity, undefined, item.unitPrice);
+      addItem(item.productId, item.quantity, undefined, item.unitPrice, combo.id, combo.name, combo.comboPrice);
     }
     setAddedId(combo.id);
     setTimeout(() => setAddedId(null), 1500);

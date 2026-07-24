@@ -1,4 +1,4 @@
-import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, X } from "lucide-react";
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, X, Percent } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useProducts } from "@/lib/hooks";
 import { useNavigate } from "@tanstack/react-router";
@@ -16,7 +16,7 @@ interface CartDrawerProps {
 }
 
 export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
-  const { items, totalItems, updateQuantity, removeItem, clearCart } = useCart();
+  const { items, totalItems, updateQuantity, removeItem, removeCombo, clearCart } = useCart();
   const navigate = useNavigate();
   const { data: products = [] } = useProducts();
 
@@ -27,6 +27,14 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
     const price = item.unitPrice || product?.price || 0;
     return sum + price * item.quantity;
   }, 0);
+
+  const comboDiscount = items
+    .filter((i) => i.comboId && i.comboDiscountPrice)
+    .reduce((sum, item) => {
+      const product = productMap.get(item.productId);
+      const originalPrice = product?.price || 0;
+      return sum + (originalPrice - (item.unitPrice || 0)) * item.quantity;
+    }, 0);
 
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -87,25 +95,50 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
               {items.map((item) => {
                 const product = productMap.get(item.productId);
                 if (!product) return null;
+                const isComboItem = !!item.comboId;
+                const originalPrice = product.price;
+                const comboSavings = isComboItem ? (originalPrice - (item.unitPrice || 0)) * item.quantity : 0;
                 return (
                   <div
-                    key={item.productId}
-                    className="group flex gap-3 rounded border border-border/40 bg-card p-3 transition-all hover:border-border/80 hover:shadow-sm"
+                    key={`${item.productId}-${item.variantId || ""}`}
+                    className={`group flex gap-3 rounded border p-3 transition-all hover:shadow-sm ${
+                      isComboItem
+                        ? "border-amber-300/60 bg-amber-50/30 hover:border-amber-400"
+                        : "border-border/40 bg-card hover:border-border/80"
+                    }`}
                   >
-                    <div className="h-20 w-20 shrink-0 rounded bg-muted/50 overflow-hidden">
+                    <div className="h-20 w-20 shrink-0 rounded bg-muted/50 overflow-hidden relative">
                       <img
                         src={product.image}
                         alt={product.name}
                         className="h-full w-full object-cover"
                       />
+                      {isComboItem && (
+                        <span className="absolute top-1 left-1 inline-flex items-center gap-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[8px] font-bold px-1 py-0.5 rounded">
+                          <Percent className="h-2 w-2" />
+                          COMBO
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-1">
-                        <h4 className="text-sm font-semibold leading-snug line-clamp-2 flex-1">{product.name}</h4>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold leading-snug line-clamp-2">{product.name}</h4>
+                          {isComboItem && item.comboName && (
+                            <p className="text-[10px] text-amber-600 font-medium mt-0.5 truncate">
+                              Combo: {item.comboName}
+                            </p>
+                          )}
+                        </div>
                         <button
                           onClick={() => {
-                            removeItem(item.productId);
-                            toast.success(`${product.name} removido`);
+                            if (isComboItem && item.comboId) {
+                              removeCombo(item.comboId);
+                              toast.success(`Combo removido do carrinho`);
+                            } else {
+                              removeItem(item.productId);
+                              toast.success(`${product.name} removido`);
+                            }
                           }}
                           className="p-0.5 text-muted-foreground/20 hover:text-primary transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shrink-0 mt-0.5"
                         >
@@ -113,17 +146,28 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                         </button>
                       </div>
                       <div className="text-xs text-muted-foreground/50 mt-0.5">{product.brand}</div>
-<div className="text-xs text-muted-foreground/40 mt-0.5 font-mono">
-                         {formatCurrency(product.price * item.quantity)}
-                       </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs font-semibold text-foreground">
+                          {formatCurrency(item.unitPrice * item.quantity)}
+                        </span>
+                        {isComboItem && comboSavings > 0 && (
+                          <span className="text-[10px] text-emerald-600 font-medium">
+                            -{formatCurrency(comboSavings)}
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-1.5 flex items-center gap-2">
                         <div className="flex items-center border border-border/40 rounded overflow-hidden">
                           <button
                             onClick={() => {
                               if (item.quantity === 1) {
-                                removeItem(item.productId);
+                                if (isComboItem && item.comboId) {
+                                  removeCombo(item.comboId);
+                                } else {
+                                  removeItem(item.productId);
+                                }
                               } else {
-                                updateQuantity(item.productId, item.quantity - 1);
+                                updateQuantity(item.productId, item.quantity - 1, item.variantId);
                               }
                             }}
                             className="inline-flex h-7 w-7 items-center justify-center hover:bg-primary/10 transition-colors"
@@ -132,14 +176,14 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                           </button>
                           <span className="w-8 text-center text-xs font-semibold border-x border-border/40">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantId)}
                             className="inline-flex h-7 w-7 items-center justify-center hover:bg-primary/10 transition-colors"
                           >
                             <Plus className="h-3 w-3" />
                           </button>
                         </div>
                         <span className="text-[11px] text-muted-foreground/40">
-                          {formatCurrency(product.price)} un.
+                          {formatCurrency(item.unitPrice)} un.
                         </span>
                       </div>
                     </div>
@@ -154,6 +198,15 @@ export function CartDrawer({ open, onOpenChange }: CartDrawerProps) {
                   <span className="text-sm text-muted-foreground">Subtotal</span>
                   <span className="text-base font-bold text-primary">{formatCurrency(total)}</span>
                 </div>
+                {comboDiscount > 0 && (
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-emerald-600 font-medium flex items-center gap-1">
+                      <Percent className="h-3 w-3" />
+                      Economia combos
+                    </span>
+                    <span className="text-emerald-600 font-bold">-{formatCurrency(comboDiscount)}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-xs text-muted-foreground/40">
                   <span>{totalQuantity} {totalQuantity === 1 ? "item" : "itens"}</span>
                   <span>Frete calculado no checkout</span>

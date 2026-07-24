@@ -61,6 +61,9 @@ export interface CartItem {
   variantId?: string;
   quantity: number;
   unitPrice: number;
+  comboId?: string;
+  comboName?: string;
+  comboDiscountPrice?: number;
 }
 
 export interface Brand {

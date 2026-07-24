@@ -40,16 +40,14 @@ export function CustomerLayout({
     >
       <GeoConsentDialog onConsent={() => {}} />
       <TopBar />
-      <div className="sticky top-0 z-50">
-        <Header />
-        {stickyNav && (
-          <div className="bg-card border-t border-border/30 py-2.5">
-            <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px]">
-              {stickyNav}
-            </div>
+      <Header />
+      {stickyNav && (
+        <div className="sticky top-[60px] z-40 bg-card border-t border-border/30 py-2.5">
+          <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px]">
+            {stickyNav}
           </div>
-        )}
-      </div>
+        </div>
+      )}
       <main
         className={
           fullWidth

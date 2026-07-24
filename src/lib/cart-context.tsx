@@ -12,8 +12,9 @@ interface CartState {
 
 type CartAction =
   | { type: "SET_ITEMS"; items: CartItem[] }
-  | { type: "ADD_ITEM"; productId: string; variantId?: string; quantity?: number; unitPrice: number }
+  | { type: "ADD_ITEM"; productId: string; variantId?: string; quantity?: number; unitPrice: number; comboId?: string; comboName?: string; comboDiscountPrice?: number }
   | { type: "REMOVE_ITEM"; productId: string; variantId?: string }
+  | { type: "REMOVE_COMBO"; comboId: string }
   | { type: "UPDATE_QUANTITY"; productId: string; variantId?: string; quantity: number }
   | { type: "CLEAR" };
 
@@ -37,7 +38,10 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           ),
         };
       }
-      return { ...state, items: [...state.items, { productId: action.productId, variantId: action.variantId, quantity: q, unitPrice: action.unitPrice }] };
+      return { ...state, items: [...state.items, { productId: action.productId, variantId: action.variantId, quantity: q, unitPrice: action.unitPrice, comboId: action.comboId, comboName: action.comboName, comboDiscountPrice: action.comboDiscountPrice }] };
+    }
+    case "REMOVE_COMBO": {
+      return { ...state, items: state.items.filter((i) => i.comboId !== action.comboId) };
     }
     case "REMOVE_ITEM": {
       const key = cartKey(action.productId, action.variantId);
@@ -66,11 +70,13 @@ interface CartContextType {
   items: CartItem[];
   totalItems: number;
   loaded: boolean;
-  addItem: (productId: string, quantity?: number, variantId?: string, unitPrice?: number) => void;
+  addItem: (productId: string, quantity?: number, variantId?: string, unitPrice?: number, comboId?: string, comboName?: string, comboDiscountPrice?: number) => void;
   removeItem: (productId: string, variantId?: string) => void;
+  removeCombo: (comboId: string) => void;
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   clearCart: () => void;
   getItemQuantity: (productId: string, variantId?: string) => number;
+  getComboItems: (comboId: string) => CartItem[];
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -80,7 +86,7 @@ async function loadCartFromSupabase(userId: string): Promise<CartItem[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("cart_items")
-    .select("product_id, variant_id, quantity, unit_price")
+    .select("product_id, variant_id, quantity, unit_price, combo_id, combo_name, combo_discount_price")
     .eq("user_id", userId);
   if (error || !data) return [];
   return data.map((row: Record<string, unknown>) => ({
@@ -88,6 +94,9 @@ async function loadCartFromSupabase(userId: string): Promise<CartItem[]> {
     variantId: (row.variant_id as string) || undefined,
     quantity: Number(row.quantity) || 1,
     unitPrice: Number(row.unit_price) || 0,
+    comboId: (row.combo_id as string) || undefined,
+    comboName: (row.combo_name as string) || undefined,
+    comboDiscountPrice: row.combo_discount_price != null ? Number(row.combo_discount_price) : undefined,
   }));
 }
 
@@ -102,6 +111,9 @@ async function saveCartToSupabase(userId: string, items: CartItem[]): Promise<vo
     variant_id: item.variantId || null,
     quantity: item.quantity,
     unit_price: item.unitPrice,
+    combo_id: item.comboId || null,
+    combo_name: item.comboName || null,
+    combo_discount_price: item.comboDiscountPrice ?? null,
   }));
   await supabase.from("cart_items").insert(rows);
 }
@@ -132,7 +144,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timeout);
   }, [user, state.items, state.loaded]);
 
-  const addItem = useCallback((productId: string, quantity?: number, variantId?: string, unitPrice?: number) => {
+  const addItem = useCallback((productId: string, quantity?: number, variantId?: string, unitPrice?: number, comboId?: string, comboName?: string, comboDiscountPrice?: number) => {
     const q = quantity ?? 1;
     const product = productMap.get(productId);
     if (!product) {
@@ -166,11 +178,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return;
     }
-    dispatch({ type: "ADD_ITEM", productId, variantId, quantity: q, unitPrice: price });
+    dispatch({ type: "ADD_ITEM", productId, variantId, quantity: q, unitPrice: price, comboId, comboName, comboDiscountPrice });
   }, [state.items, productMap]);
 
   const removeItem = useCallback((productId: string, variantId?: string) => {
     dispatch({ type: "REMOVE_ITEM", productId, variantId });
+  }, []);
+
+  const removeCombo = useCallback((comboId: string) => {
+    dispatch({ type: "REMOVE_COMBO", comboId });
   }, []);
 
   const updateQuantity = useCallback((productId: string, quantity: number, variantId?: string) => {
@@ -199,10 +215,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return state.items.find((i) => cartKey(i.productId, i.variantId) === key)?.quantity ?? 0;
   }, [state.items]);
 
+  const getComboItems = useCallback((comboId: string) => {
+    return state.items.filter((i) => i.comboId === comboId);
+  }, [state.items]);
+
   const totalItems = state.items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items: state.items, totalItems, loaded: state.loaded, addItem, removeItem, updateQuantity, clearCart, getItemQuantity }}>
+    <CartContext.Provider value={{ items: state.items, totalItems, loaded: state.loaded, addItem, removeItem, removeCombo, updateQuantity, clearCart, getItemQuantity, getComboItems }}>
       {children}
     </CartContext.Provider>
   );

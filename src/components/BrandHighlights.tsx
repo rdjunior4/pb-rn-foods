@@ -40,7 +40,7 @@ export function BrandHighlights() {
               <img
                 src={b.logo}
                 alt={b.name}
-                className="h-full w-full object-contain grayscale hover:grayscale-0 transition-all"
+                className="h-full w-full object-contain md:grayscale md:hover:grayscale-0 transition-all"
                 loading="lazy"
               />
             </Link>

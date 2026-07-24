@@ -12,7 +12,12 @@ export function ProductCard({ product }: { product: Product }) {
 
   const qty = getItemQuantity(product.id);
   const favorite = isFavorite(product.id);
-  const hasDiscount = product.discount && product.discount > 0;
+  const hasDiscount = (product.discount && product.discount > 0) || (product.oldPrice && product.oldPrice > product.price);
+  const discountPercent = product.discount && product.discount > 0
+    ? product.discount
+    : product.oldPrice && product.oldPrice > product.price
+      ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+      : 0;
 
   return (
     <div
@@ -31,7 +36,7 @@ export function ProductCard({ product }: { product: Product }) {
         {/* Discount badge */}
         {hasDiscount && (
           <span className="absolute top-2 left-2 inline-flex items-center rounded-md bg-primary px-1.5 py-[3px] text-[10px] font-bold text-primary-foreground shadow-md">
-            -{product.discount}%
+            -{discountPercent}%
           </span>
         )}
 
@@ -78,7 +83,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="mt-auto pt-2 border-t border-border/40">
           <div className="flex items-end justify-between gap-1">
             <div className="min-w-0">
-              {product.oldPrice && (
+              {product.oldPrice && product.oldPrice > product.price && (
                 <div className="text-[10px] text-muted-foreground line-through truncate">
                   {formatCurrency(product.oldPrice)}
                 </div>

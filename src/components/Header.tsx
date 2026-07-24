@@ -1,5 +1,6 @@
 import { Search, User, ShoppingCart, Menu, LogIn, UserPlus, Package, Heart, Settings, LogOut, X, Home, Tag, Phone, ShieldCheck, Shield } from "lucide-react";
 import { Logo } from "./Logo";
+import type { Product } from "@/lib/types";
 import { CartDrawer } from "./CartDrawer";
 import { AuthModal } from "./AuthModal";
 import { NotificationBell } from "./NotificationBell";
