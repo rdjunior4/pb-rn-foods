@@ -41,12 +41,13 @@ export function Newsletter() {
 
   return (
     <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px] mt-16">
-      <div className="relative overflow-hidden rounded-xl bg-brand-black px-6 py-12 sm:px-12 sm:py-14">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(249,115,22,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(249,115,22,0.06),transparent_60%)]" />
+      <div className="relative overflow-hidden rounded-xl px-6 py-14 sm:px-12 sm:py-16">
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-red-950/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(220,38,38,0.2),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(220,38,38,0.08),transparent_60%)]" />
 
-        <div className="relative z-10 max-w-xl mx-auto text-center">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 mb-5">
+        <div className="relative z-10 max-w-md mx-auto text-center">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 mb-5 mx-auto">
             <Mail className="h-5 w-5 text-white" />
           </div>
 
@@ -63,19 +64,19 @@ export function Newsletter() {
               Cadastro realizado com sucesso!
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Seu melhor e-mail"
                 required
-                className="flex-1 h-11 rounded-lg border border-white/15 bg-white/5 px-4 text-sm text-white placeholder:text-white/30 outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all"
+                className="w-full h-11 rounded-lg border border-white/15 bg-white/5 px-4 text-sm text-white placeholder:text-white/30 outline-none focus:border-red-500/60 focus:ring-2 focus:ring-red-500/20 transition-all"
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary text-white font-semibold px-6 text-sm hover:bg-primary-hover transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none shrink-0"
+                className="w-full h-11 rounded-lg bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
               >
                 {loading ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
