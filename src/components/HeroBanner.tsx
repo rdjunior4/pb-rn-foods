@@ -61,13 +61,13 @@ export function HeroBanner() {
     setCurrent((prev) => (prev - 1 + activeBanners.length) % Math.max(activeBanners.length, 1));
 
   return (
-    <section className="w-full mx-auto max-w-[1400px] px-0 sm:px-4 sm:px-6 lg:px-[30px]">
+    <section className="w-full mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-[30px]">
       <AutoCarousel
         enabled={shouldCarousel}
         interval={carouselInterval}
         onNext={nextSlide}
       />
-      <div className="group relative overflow-hidden bg-brand-black aspect-[16/9] sm:aspect-[2.8/1] lg:aspect-[3.1/1] flex items-center rounded-none sm:rounded-lg">
+      <div className="group relative overflow-hidden bg-brand-black aspect-[2.2/1] sm:aspect-[2.8/1] lg:aspect-[3.1/1] flex items-center rounded-lg">
         <img
           src={(isMobile && displayBanner?.mobileImage) ? displayBanner.mobileImage : (displayBanner?.image || defaultHeroImg)}
           alt={displayBanner?.title || ""}

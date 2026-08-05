@@ -28,16 +28,16 @@ function AdminLogistica() {
   const stats = useMemo(() => {
     const delivery = orders.filter((o) => o.shippingCarrier === "propria");
     const pickup = orders.filter((o) => o.shippingCarrier === "retirada");
-    const pending = orders.filter((o) => o.status === "pending" || o.status === "confirmed");
+    const pending = orders.filter((o) => o.status === "pending" || o.status === "paid");
     const preparing = orders.filter((o) => o.status === "preparing");
-    const shipped = orders.filter((o) => o.status === "shipped");
-    const delivered = orders.filter((o) => o.status === "delivered");
+    const shipped = orders.filter((o) => o.status === "shipped" || o.status === "in_transit");
+    const delivered = orders.filter((o) => o.status === "delivered" || o.status === "completed");
 
     const pendingDelivery = delivery.filter(
-      (o) => o.status === "pending" || o.status === "confirmed" || o.status === "preparing",
+      (o) => o.status === "pending" || o.status === "paid" || o.status === "preparing",
     );
     const pendingPickup = pickup.filter(
-      (o) => o.status === "pending" || o.status === "confirmed" || o.status === "preparing",
+      (o) => o.status === "pending" || o.status === "paid" || o.status === "preparing",
     );
 
     return {

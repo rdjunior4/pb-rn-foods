@@ -65,7 +65,7 @@ const ITEMS_PER_PAGE = ITEMS_PER_PAGE_ADMIN;
 
 const pipelineStatuses: OrderStatus[] = [
   "pending",
-  "confirmed",
+  "paid",
   "preparing",
   "shipped",
   "delivered",
@@ -73,11 +73,15 @@ const pipelineStatuses: OrderStatus[] = [
 
 const statusCardBg: Record<OrderStatus, string> = {
   pending: "bg-amber-50/50 border-amber-200",
-  confirmed: "bg-blue-50/50 border-blue-200",
+  paid: "bg-blue-50/50 border-blue-200",
   preparing: "bg-violet-50/50 border-violet-200",
+  ready: "bg-cyan-50/50 border-cyan-200",
   shipped: "bg-indigo-50/50 border-indigo-200",
+  in_transit: "bg-purple-50/50 border-purple-200",
   delivered: "bg-emerald-50/50 border-emerald-200",
+  completed: "bg-green-50/50 border-green-200",
   cancelled: "bg-red-50/50 border-red-200",
+  refunded: "bg-orange-50/50 border-orange-200",
 };
 
 function AdminOrders() {
@@ -158,11 +162,15 @@ function AdminOrders() {
   const pipelineGroups = useMemo(() => {
     const groups: Record<OrderStatus, Order[]> = {
       pending: [],
-      confirmed: [],
+      paid: [],
       preparing: [],
+      ready: [],
       shipped: [],
+      in_transit: [],
       delivered: [],
+      completed: [],
       cancelled: [],
+      refunded: [],
     };
     for (const o of filtered) {
       if (groups[o.status]) groups[o.status].push(o);
@@ -294,11 +302,14 @@ function AdminOrders() {
       if (!order || order.status === targetStatus) return;
 
       const allowedNext: Record<string, string[]> = {
-        pending: ["confirmed"],
-        confirmed: ["preparing"],
-        preparing: ["shipped"],
-        shipped: ["delivered"],
-        delivered: [],
+        pending: ["paid"],
+        paid: ["preparing"],
+        preparing: ["ready"],
+        ready: ["shipped"],
+        shipped: ["in_transit"],
+        in_transit: ["delivered"],
+        delivered: ["completed"],
+        completed: [],
       };
       if (!allowedNext[order.status]?.includes(targetStatus)) {
         toast.error("Transição de status não permitida");

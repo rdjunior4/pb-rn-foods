@@ -97,20 +97,28 @@ function pctChange(current: number, previous: number): number {
 
 const statusDot: Record<OrderStatus, string> = {
   pending: "bg-amber-500",
-  confirmed: "bg-blue-500",
+  paid: "bg-blue-500",
   preparing: "bg-violet-500",
+  ready: "bg-cyan-500",
   shipped: "bg-indigo-500",
+  in_transit: "bg-purple-500",
   delivered: "bg-emerald-500",
+  completed: "bg-green-500",
   cancelled: "bg-red-500",
+  refunded: "bg-orange-500",
 };
 
 const statusLabel: Record<OrderStatus, string> = {
   pending: "Pendente",
-  confirmed: "Confirmado",
+  paid: "Pago",
   preparing: "Separando",
-  shipped: "Em trânsito",
+  ready: "Pronto",
+  shipped: "Enviado",
+  in_transit: "Em trânsito",
   delivered: "Entregue",
+  completed: "Concluído",
   cancelled: "Cancelado",
+  refunded: "Estornado",
 };
 
 function AdminDashboard() {

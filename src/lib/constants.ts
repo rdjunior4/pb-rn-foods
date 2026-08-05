@@ -6,18 +6,30 @@ export const statusConfig: Record<
   { label: string; color: string; dot: string; bg: string }
 > = {
   pending: { label: "Pendente", color: "text-amber-700", dot: "bg-amber-500", bg: "bg-amber-50" },
-  confirmed: { label: "Confirmado", color: "text-blue-700", dot: "bg-blue-500", bg: "bg-blue-50" },
+  paid: { label: "Pago", color: "text-blue-700", dot: "bg-blue-500", bg: "bg-blue-50" },
   preparing: {
     label: "Separando",
     color: "text-violet-700",
     dot: "bg-violet-500",
     bg: "bg-violet-50",
   },
+  ready: {
+    label: "Pronto",
+    color: "text-cyan-700",
+    dot: "bg-cyan-500",
+    bg: "bg-cyan-50",
+  },
   shipped: {
-    label: "Em trânsito",
+    label: "Enviado",
     color: "text-indigo-700",
     dot: "bg-indigo-500",
     bg: "bg-indigo-50",
+  },
+  in_transit: {
+    label: "Em trânsito",
+    color: "text-purple-700",
+    dot: "bg-purple-500",
+    bg: "bg-purple-50",
   },
   delivered: {
     label: "Entregue",
@@ -25,24 +37,38 @@ export const statusConfig: Record<
     dot: "bg-emerald-500",
     bg: "bg-emerald-50",
   },
+  completed: {
+    label: "Concluído",
+    color: "text-green-700",
+    dot: "bg-green-500",
+    bg: "bg-green-50",
+  },
   cancelled: { label: "Cancelado", color: "text-red-700", dot: "bg-red-500", bg: "bg-red-50" },
+  refunded: { label: "Estornado", color: "text-orange-700", dot: "bg-orange-500", bg: "bg-orange-50" },
 };
 
 export const statusSteps: OrderStatus[] = [
   "pending",
-  "confirmed",
+  "paid",
   "preparing",
+  "ready",
   "shipped",
+  "in_transit",
   "delivered",
+  "completed",
 ];
 
 export const nextStatus: Record<OrderStatus, OrderStatus | null> = {
-  pending: "confirmed",
-  confirmed: "preparing",
-  preparing: "shipped",
-  shipped: "delivered",
-  delivered: null,
+  pending: "paid",
+  paid: "preparing",
+  preparing: "ready",
+  ready: "shipped",
+  shipped: "in_transit",
+  in_transit: "delivered",
+  delivered: "completed",
+  completed: null,
   cancelled: null,
+  refunded: null,
 };
 
 /* ─── Transportadoras ─── */

@@ -1,5 +1,15 @@
 import { getSupabase, isSupabaseConfigured } from "../supabase";
-import type { Order, OrderItem, OrderStatus } from "../types";
+import type {
+  Order,
+  OrderItem,
+  OrderStatus,
+  Payment,
+  OrderHistory,
+  OrderNote,
+  StockReservation,
+  OrderWithDetails,
+  OrderHistoryAction,
+} from "../types";
 
 export async function apiLoadOrders(): Promise<Order[]> {
   const supabase = getSupabase();
@@ -181,5 +191,271 @@ function mapDbOrder(db: Record<string, unknown>): Order {
     distributorId: db.distributor_id as string | undefined,
     createdAt: db.created_at as string,
     updatedAt: db.updated_at as string,
+  };
+}
+
+// ============================================================
+// PAYMENTS
+// ============================================================
+
+export async function apiLoadPaymentsByOrder(orderId: string): Promise<Payment[]> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return [];
+  const { data, error } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map(mapDbPayment);
+}
+
+export async function apiCreatePayment(payment: Omit<Payment, "id" | "createdAt" | "updatedAt">): Promise<Payment | null> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return null;
+  const { data, error } = await supabase
+    .from("payments")
+    .insert({
+      order_id: payment.orderId,
+      provider: payment.provider,
+      provider_id: payment.providerId,
+      status: payment.status,
+      amount: payment.amount,
+      payment_method: payment.paymentMethod,
+      transaction_id: payment.transactionId,
+      pix_qr_code: payment.pixQrCode,
+      pix_copy_paste: payment.pixCopyPaste,
+      boleto_url: payment.boletoUrl,
+      boleto_barcode: payment.boletoBarcode,
+      card_last_digits: payment.cardLastDigits,
+      card_brand: payment.cardBrand,
+      installments: payment.installments,
+      installment_value: payment.installmentValue,
+      paid_at: payment.paidAt,
+      expires_at: payment.expiresAt,
+      metadata: payment.metadata,
+    })
+    .select()
+    .single();
+  if (error || !data) return null;
+  return mapDbPayment(data);
+}
+
+export async function apiUpdatePaymentStatus(
+  id: string,
+  status: Payment["status"],
+  paidAt?: string,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return;
+  const update: Record<string, unknown> = { status };
+  if (paidAt) update.paid_at = paidAt;
+  await supabase.from("payments").update(update).eq("id", id);
+}
+
+function mapDbPayment(db: Record<string, unknown>): Payment {
+  return {
+    id: db.id as string,
+    orderId: db.order_id as string,
+    provider: db.provider as Payment["provider"],
+    providerId: db.provider_id as string | undefined,
+    status: db.status as Payment["status"],
+    amount: Number(db.amount) || 0,
+    paymentMethod: db.payment_method as Payment["paymentMethod"],
+    transactionId: db.transaction_id as string | undefined,
+    pixQrCode: db.pix_qr_code as string | undefined,
+    pixCopyPaste: db.pix_copy_paste as string | undefined,
+    boletoUrl: db.boleto_url as string | undefined,
+    boletoBarcode: db.boleto_barcode as string | undefined,
+    cardLastDigits: db.card_last_digits as string | undefined,
+    cardBrand: db.card_brand as string | undefined,
+    installments: Number(db.installments) || 1,
+    installmentValue: db.installment_value ? Number(db.installment_value) : undefined,
+    paidAt: db.paid_at as string | undefined,
+    expiresAt: db.expires_at as string | undefined,
+    metadata: (db.metadata as Record<string, unknown>) || {},
+    createdAt: db.created_at as string,
+    updatedAt: db.updated_at as string,
+  };
+}
+
+// ============================================================
+// ORDER HISTORY
+// ============================================================
+
+export async function apiLoadOrderHistory(orderId: string): Promise<OrderHistory[]> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return [];
+  const { data, error } = await supabase
+    .from("order_history")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map(mapDbOrderHistory);
+}
+
+export async function apiAddOrderHistory(
+  history: Omit<OrderHistory, "id" | "createdAt">,
+): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return;
+  await supabase.from("order_history").insert({
+    order_id: history.orderId,
+    old_status: history.oldStatus,
+    new_status: history.newStatus,
+    changed_by: history.changedBy,
+    changed_by_name: history.changedByName,
+    changed_by_role: history.changedByRole,
+    action: history.action,
+    notes: history.notes,
+    metadata: history.metadata,
+  });
+}
+
+function mapDbOrderHistory(db: Record<string, unknown>): OrderHistory {
+  return {
+    id: db.id as string,
+    orderId: db.order_id as string,
+    oldStatus: db.old_status as OrderHistory["oldStatus"],
+    newStatus: db.new_status as OrderStatus,
+    changedBy: db.changed_by as string | undefined,
+    changedByName: db.changed_by_name as string | undefined,
+    changedByRole: db.changed_by_role as OrderHistory["changedByRole"],
+    action: db.action as OrderHistoryAction,
+    notes: db.notes as string | undefined,
+    metadata: (db.metadata as Record<string, unknown>) || {},
+    createdAt: db.created_at as string,
+  };
+}
+
+// ============================================================
+// ORDER NOTES
+// ============================================================
+
+export async function apiLoadOrderNotes(orderId: string): Promise<OrderNote[]> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return [];
+  const { data, error } = await supabase
+    .from("order_notes")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map(mapDbOrderNote);
+}
+
+export async function apiAddOrderNote(note: {
+  orderId: string;
+  authorId?: string;
+  authorName: string;
+  authorRole: OrderNote["authorRole"];
+  content: string;
+  isInternal?: boolean;
+}): Promise<OrderNote | null> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return null;
+  const { data, error } = await supabase
+    .from("order_notes")
+    .insert({
+      order_id: note.orderId,
+      author_id: note.authorId,
+      author_name: note.authorName,
+      author_role: note.authorRole,
+      content: note.content,
+      is_internal: note.isInternal ?? false,
+    })
+    .select()
+    .single();
+  if (error || !data) return null;
+  return mapDbOrderNote(data);
+}
+
+function mapDbOrderNote(db: Record<string, unknown>): OrderNote {
+  return {
+    id: db.id as string,
+    orderId: db.order_id as string,
+    authorId: db.author_id as string | undefined,
+    authorName: db.author_name as string,
+    authorRole: db.author_role as OrderNote["authorRole"],
+    content: db.content as string,
+    isInternal: db.is_internal as boolean,
+    createdAt: db.created_at as string,
+  };
+}
+
+// ============================================================
+// STOCK RESERVATIONS
+// ============================================================
+
+export async function apiLoadStockReservations(orderId: string): Promise<StockReservation[]> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return [];
+  const { data, error } = await supabase
+    .from("stock_reservations")
+    .select("*")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map(mapDbStockReservation);
+}
+
+export async function apiReserveStock(
+  orderId: string,
+  items: { productId: string; variantId?: string; quantity: number }[],
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) {
+    return { ok: false, error: "Supabase não configurado" };
+  }
+  const { data, error } = await supabase.rpc("reserve_stock_for_order", {
+    p_order_id: orderId,
+    p_items: items.map((i) => ({
+      productId: i.productId,
+      variantId: i.variantId || "",
+      quantity: i.quantity,
+    })),
+  });
+  if (error) return { ok: false, error: error.message };
+  return data as { ok: boolean; error?: string };
+}
+
+function mapDbStockReservation(db: Record<string, unknown>): StockReservation {
+  return {
+    id: db.id as string,
+    orderId: db.order_id as string,
+    productId: db.product_id as string,
+    variantId: db.variant_id as string | undefined,
+    quantity: Number(db.quantity) || 0,
+    expiresAt: db.expires_at as string,
+    status: db.status as StockReservation["status"],
+    createdAt: db.created_at as string,
+  };
+}
+
+// ============================================================
+// ORDER COMPLETO (com dados expandidos)
+// ============================================================
+
+export async function apiGetOrderWithDetails(orderId: string): Promise<OrderWithDetails | null> {
+  const supabase = getSupabase();
+  if (!supabase || !isSupabaseConfigured()) return null;
+  
+  const [order, payments, history, notes, reservations] = await Promise.all([
+    apiGetOrderById(orderId),
+    apiLoadPaymentsByOrder(orderId),
+    apiLoadOrderHistory(orderId),
+    apiLoadOrderNotes(orderId),
+    apiLoadStockReservations(orderId),
+  ]);
+
+  if (!order) return null;
+
+  return {
+    ...order,
+    payments,
+    history,
+    notes,
+    reservations,
   };
 }

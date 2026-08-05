@@ -238,21 +238,28 @@ function AccountPage() {
                     <span className="text-sm font-bold">{order.id}</span>
                     <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-0.5 text-[10px] font-semibold ${
                       order.status === "pending" ? "bg-amber-50 text-amber-700" :
-                      order.status === "confirmed" ? "bg-blue-50 text-blue-700" :
-                      order.status === "shipped" ? "bg-purple-50 text-purple-700" :
-                      order.status === "delivered" ? "bg-emerald-50 text-emerald-700" :
-                      "bg-red-50 text-red-700"
+                      order.status === "paid" ? "bg-blue-50 text-blue-700" :
+                      order.status === "shipped" || order.status === "in_transit" ? "bg-purple-50 text-purple-700" :
+                      order.status === "delivered" || order.status === "completed" ? "bg-emerald-50 text-emerald-700" :
+                      order.status === "cancelled" || order.status === "refunded" ? "bg-red-50 text-red-700" :
+                      "bg-zinc-50 text-zinc-700"
                     }`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${
                         order.status === "pending" ? "bg-amber-500" :
-                        order.status === "confirmed" ? "bg-blue-500" :
-                        order.status === "shipped" ? "bg-purple-500" :
-                        order.status === "delivered" ? "bg-emerald-500" : "bg-red-500"
+                        order.status === "paid" ? "bg-blue-500" :
+                        order.status === "shipped" || order.status === "in_transit" ? "bg-purple-500" :
+                        order.status === "delivered" || order.status === "completed" ? "bg-emerald-500" :
+                        order.status === "cancelled" || order.status === "refunded" ? "bg-red-500" : "bg-zinc-500"
                       }`} />
                       {order.status === "pending" ? "Pendente" :
-                       order.status === "confirmed" ? "Confirmado" :
+                       order.status === "paid" ? "Pago" :
+                       order.status === "preparing" ? "Separando" :
+                       order.status === "ready" ? "Pronto" :
                        order.status === "shipped" ? "Enviado" :
-                       order.status === "delivered" ? "Entregue" : "Cancelado"}
+                       order.status === "in_transit" ? "Em trânsito" :
+                       order.status === "delivered" ? "Entregue" :
+                       order.status === "completed" ? "Concluído" :
+                       order.status === "cancelled" ? "Cancelado" : "Estornado"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">

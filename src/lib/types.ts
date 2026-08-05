@@ -100,11 +100,15 @@ export interface Banner {
 
 export type OrderStatus =
   | "pending"
-  | "confirmed"
+  | "paid"
   | "preparing"
+  | "ready"
   | "shipped"
+  | "in_transit"
   | "delivered"
-  | "cancelled";
+  | "completed"
+  | "cancelled"
+  | "refunded";
 
 export interface OrderItem {
   productId: string;
@@ -417,4 +421,107 @@ export interface ProductFiscal {
   pisAliquota: number;
   cofinsCst: string;
   cofinsAliquota: number;
+}
+
+// ============================================================
+// PAYMENTS (Rastreio de Pagamentos)
+// ============================================================
+
+export type PaymentStatus = "pending" | "processing" | "approved" | "failed" | "refunded";
+export type PaymentMethod = "pix" | "boleto" | "credit_card" | "debit_card" | "cash";
+export type PaymentProvider = "asaas" | "mercadopago" | "pagseguro" | "manual";
+
+export interface Payment {
+  id: string;
+  orderId: string;
+  provider: PaymentProvider;
+  providerId?: string;
+  status: PaymentStatus;
+  amount: number;
+  paymentMethod: PaymentMethod;
+  transactionId?: string;
+  pixQrCode?: string;
+  pixCopyPaste?: string;
+  boletoUrl?: string;
+  boletoBarcode?: string;
+  cardLastDigits?: string;
+  cardBrand?: string;
+  installments: number;
+  installmentValue?: number;
+  paidAt?: string;
+  expiresAt?: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================
+// ORDER HISTORY (Auditoria de Mudanças)
+// ============================================================
+
+export type OrderHistoryAction = 
+  | "status_change"
+  | "payment_update"
+  | "note_added"
+  | "stock_reserved"
+  | "stock_released"
+  | "other";
+
+export type OrderAuthorRole = "customer" | "admin" | "system";
+
+export interface OrderHistory {
+  id: string;
+  orderId: string;
+  oldStatus?: OrderStatus;
+  newStatus: OrderStatus;
+  changedBy?: string;
+  changedByName?: string;
+  changedByRole?: OrderAuthorRole;
+  action: OrderHistoryAction;
+  notes?: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+// ============================================================
+// ORDER NOTES (Comunicação)
+// ============================================================
+
+export interface OrderNote {
+  id: string;
+  orderId: string;
+  authorId?: string;
+  authorName: string;
+  authorRole: OrderAuthorRole;
+  content: string;
+  isInternal: boolean;
+  createdAt: string;
+}
+
+// ============================================================
+// STOCK RESERVATIONS (Reserva de Estoque)
+// ============================================================
+
+export type StockReservationStatus = "active" | "confirmed" | "cancelled";
+
+export interface StockReservation {
+  id: string;
+  orderId: string;
+  productId: string;
+  variantId?: string;
+  quantity: number;
+  expiresAt: string;
+  status: StockReservationStatus;
+  createdAt: string;
+}
+
+// ============================================================
+// ORDER COMPLETO (com dados expandidos)
+// ============================================================
+
+export interface OrderWithDetails extends Order {
+  payments: Payment[];
+  history: OrderHistory[];
+  notes: OrderNote[];
+  reservations: StockReservation[];
 }
