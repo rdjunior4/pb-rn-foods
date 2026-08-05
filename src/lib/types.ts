@@ -330,3 +330,91 @@ export interface UserPreferences {
   createdAt: string;
   updatedAt: string;
 }
+
+// ============================================================
+// NOTA FISCAL (NF-e)
+// ============================================================
+
+export type NfeStatus = "pendente" | "autorizada" | "cancelada" | "inutilizada";
+
+export interface NfeConfig {
+  cnpj: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  ie: string;
+  im: string;
+  crt: "1" | "2" | "3";
+  endereco: {
+    rua: string;
+    numero: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+    cep: string;
+  };
+  telefone: string;
+  emailNfe: string;
+  serie: number;
+  proximoNumero: number;
+}
+
+export interface NfeItemFiscal {
+  produtoId: string;
+  nome: string;
+  ncm: string;
+  cfop: string;
+  unidade: string;
+  quantidade: number;
+  valorUnitario: number;
+  valorTotal: number;
+  pesoLiquido: number;
+  pesoBruto: number;
+  icms: { cst: string; aliquota: number; valor: number };
+  pis: { cst: string; aliquota: number; valor: number };
+  cofins: { cst: string; aliquota: number; valor: number };
+}
+
+export interface NotaFiscal {
+  id: string;
+  orderId: string;
+  numero: number;
+  serie: number;
+  chaveAcesso: string;
+  protocolo: string;
+  status: NfeStatus;
+  emitente: NfeConfig;
+  destinatario: {
+    nome: string;
+    cnpj: string;
+    ie: string;
+    endereco: string;
+    telefone: string;
+    email: string;
+  };
+  items: NfeItemFiscal[];
+  valorProdutos: number;
+  valorFrete: number;
+  valorDesconto: number;
+  valorTotal: number;
+  valorIcms: number;
+  valorPis: number;
+  valorCofins: number;
+  dataEmissao: string;
+  dataAutorizacao?: string;
+  observacoes?: string;
+}
+
+export interface ProductFiscal {
+  ncm: string;
+  cest: string;
+  cfopPadrao: string;
+  origemMercadoria: number;
+  pesoLiquido: number;
+  pesoBruto: number;
+  icmsCst: string;
+  icmsAliquota: number;
+  pisCst: string;
+  pisAliquota: number;
+  cofinsCst: string;
+  cofinsAliquota: number;
+}

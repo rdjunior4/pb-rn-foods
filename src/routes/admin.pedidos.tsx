@@ -29,7 +29,12 @@ import {
   GripVertical,
   LayoutGrid,
   List,
+  FileCheck,
 } from "lucide-react";
+import { NfeEmitirModal } from "@/components/admin/NfeEmitirModal";
+import { formatNfeNumero } from "@/lib/nfe-utils";
+import { getNotaByOrderId } from "@/lib/nfe-store";
+import { NfeBadge } from "@/components/admin/NfeBadge";
 import type { Order, OrderStatus } from "@/lib/types";
 import { toast } from "sonner";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -103,6 +108,7 @@ function AdminOrders() {
   const [editCarrier, setEditCarrier] = useState("");
   const [editTracking, setEditTracking] = useState("");
   const [editEstDelivery, setEditEstDelivery] = useState("");
+  const [nfeModalOpen, setNfeModalOpen] = useState(false);
 
   // ─── Debounced search ───
   useEffect(() => {
@@ -653,6 +659,33 @@ function AdminOrders() {
                           value={distributorsMap.get(selected.distributorId)!.name}
                         />
                       )}
+                    </div>
+
+                    {/* NF-e */}
+                    <div className="border-t border-zinc-100 pt-4">
+                      <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">
+                        Nota Fiscal
+                      </div>
+                      {(() => {
+                        const nota = getNotaByOrderId(selected.id);
+                        if (nota) {
+                          return (
+                            <div className="flex items-center gap-2">
+                              <NfeBadge status={nota.status} numero={nota.numero} compact />
+                              <span className="text-xs text-zinc-500 font-mono">{formatNfeNumero(nota.numero, nota.serie)}</span>
+                            </div>
+                          );
+                        }
+                        return (
+                          <button
+                            onClick={() => setNfeModalOpen(true)}
+                            className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm font-medium text-zinc-600 px-3 py-2.5 hover:bg-zinc-100 hover:border-zinc-400 transition-colors"
+                          >
+                            <FileCheck className="h-4 w-4" />
+                            Emitir NF-e
+                          </button>
+                        );
+                      })()}
                     </div>
 
                     {/* Shipping Edit */}
@@ -1255,6 +1288,18 @@ function AdminOrders() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selected && (
+        <NfeEmitirModal
+          open={nfeModalOpen}
+          onOpenChange={setNfeModalOpen}
+          order={selected}
+          onEmitted={() => {
+            setNfeModalOpen(false);
+            refetch();
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -43,6 +43,12 @@ const navGroups = [
     ],
   },
   {
+    label: "Financeiro",
+    items: [
+      { label: "Notas Fiscais", href: "/admin/nfe", icon: FileText },
+    ],
+  },
+  {
     label: "Loja & Conteúdo",
     items: [
       { label: "Relatórios", href: "/admin/relatorios", icon: BarChart3 },
